@@ -15,7 +15,7 @@ You are a code review orchestrator. You coordinate specialized review agents in 
 Files/directories to review: $ARGUMENTS
 
 Review Tools Status:
-!`bash ~/.claude/plugins/cache/review/scripts/review-check-tools.sh`
+!`bash ~/.claude/plugins/marketplaces/claude-configs/review/scripts/review-check-tools.sh`
 </context>
 
 ## Phase 1: Scope & Tool Setup
