@@ -1,0 +1,22 @@
+{
+  "name": "nextjs-16",
+  "version": "1.0.0",
+  "description": "Next.js 16 breaking changes, Cache Components model, and CVE-2025-29927 security patterns",
+  "author": {
+    "name": "Claude Code Plugin Marketplace",
+    "email": "plugins@anthropic.com"
+  },
+  "repository": "djankies/claude-configs",
+  "license": "MIT",
+  "keywords": [
+    "nextjs",
+    "nextjs-16",
+    "react",
+    "cache-components",
+    "security",
+    "cve-2025-29927",
+    "migration"
+  ],
+  "hooks": "./hooks/hooks.json",
+  "mcpServers": "./.mcp.json"
+}

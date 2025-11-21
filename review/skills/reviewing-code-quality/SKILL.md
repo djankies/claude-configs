@@ -1,28 +1,6 @@
-# System-Wide Optimization Recommendations
-
-After analyzing the code quality skill alongside the orchestrator and agent prompts, here are the critical modifications needed to eliminate overlap and create a cohesive system:
-
-## Problems Identified
-
-**CRITICAL:**
-
-1. **Skill runs bash scripts, but agent prompt doesn't mention this** - Agent expects to use Read/Grep/Glob, but skill says "run these bash scripts first"
-2. **Skill says "load additional domain-specific skills after" but agent is already domain-specific** - Circular logic
-3. **Skill includes "estimated effort for fixes" but agent constraints say "DO NOT estimate workload"** - Direct contradiction
-4. **Severity classification exists in both skill and agent** - Duplication causes confusion
-
-**HIGH:** 5. **Manual review process in skill overlaps with agent's core instructions** - Agent already knows to read files and look for issues 6. **Success criteria in skill conflicts with agent output requirements** - Skill wants "summarized" output, agent wants "standardized JSON"
-
-## Recommended Changes
-
-### 1. Modify Code Quality Review Skill (Make it a Pure Tool Guide)
-
-````markdown
 ---
 name: reviewing-code-quality
-description: Automated tooling and detection patterns for JavaScript/TypeScript code quality review. Provides tool commands and what to look for—not how to structure output.
-allowed-tools: Bash, Read, Grep, Glob
-version: 1.0.0
+description: Automated tooling and detection patterns for JavaScript/TypeScript code quality review
 ---
 
 # Code Quality Review Skill

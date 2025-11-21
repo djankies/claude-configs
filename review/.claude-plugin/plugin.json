@@ -6,6 +6,7 @@
     "name": "Claude Code Plugin Marketplace",
     "email": "plugins@claudecode.dev"
   },
+  "repository": "djankies/claude-configs",
   "license": "MIT",
   "keywords": [
     "review",
@@ -14,6 +15,5 @@
     "cross-cutting",
     "best-practices",
     "quality-assurance"
-  ],
-  "commands": "./commands"
+  ]
 }

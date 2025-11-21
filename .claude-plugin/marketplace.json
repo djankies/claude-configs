@@ -53,6 +53,21 @@
       "license": "MIT",
       "keywords": ["typescript", "type-safety", "compiler", "validation", "security", "ts5.9", "best-practices", "hooks", "runtime-validation"],
       "category": "language"
+    },
+    {
+      "name": "nextjs-16",
+      "source": "./nextjs-16",
+      "description": "Next.js 16 breaking changes, Cache Components model, and CVE-2025-29927 security patterns",
+      "version": "1.0.0",
+      "author": {
+        "name": "Daniel Jankowski",
+        "email": "djank0113@gmail.com"
+      },
+      "homepage": "https://github.com/djankies/claude-configs",
+      "repository": "djankies/claude-configs",
+      "license": "MIT",
+      "keywords": ["nextjs", "nextjs-16", "react", "cache-components", "security", "cve-2025-29927", "migration"],
+      "category": "framework"
     }
   ]
 }
