@@ -1,4 +1,3 @@
-```markdown
 ---
 description: Multipurpose code review with parallel agent deployment and merging of findings.
 argument-hint: [files, directories, or current changes...]
@@ -24,6 +23,7 @@ Review Tools Status:
 ### 1.1 Select Review Scope
 
 Use AskUserQuestion:
+
 ```
 
 Question: "Which aspects should I review?"
@@ -38,11 +38,12 @@ Options:
 - Duplication: "Copy-paste detection (~4min, needs jsinspect)"
 - Dependencies: "Unused dependencies, dead code (~3min, needs knip/depcheck)"
 
-````
+```
 
 ### 1.2 Validate File Count
 
 Count files to review:
+
 ```bash
 # For directories
 find <directory> -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \) | wc -l
@@ -51,7 +52,7 @@ find <directory> -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -na
 if git rev-parse --git-dir > /dev/null 2>&1; then
   echo "Staged: $(git diff --cached --name-only | wc -l), Unstaged: $(git diff --name-only | wc -l)"
 fi
-````
+```
 
 **If >15 files:** Ask user to confirm or select subset (suggest 3-5 logical subsets by directory/change type)
 
