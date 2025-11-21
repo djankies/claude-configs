@@ -2,7 +2,6 @@
 description: Multipurpose code review with parallel agent deployment and merging of findings.
 argument-hint: [files, directories, or current changes...]
 allowed-tools: Read, Glob, Grep, Bash, TodoWrite, Skill, AskUserQuestion, Task
-model: sonnet
 ---
 
 # Code Review Orchestrator
