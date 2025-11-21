@@ -194,7 +194,7 @@ Apply these criteria consistently:
 
 ## Score Calculation
 
-Use Bash tool: `~/.claude/plugins/cache/review/scripts/review-scoring.sh <critical> <high> <medium> <nitpick>`
+Use Bash tool: `~/.claude/plugins/marketplaces/claude-configs/review/scripts/review-scoring.sh <critical> <high> <medium> <nitpick>`
 
 If unavailable, calculate manually:
 

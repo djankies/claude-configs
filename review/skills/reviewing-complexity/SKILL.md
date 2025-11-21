@@ -16,7 +16,7 @@ Provides automated complexity analysis commands and manual detection patterns fo
 Run Lizard complexity analyzer:
 
 ```bash
-bash ~/.claude/plugins/cache/review/scripts/review-complexity.sh
+bash ~/.claude/plugins/marketplaces/claude-configs/review/scripts/review-complexity.sh
 ```
 
 **Returns:**

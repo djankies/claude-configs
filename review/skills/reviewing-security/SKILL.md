@@ -16,7 +16,7 @@ This skill provides automated security scanning commands and vulnerability detec
 Run Semgrep security analysis (if available):
 
 ```bash
-bash ~/.claude/plugins/cache/review/scripts/review-security.sh
+bash ~/.claude/plugins/marketplaces/claude-configs/review/scripts/review-security.sh
 ```
 
 **Returns:** Security issues by severity, vulnerability types (XSS, injection, etc.), file:line locations, CWE/OWASP references

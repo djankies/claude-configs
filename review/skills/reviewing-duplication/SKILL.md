@@ -14,7 +14,7 @@ This skill provides automated duplication detection commands and manual search p
 ## Automated Duplication Detection
 
 ```bash
-bash ~/.claude/plugins/cache/review/scripts/review-duplicates.sh
+bash ~/.claude/plugins/marketplaces/claude-configs/review/scripts/review-duplicates.sh
 ```
 
 **Uses:** jsinspect (preferred) or Lizard fallback

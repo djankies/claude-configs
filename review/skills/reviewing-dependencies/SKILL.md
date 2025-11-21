@@ -18,7 +18,7 @@ Run these scripts to gather metrics (if tools available):
 ### Unused Dependencies Detection
 
 ```bash
-bash ~/.claude/plugins/cache/review/scripts/review-unused-deps.sh
+bash ~/.claude/plugins/marketplaces/claude-configs/review/scripts/review-unused-deps.sh
 ```
 
 **Returns:** Unused dependencies, unused devDependencies, missing dependencies (imported but not in package.json)
@@ -26,7 +26,7 @@ bash ~/.claude/plugins/cache/review/scripts/review-unused-deps.sh
 ### Unused Code Detection
 
 ```bash
-bash ~/.claude/plugins/cache/review/scripts/review-unused-code.sh
+bash ~/.claude/plugins/marketplaces/claude-configs/review/scripts/review-unused-code.sh
 ```
 
 **Returns:** Unused exports, unused files, unused enum/class members, unused types/interfaces

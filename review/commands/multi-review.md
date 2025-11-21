@@ -65,7 +65,23 @@ Map review types to required tools:
 - Duplication → jsinspect
 - Dependencies → depcheck, knip
 
-If tools missing, offer installation via Task agent:
+If tools missing, STOP and use the AskUserQuestion tool to ask the user if they want to install the tools.
+
+```AskUserQuestion
+Question: "Do you want to install the tools?"
+Header: "Install Tools"
+multi-select: true
+options:
+  - "semgrep"
+  - "lizard"
+  - "jsinspect": "Duplicate code detection tool"
+  - "depcheck": "Find unused dependencies"
+  - "knip": "Find unused code/exports/deps (comprehensive)"
+  - "eslint": "JavaScript/TypeScript linter for code quality"
+  - "typescript": "Type checking with tsc command"
+```
+
+If the user confirms, use the Task tool to install the tools the user selected.
 
 ```
 Task:
@@ -350,7 +366,7 @@ Grade: {grade} | Risk: {risk_level} | Issues: {total_issues}
 **What Worked Well:** {synthesized positive skill_feedback}
 **Areas for Improvement:** {synthesized improvement suggestions}
 **Prompt Issues:** {ignored or unclear instructions from agents}
-Record feedback in ~/.claude/plugins/cache/review/feedback.md for future improvements. If the feedback already exists, note in the document that the same feedback was reported again. (higher confidence)
+Record feedback in ~/.claude/plugins/marketplaces/claude-configs/review/feedback.md for future improvements. If the feedback already exists, note in the document that the same feedback was reported again. (higher confidence)
 
 ---
 

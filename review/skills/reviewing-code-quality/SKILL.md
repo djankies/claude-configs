@@ -38,7 +38,7 @@ Run these scripts to gather metrics (if tools available):
 ### Linting Analysis
 
 ```bash
-bash ~/.claude/plugins/cache/review/scripts/review-lint.sh
+bash ~/.claude/plugins/marketplaces/claude-configs/review/scripts/review-lint.sh
 ```
 ````
 
@@ -47,7 +47,7 @@ bash ~/.claude/plugins/cache/review/scripts/review-lint.sh
 ### Type Safety Analysis
 
 ```bash
-bash ~/.claude/plugins/cache/review/scripts/review-types.sh
+bash ~/.claude/plugins/marketplaces/claude-configs/review/scripts/review-types.sh
 ```
 
 **Returns:** Type errors, missing annotations, error locations
@@ -55,7 +55,7 @@ bash ~/.claude/plugins/cache/review/scripts/review-types.sh
 ### Unused Code Detection
 
 ```bash
-bash ~/.claude/plugins/cache/review/scripts/review-unused-code.sh
+bash ~/.claude/plugins/marketplaces/claude-configs/review/scripts/review-unused-code.sh
 ```
 
 **Returns:** Unused exports, unused dependencies, dead code
@@ -63,7 +63,7 @@ bash ~/.claude/plugins/cache/review/scripts/review-unused-code.sh
 ### TODO/FIXME Comments
 
 ```bash
-bash ~/.claude/plugins/cache/review/scripts/review-todos.sh
+bash ~/.claude/plugins/marketplaces/claude-configs/review/scripts/review-todos.sh
 ```
 
 **Returns:** Comment count by type, locations with context
@@ -71,7 +71,7 @@ bash ~/.claude/plugins/cache/review/scripts/review-todos.sh
 ### Debug Statements
 
 ```bash
-bash ~/.claude/plugins/cache/review/scripts/review-debug-statements.sh
+bash ~/.claude/plugins/marketplaces/claude-configs/review/scripts/review-debug-statements.sh
 ```
 
 **Returns:** console.log/debugger statements with locations
@@ -79,7 +79,7 @@ bash ~/.claude/plugins/cache/review/scripts/review-debug-statements.sh
 ### Large Files
 
 ```bash
-bash ~/.claude/plugins/cache/review/scripts/review-large-files.sh
+bash ~/.claude/plugins/marketplaces/claude-configs/review/scripts/review-large-files.sh
 ```
 
 **Returns:** Files >500 lines sorted by size
