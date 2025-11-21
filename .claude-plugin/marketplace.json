@@ -44,18 +44,6 @@
       "license": "MIT",
       "keywords": ["typescript", "type-safety", "compiler", "validation", "security", "ts5.9", "best-practices", "hooks", "runtime-validation"],
       "category": "language"
-    },
-    {
-      "name": "plugin-template",
-      "source": "./plugin-template",
-      "description": "A comprehensive template demonstrating all Claude Code plugin features",
-      "version": "1.0.0",
-      "author": "Daniel Jankowski",
-      "homepage": "https://github.com/djankies/claude-configs",
-      "repository": "djankies/claude-configs",
-      "license": "MIT",
-      "keywords": ["claude-code", "plugin", "template", "example"],
-      "category": "development"
     }
   ]
 }
