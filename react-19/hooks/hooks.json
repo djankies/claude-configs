@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "./scripts/validate-react-patterns.sh",
+            "command": "~/.claude/plugins/marketplaces/claude-configs/react-19/scripts/validate-react-patterns.sh",
             "timeout": 30
           }
         ]
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "./scripts/validate-compliance.sh",
+            "command": "~/.claude/plugins/marketplaces/claude-configs/react-19/scripts/validate-compliance.sh",
             "timeout": 30
           }
         ]
@@ -29,7 +29,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "./scripts/check-react-version.sh",
+            "command": "~/.claude/plugins/marketplaces/claude-configs/react-19/scripts/check-react-version.sh",
             "timeout": 30
           }
         ]
