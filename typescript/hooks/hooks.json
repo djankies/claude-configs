@@ -1,0 +1,37 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./hooks/scripts/init-session.sh",
+            "timeout": 500
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./hooks/scripts/recommend-skills.sh",
+            "timeout": 500
+          },
+          {
+            "type": "command",
+            "command": "./hooks/scripts/check-type-safety.sh",
+            "timeout": 500
+          },
+          {
+            "type": "command",
+            "command": "./hooks/scripts/check-deprecated-apis.sh",
+            "timeout": 200
+          }
+        ]
+      }
+    ]
+  }
+}

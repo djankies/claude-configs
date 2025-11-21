@@ -1,0 +1,34 @@
+{
+  "name": "claude-configs-marketplace",
+  "version": "1.0.0",
+  "description": "A curated marketplace of Claude Code plugins for various technologies",
+  "main": "index.js",
+  "scripts": {
+    "validate": "node scripts/validate.js",
+    "test": "npm run validate",
+    "lint": "eslint scripts/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/daniel/claude-configs.git"
+  },
+  "keywords": [
+    "claude-code",
+    "plugins",
+    "marketplace",
+    "mcp",
+    "model-context-protocol"
+  ],
+  "author": "Daniel",
+  "license": "MIT",
+  "devDependencies": {
+    "ajv": "^8.12.0",
+    "ajv-formats": "^2.1.1",
+    "chalk": "^4.1.2",
+    "glob": "^10.3.10"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
+

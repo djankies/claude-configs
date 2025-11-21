@@ -1,0 +1,12 @@
+{
+  "name": "claude-configs",
+  "owner": {
+    "name": "Daniel",
+    "email": "contact@example.com"
+  },
+  "metadata": {
+    "description": "A curated marketplace of Claude Code plugins for various technologies",
+    "version": "1.0.0"
+  },
+  "plugins": []
+}

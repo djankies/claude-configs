@@ -1,0 +1,22 @@
+{
+  "name": "payment-processing-service",
+  "version": "1.0.0",
+  "description": "Multi-method payment processing service with validation and error handling",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js",
+    "example": "node example.js",
+    "start": "node example.js"
+  },
+  "keywords": [
+    "payment",
+    "processing",
+    "credit-card",
+    "paypal",
+    "bank-transfer",
+    "validation",
+    "ecommerce"
+  ],
+  "author": "",
+  "license": "MIT"
+}

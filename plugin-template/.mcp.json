@@ -1,0 +1,106 @@
+{
+  "mcpServers": {
+    "example-stdio-server": {
+      "type": "stdio",
+      "command": "${CLAUDE_PLUGIN_ROOT}/mcp-servers/example-server.js",
+      "args": ["--verbose"],
+      "env": {
+        "API_KEY": "${EXAMPLE_API_KEY}",
+        "LOG_LEVEL": "info"
+      }
+    },
+    "example-http-server": {
+      "type": "http",
+      "url": "https://api.example.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${MCP_TOKEN}",
+        "Content-Type": "application/json"
+      }
+    },
+    "example-sse-server": {
+      "type": "sse",
+      "url": "https://api.example.com/events",
+      "headers": {
+        "Authorization": "Bearer ${SSE_TOKEN:-default-token}"
+      }
+    }
+  },
+  "_instructions": {
+    "server_types": {
+      "stdio": {
+        "description": "Standard input/output server (local executable)",
+        "required_fields": ["type", "command"],
+        "optional_fields": ["args", "env"],
+        "example": {
+          "type": "stdio",
+          "command": "/path/to/server",
+          "args": ["--flag", "value"],
+          "env": {
+            "VAR": "value"
+          }
+        }
+      },
+      "http": {
+        "description": "HTTP-based MCP server",
+        "required_fields": ["type", "url"],
+        "optional_fields": ["headers"],
+        "example": {
+          "type": "http",
+          "url": "https://api.example.com/mcp",
+          "headers": {
+            "Authorization": "Bearer token"
+          }
+        }
+      },
+      "sse": {
+        "description": "Server-Sent Events MCP server",
+        "required_fields": ["type", "url"],
+        "optional_fields": ["headers"],
+        "example": {
+          "type": "sse",
+          "url": "https://api.example.com/events",
+          "headers": {
+            "Authorization": "Bearer token"
+          }
+        }
+      }
+    },
+    "environment_variables": {
+      "expansion": "Use ${VAR} or ${VAR:-default} syntax",
+      "plugin_root": "Use ${CLAUDE_PLUGIN_ROOT} for paths relative to plugin",
+      "project_dir": "Use ${CLAUDE_PROJECT_DIR} for paths relative to project (not in plugins)",
+      "examples": [
+        "${API_KEY} - Expands to value of API_KEY env var",
+        "${PORT:-8000} - Uses PORT env var, or 8000 if not set",
+        "${CLAUDE_PLUGIN_ROOT}/server.js - Path to server.js in plugin root"
+      ]
+    },
+    "available_tools": {
+      "note": "Tools are provided by the MCP server itself, not defined in this file",
+      "discovery": "Claude Code discovers available tools when the server starts",
+      "usage": "Tools automatically appear in Claude's available tool list"
+    },
+    "plugin_vs_global": {
+      "plugin_mcp": "Defined in plugin's .mcp.json or inline in plugin.json",
+      "global_mcp": "Managed via CLI: claude mcp add",
+      "precedence": "Plugin servers start when plugin loads",
+      "restart_required": "Restart Claude Code after changes"
+    },
+    "template_instructions": [
+      "1. Choose server type: stdio (local), http, or sse",
+      "2. For stdio: provide absolute path or use ${CLAUDE_PLUGIN_ROOT}",
+      "3. For http/sse: provide full URL endpoint",
+      "4. Use environment variables for sensitive data",
+      "5. Create actual MCP server implementation separately",
+      "6. Test server starts correctly",
+      "7. Verify tools are discovered and available"
+    ],
+    "common_mistakes": [
+      "Using relative paths without ${CLAUDE_PLUGIN_ROOT} in plugins",
+      "Defining tools in this file (tools come from the server)",
+      "Using ${CLAUDE_PROJECT_DIR} in plugin MCP configs (use ${CLAUDE_PLUGIN_ROOT})",
+      "Forgetting to restart Claude Code after changes",
+      "Not making server script executable (chmod +x for stdio servers)"
+    ]
+  }
+}

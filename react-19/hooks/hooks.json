@@ -1,0 +1,57 @@
+{
+  "hooks": [
+    {
+      "name": "PreToolExecution",
+      "event": "PreToolExecution",
+      "description": "Validate React 19 patterns before editing files",
+      "condition": {
+        "toolNames": ["Edit", "Write"],
+        "filePatterns": ["**/*.jsx", "**/*.tsx", "**/*.js", "**/*.ts"]
+      },
+      "action": {
+        "type": "script",
+        "script": "./scripts/validate-react-patterns.sh"
+      }
+    },
+    {
+      "name": "PostToolExecution",
+      "event": "PostToolExecution",
+      "description": "Validate React 19 compliance after editing files",
+      "condition": {
+        "toolNames": ["Edit", "Write"],
+        "filePatterns": ["**/*.jsx", "**/*.tsx", "**/*.js", "**/*.ts"]
+      },
+      "action": {
+        "type": "script",
+        "script": "./scripts/validate-compliance.sh"
+      }
+    },
+    {
+      "name": "PostAgentMessage",
+      "event": "PostAgentMessage",
+      "description": "Review agent suggestions for React 19 alignment",
+      "action": {
+        "type": "script",
+        "script": "./scripts/review-suggestions.sh"
+      }
+    },
+    {
+      "name": "SessionStart",
+      "event": "SessionStart",
+      "description": "Check React version and activate React 19 plugin",
+      "action": {
+        "type": "script",
+        "script": "./scripts/check-react-version.sh"
+      }
+    },
+    {
+      "name": "SessionEnd",
+      "event": "SessionEnd",
+      "description": "Remind about React 19 documentation",
+      "action": {
+        "type": "message",
+        "message": "React 19 comprehensive documentation available at: research/react-19-comprehensive.md"
+      }
+    }
+  ]
+}

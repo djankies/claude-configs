@@ -1,0 +1,139 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./hooks/scripts/validate-write.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./hooks/scripts/log-tool-use.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Before proceeding, verify that the user's request in $ARGUMENTS is clear and actionable.",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./hooks/scripts/session-init.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  },
+  "_instructions": {
+    "supported_events": {
+      "with_matcher": [
+        "PreToolUse - Before tool execution",
+        "PostToolUse - After tool completion",
+        "PermissionRequest - Permission dialog handling",
+        "Notification - System notifications"
+      ],
+      "without_matcher": [
+        "UserPromptSubmit - User submits prompt",
+        "Stop - Main agent completes",
+        "SubagentStop - Subagent completes",
+        "PreCompact - Before context compaction",
+        "SessionStart - Session initialization",
+        "SessionEnd - Session termination"
+      ]
+    },
+    "hook_types": {
+      "command": {
+        "description": "Execute a shell command",
+        "required_fields": ["type", "command"],
+        "optional_fields": ["timeout"],
+        "example": {
+          "type": "command",
+          "command": "./hooks/scripts/my-hook.sh",
+          "timeout": 30
+        }
+      },
+      "prompt": {
+        "description": "Send a prompt to Claude for evaluation",
+        "required_fields": ["type", "prompt"],
+        "optional_fields": ["timeout"],
+        "example": {
+          "type": "prompt",
+          "prompt": "Evaluate if $ARGUMENTS is valid",
+          "timeout": 60
+        }
+      }
+    },
+    "matcher_patterns": {
+      "exact": "Write - matches exactly 'Write' tool",
+      "regex": "Write|Edit|Read - matches any of these tools",
+      "wildcard": "* - matches all tools",
+      "note": "Matchers are case-sensitive"
+    },
+    "hook_input_via_stdin": {
+      "format": "JSON object with:",
+      "fields": [
+        "session_id - Session identifier",
+        "transcript_path - Path to transcript file",
+        "cwd - Current working directory",
+        "permission_mode - Current permission mode",
+        "hook_event_name - Name of the hook event",
+        "tool_name - Name of the tool (for tool events)",
+        "tool_input - Tool input parameters",
+        "tool_response - Tool response (for PostToolUse)"
+      ]
+    },
+    "hook_output_requirements": {
+      "format": "JSON to stdout (only if exit code 0)",
+      "fields": {
+        "decision": "approve|block|allow|deny",
+        "reason": "Human-readable explanation",
+        "continue": "Boolean - whether to continue",
+        "suppressOutput": "Boolean - hide hook output from user",
+        "systemMessage": "Optional warning/error message"
+      },
+      "exit_codes": {
+        "0": "Success - stdout parsed as JSON",
+        "2": "Blocking error - stderr shown, prevents action",
+        "other": "Non-blocking error - verbose mode only"
+      }
+    },
+    "plugin_usage": {
+      "paths": "Use relative paths starting with ./ for portability",
+      "variable": "Use ${CLAUDE_PLUGIN_ROOT} for plugin-relative paths",
+      "example_command": "./hooks/scripts/my-hook.sh",
+      "note": "All paths must be relative to plugin root"
+    },
+    "template_instructions": [
+      "1. Choose appropriate hook events for your use case",
+      "2. Use matcher for events that support it (PreToolUse, PostToolUse, etc.)",
+      "3. Create hook scripts in ./hooks/scripts/ directory",
+      "4. Make scripts executable: chmod +x hooks/scripts/*.sh",
+      "5. Test hooks with appropriate tool calls",
+      "6. Return proper JSON from command hooks for structured decisions",
+      "7. Use exit code 0 for success, 2 for blocking errors"
+    ]
+  }
+}

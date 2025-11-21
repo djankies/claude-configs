@@ -1,0 +1,27 @@
+{
+  "name": "collection-management-system",
+  "version": "1.0.0",
+  "description": "Type-safe collection management system for handling Users, Products, and Orders with CRUD operations",
+  "main": "index.ts",
+  "scripts": {
+    "start": "ts-node examples.ts",
+    "build": "tsc",
+    "test": "jest"
+  },
+  "keywords": [
+    "collection",
+    "crud",
+    "typescript",
+    "type-safe",
+    "database",
+    "entity",
+    "management"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.0.0"
+  }
+}

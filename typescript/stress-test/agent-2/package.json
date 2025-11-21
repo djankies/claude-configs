@@ -1,0 +1,13 @@
+{
+  "name": "data-fetching-utility",
+  "version": "1.0.0",
+  "description": "Reusable data fetching utility with concurrent API calls and error handling",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "keywords": ["fetch", "api", "concurrent", "microservices"],
+  "author": "",
+  "license": "MIT"
+}

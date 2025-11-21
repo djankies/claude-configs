@@ -1,0 +1,36 @@
+{
+  "name": "react-19",
+  "version": "1.0.0",
+  "description": "React 19 patterns, hooks, and best practices for modern React applications",
+  "author": {
+    "name": "Plugin Author",
+    "email": "author@example.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "react",
+    "react-19",
+    "hooks",
+    "server-actions",
+    "server-components",
+    "forms",
+    "state-management",
+    "performance"
+  ],
+  "engines": {
+    "claude-code": ">=1.0.0"
+  },
+  "exports": {
+    "concerns": "./concerns",
+    "skills": "./concerns/*/skills",
+    "validation": "./concerns/*/validation",
+    "research": "./research"
+  },
+  "peerPlugins": {
+    "nextjs-15": "optional",
+    "remix-2": "optional",
+    "testing-tools": "optional",
+    "migration-tools": "optional",
+    "review": "optional"
+  }
+}

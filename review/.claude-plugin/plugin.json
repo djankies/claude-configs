@@ -1,0 +1,31 @@
+{
+  "name": "review",
+  "version": "1.0.0",
+  "description": "Cross-cutting code review plugin that orchestrates review skills from tool plugins",
+  "author": {
+    "name": "Claude Code Plugin Marketplace",
+    "email": "plugins@claudecode.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "review",
+    "code-quality",
+    "orchestration",
+    "cross-cutting",
+    "best-practices",
+    "quality-assurance"
+  ],
+  "engines": {
+    "claude-code": ">=1.0.0"
+  },
+  "peerPlugins": {
+    "react-19": "optional",
+    "typescript": "optional",
+    "nextjs-15": "optional",
+    "security": "optional"
+  },
+  "consumes": {
+    "review-skills": "*/concerns/*/skills/review-*.md"
+  },
+  "commands": "./commands"
+}

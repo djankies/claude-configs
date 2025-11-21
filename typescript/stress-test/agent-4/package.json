@@ -1,0 +1,33 @@
+{
+  "name": "config-loader",
+  "version": "1.0.0",
+  "description": "Type-safe configuration loading system with JSON validation",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "example": "ts-node example-usage.ts",
+    "test": "jest",
+    "lint": "eslint . --ext .ts"
+  },
+  "keywords": [
+    "config",
+    "configuration",
+    "json",
+    "validation",
+    "type-safe"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.0.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0",
+    "ts-jest": "^29.0.0",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0"
+  }
+}

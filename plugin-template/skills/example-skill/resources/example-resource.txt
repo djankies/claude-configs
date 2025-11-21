@@ -1,0 +1,10 @@
+This is an example supporting file that the skill can reference.
+
+Skills can include any supporting files needed:
+- Code templates
+- Configuration examples
+- Documentation snippets
+- Helper scripts
+
+Reference this file in SKILL.md instructions like:
+"Use the template in templates/example-template.txt"

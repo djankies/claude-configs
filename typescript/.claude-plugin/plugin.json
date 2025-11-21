@@ -1,0 +1,24 @@
+{
+  "name": "typescript",
+  "version": "1.0.0",
+  "description": "TypeScript 5.9 type safety, compiler configuration, and best practices based on real-world AI coding failures. Provides intelligent skill recommendations, type safety validation, and prevents common TypeScript anti-patterns.",
+  "author": {
+    "name": "Claude Code Plugin Marketplace",
+    "email": "plugins@anthropic.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "typescript",
+    "type-safety",
+    "compiler",
+    "validation",
+    "security",
+    "ts5.9",
+    "best-practices",
+    "hooks",
+    "runtime-validation"
+  ],
+  "engines": {
+    "claude-code": ">=1.0.0"
+  }
+}
