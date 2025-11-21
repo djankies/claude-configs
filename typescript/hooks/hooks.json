@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/plugins/marketplaces/claude-configs/typescript/hooks/scripts/init-session.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/init-session.sh",
             "timeout": 500
           }
         ]
@@ -17,17 +17,17 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/plugins/marketplaces/claude-configs/typescript/hooks/scripts/recommend-skills.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/recommend-skills.sh",
             "timeout": 500
           },
           {
             "type": "command",
-            "command": "~/.claude/plugins/marketplaces/claude-configs/typescript/hooks/scripts/check-type-safety.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check-type-safety.sh",
             "timeout": 500
           },
           {
             "type": "command",
-            "command": "~/.claude/plugins/marketplaces/claude-configs/typescript/hooks/scripts/check-deprecated-apis.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check-deprecated-apis.sh",
             "timeout": 200
           }
         ]

@@ -6,6 +6,7 @@
     "name": "Claude Code Plugin Marketplace",
     "email": "plugins@anthropic.com"
   },
+  "repository": "djankies/claude-configs",
   "license": "MIT",
   "keywords": [
     "typescript",

@@ -1,89 +1,18 @@
 {
-  "name": "plugin-template",
-  "version": "1.0.0",
-  "description": "A comprehensive template demonstrating all Claude Code plugin features",
+  "name": "plugin-name",
+  "version": "1.2.0",
+  "description": "Brief plugin description",
   "author": {
-    "name": "Daniel Jankowski",
-    "email": "djank0113@gmail.com",
-    "url": "https://github.com/djankies"
+    "name": "Author Name",
+    "email": "author@example.com",
+    "url": "https://github.com/author"
   },
-  "homepage": "https://github.com/djankies/claude-configs",
-  "repository": "https://github.com/djankies/claude-configs",
+  "homepage": "https://docs.example.com/plugin",
+  "repository": "https://github.com/author/plugin",
   "license": "MIT",
-  "keywords": ["claude-code", "plugin", "template", "example"],
-  "commands": "./commands",
-  "agents": "./agents",
-  "skills": "./skills",
-  "hooks": "./hooks/hooks.json",
-  "mcpServers": "./.mcp.json",
-  "_instructions": {
-    "required_fields": {
-      "name": "Unique plugin identifier in kebab-case (required)"
-    },
-    "metadata_fields": {
-      "version": "Semantic version (e.g., 1.0.0)",
-      "description": "Brief description of plugin functionality",
-      "author": "Object with name, email, url fields",
-      "homepage": "Plugin documentation URL",
-      "repository": "Source code repository URL",
-      "license": "License identifier (MIT, Apache-2.0, etc.)",
-      "keywords": "Array of search/discovery tags"
-    },
-    "component_paths": {
-      "commands": "Path to commands directory (optional, auto-discovered from ./commands)",
-      "agents": "Path to agents directory (optional, auto-discovered from ./agents)",
-      "skills": "Path to skills directory (optional, auto-discovered from ./skills)",
-      "hooks": "Path to hooks.json file or inline object (optional)",
-      "mcpServers": "Path to .mcp.json file or inline object (optional)"
-    },
-    "auto_discovery": {
-      "note": "Components are auto-discovered from default directories even without explicit paths",
-      "commands": "Auto-discovered from ./commands/ directory",
-      "agents": "Auto-discovered from ./agents/ directory",
-      "skills": "Auto-discovered from ./skills/ directory",
-      "hooks": "Not auto-discovered - must be specified in plugin.json or separate file",
-      "mcpServers": "Not auto-discovered - must be specified in plugin.json or separate file"
-    },
-    "component_definitions": {
-      "commands": "Defined in Markdown files (commands/*.md), NOT in plugin.json",
-      "agents": "Defined in Markdown files (agents/*.md), NOT in plugin.json",
-      "skills": "Defined in directories with SKILL.md (skills/*/SKILL.md), NOT in plugin.json",
-      "hooks": "Defined in hooks.json or inline in this file",
-      "mcpServers": "Defined in .mcp.json or inline in this file"
-    },
-    "directory_structure": {
-      "plugin_root": [
-        ".claude-plugin/",
-        "  plugin.json          (this file - REQUIRED)",
-        "commands/             (auto-discovered)",
-        "  *.md                (slash command definitions)",
-        "agents/               (auto-discovered)",
-        "  *.md                (agent definitions)",
-        "skills/               (auto-discovered)",
-        "  skill-name/",
-        "    SKILL.md          (skill definition)",
-        "    templates/        (supporting files)",
-        "hooks/                (optional)",
-        "  hooks.json          (hook configuration)",
-        "  scripts/            (hook scripts)",
-        ".mcp.json             (optional MCP config)",
-        "mcp-servers/          (optional MCP server implementations)"
-      ]
-    },
-    "common_mistakes": [
-      "Putting agent/skill/command definitions in plugin.json (they go in Markdown files)",
-      "Using Node.js fields like 'main', 'engines', 'dependencies' (not used by Claude Code)",
-      "Placing component directories inside .claude-plugin/ (they go at plugin root)",
-      "Using absolute paths (always use relative paths starting with ./)",
-      "Not understanding that component paths are optional (auto-discovery works without them)"
-    ],
-    "template_instructions": [
-      "1. Update 'name' to your plugin identifier (required)",
-      "2. Update metadata fields (version, description, author, etc.)",
-      "3. Customize keywords for plugin discovery",
-      "4. Component paths are optional - remove if using default locations",
-      "5. This file must be at .claude-plugin/plugin.json",
-      "6. Component directories must be at plugin root, not in .claude-plugin/"
-    ]
-  }
+  "keywords": ["keyword1", "keyword2"],
+  "commands": ["./custom/commands/special.md"],
+  "agents": "./custom/agents/",
+  "hooks": "./config/hooks.json",
+  "mcpServers": "./mcp-config.json"
 }

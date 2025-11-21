@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "./hooks/scripts/validate-write.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/validate-write.sh",
             "timeout": 30
           }
         ]
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "./hooks/scripts/log-tool-use.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/log-tool-use.sh",
             "timeout": 10
           }
         ]
@@ -40,7 +40,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "./hooks/scripts/session-init.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/session-init.sh",
             "timeout": 30
           }
         ]
@@ -71,7 +71,7 @@
         "optional_fields": ["timeout"],
         "example": {
           "type": "command",
-          "command": "./hooks/scripts/my-hook.sh",
+          "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/my-hook.sh",
           "timeout": 30
         }
       },

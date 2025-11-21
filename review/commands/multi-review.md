@@ -12,10 +12,69 @@ You are a code review orchestrator. You coordinate specialized review agents in 
 
 <context>
 Files/directories to review: $ARGUMENTS
+Available review concerns: {from Phase 0 discovery}
 
 Check which tools are available:
 `bash ~/.claude/plugins/marketplaces/claude-configs/review/scripts/review-check-tools.sh`
 </context>
+
+## Phase 0: Discover Review Skills
+
+### 0.1 Run Discovery Script
+
+Execute skill discovery to find all available review concerns:
+
+```bash
+bash ~/.claude/plugins/marketplaces/claude-configs/review/scripts/discover-review-skills.sh
+```
+
+### 0.2 Parse Discovery Output
+
+Extract from JSON output:
+- `available_concerns`: Unique list of concern names (e.g., "react", "typescript", "nextjs", "security")
+- `skill_mapping`: Map of concern → {plugin, skill_path} for loading skills
+
+Example output structure:
+```json
+{
+  "available_concerns": ["react", "typescript", "nextjs", "security", "code-quality"],
+  "skill_mapping": {
+    "react": {"plugin": "review", "skill_path": "reviewing-react"},
+    "typescript": {"plugin": "review", "skill_path": "reviewing-typescript"}
+  }
+}
+```
+
+### 0.3 Process User Arguments
+
+**If user provides concern arguments** (e.g., `/review react typescript nextjs`):
+1. Parse concern names from $ARGUMENTS
+2. Map each concern to discovered skills using skill_mapping
+3. Load skills using Skill tool: `@{plugin}/{skill_name}`
+4. If concern not found in available_concerns:
+   - Warn user: "Concern '{concern}' not found"
+   - Suggest: "Available concerns: {available_concerns}"
+   - Continue with valid concerns
+
+**If user provides no arguments** (e.g., `/review`):
+1. Display available concerns from discovery
+2. Use AskUserQuestion to let user select concerns:
+
+```AskUserQuestion
+Question: "Which concerns should I review?"
+Header: "Available Review Concerns"
+MultiSelect: true
+Options: {generate from available_concerns}
+```
+
+3. Load selected skills
+
+### 0.4 Backward Compatibility
+
+If discovery script fails or returns empty results:
+- Fall back to hardcoded concern list from Phase 1.1
+- Log warning in problems_encountered
+- Continue with standard multi-select flow
 
 ## Phase 1: Scope & Tool Setup
 

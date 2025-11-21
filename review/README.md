@@ -99,11 +99,43 @@ Following the plugin philosophy design hierarchy:
 
 ### 1. Skill Discovery
 
-The plugin discovers review skills through:
+**Auto-Discovery Mechanism**
 
-- **Frontmatter tag:** Skills marked with `review: true`
-- **Naming convention:** Skills matching `review-*.md`
-- **Plugin metadata:** Plugins exporting review skills
+The plugin automatically discovers review skills on command invocation:
+
+1. **Runs discovery script:** Executes `discover-review-skills.sh` when `/review` is called
+2. **Scans all plugins:** Searches all installed plugins for skills with `review: true` frontmatter
+3. **Builds dynamic mapping:** Creates a mapping of concerns → skills for fast lookup
+4. **No configuration needed:** New plugins work immediately after installation
+
+**Skill Tagging Convention**
+
+Tool plugins tag review skills for auto-discovery:
+
+- **Frontmatter:** Skills marked with `review: true` in YAML frontmatter
+- **Naming convention:** Skill names use gerund form: `reviewing-{concern}`
+  - Example: `reviewing-nextjs-16-patterns`
+  - Example: `reviewing-react-hooks`
+  - Example: `reviewing-typescript-types`
+- **Location:** Skills can be anywhere in plugin directory structure
+
+**Automatic Integration**
+
+Once a plugin is installed:
+
+- Review skills automatically available via `/review`
+- Users invoke: `/review {concern}` where concern matches plugin domain
+- Multiple concerns composable: `/review react typescript nextjs-16`
+- Discovery runs fresh on each invocation to catch new plugins
+
+**Backward Compatibility**
+
+The system supports both:
+
+- Auto-discovered skills (preferred, dynamic)
+- Hardcoded skill references (legacy, static)
+
+New plugins should use auto-discovery for zero-configuration integration.
 
 ### 2. Tool Plugin Structure
 
@@ -155,7 +187,7 @@ claude plugin install review
 /review
 ```
 
-Loads all review skills from all installed tool plugins.
+Shows all available concerns from auto-discovery, then loads all review skills from all installed tool plugins.
 
 ### Review Specific Concerns
 
@@ -163,15 +195,23 @@ Loads all review skills from all installed tool plugins.
 /review react typescript
 ```
 
-Loads only React and TypeScript review skills.
+Loads only React and TypeScript review skills (auto-discovered from installed plugins).
 
 ### Review Single Concern
 
 ```bash
-/review security
+/review nextjs-16
 ```
 
-Loads only security review skills.
+Uses auto-discovered Next.js 16 review skill from the nextjs-16 plugin.
+
+### Compose Multiple Auto-Discovered Skills
+
+```bash
+/review react typescript nextjs-16
+```
+
+Composes multiple auto-discovered skills together for comprehensive review across React, TypeScript, and Next.js 16 concerns.
 
 ### Conversational Review
 
