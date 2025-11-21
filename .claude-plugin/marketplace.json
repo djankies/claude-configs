@@ -8,5 +8,54 @@
     "description": "A curated marketplace of Claude Code plugins for various technologies",
     "version": "1.0.0"
   },
-  "plugins": []
+  "plugins": [
+    {
+      "name": "react-19",
+      "source": "./react-19",
+      "description": "React 19 patterns, hooks, and best practices for modern React applications",
+      "version": "1.0.0",
+      "author": "Daniel Jankowski",
+      "homepage": "https://github.com/djankies/claude-configs",
+      "repository": "djankies/claude-configs",
+      "license": "MIT",
+      "keywords": ["react", "react-19", "hooks", "server-actions", "server-components", "forms", "state-management", "performance"],
+      "category": "framework"
+    },
+    {
+      "name": "review",
+      "source": "./review",
+      "description": "Cross-cutting code review plugin that orchestrates review skills from tool plugins",
+      "version": "1.0.0",
+      "author": "Daniel Jankowski",
+      "homepage": "https://github.com/djankies/claude-configs",
+      "repository": "djankies/claude-configs",
+      "license": "MIT",
+      "keywords": ["review", "code-quality", "orchestration", "cross-cutting", "best-practices", "quality-assurance"],
+      "category": "tools"
+    },
+    {
+      "name": "typescript",
+      "source": "./typescript",
+      "description": "TypeScript 5.9 type safety, compiler configuration, and best practices based on real-world AI coding failures. Provides intelligent skill recommendations, type safety validation, and prevents common TypeScript anti-patterns.",
+      "version": "1.0.0",
+      "author": "Daniel Jankowski",
+      "homepage": "https://github.com/djankies/claude-configs",
+      "repository": "djankies/claude-configs",
+      "license": "MIT",
+      "keywords": ["typescript", "type-safety", "compiler", "validation", "security", "ts5.9", "best-practices", "hooks", "runtime-validation"],
+      "category": "language"
+    },
+    {
+      "name": "plugin-template",
+      "source": "./plugin-template",
+      "description": "A comprehensive template demonstrating all Claude Code plugin features",
+      "version": "1.0.0",
+      "author": "Daniel Jankowski",
+      "homepage": "https://github.com/djankies/claude-configs",
+      "repository": "djankies/claude-configs",
+      "license": "MIT",
+      "keywords": ["claude-code", "plugin", "template", "example"],
+      "category": "development"
+    }
+  ]
 }
