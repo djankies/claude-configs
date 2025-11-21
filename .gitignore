@@ -61,3 +61,5 @@ mcp-servers/**/node_modules/
 
 # Snyk Security Extension - AI Rules (auto-generated)
 .cursor/rules/snyk_rules.mdc
+
+**/stress-test/**
