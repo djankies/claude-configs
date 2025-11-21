@@ -1,4 +1,3 @@
-````markdown
 ---
 description: Create a new Claude Code plugin following ecosystem philosophy
 argument-hint: <plugin-name>
@@ -29,7 +28,6 @@ Read design document:
 ```bash
 cat @$ARGUMENTS/PLUGIN-DESIGN.md
 ```
-````
 
 **If not found:** STOP → "No design document at @$ARGUMENTS/PLUGIN-DESIGN.md. Run `/design-plugin $ARGUMENTS` first."
 
@@ -74,6 +72,8 @@ Components: {list_from_design}
 ```
 
 ### 3.2 Deploy All Generators (Single Message)
+
+subagent_type: "general-purpose" for Tasks 1-8
 
 ```
 Task 1:
@@ -281,7 +281,3 @@ NEVER mark complete with failing validation.
 **No design:** STOP → "No design at @$ARGUMENTS/PLUGIN-DESIGN.md. Run `/design-plugin $ARGUMENTS` first."
 **Component fails:** Note in summary, continue others
 **Validation fails:** Document, remediate, re-validate
-
-```
-
-```

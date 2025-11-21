@@ -177,15 +177,16 @@ priority_4 = nitpick issues
 
 ## Phase 4: Remediation
 
-Ask user:
+Ask user with AskUserQuestion tool:
 
 ```text
 Question: "Found {total} issues ({critical} critical, {high} high, {medium} medium, {nitpick} nitpick) and {integration_opportunities} integration opportunities. Proceed?"
+multi-select: true
 Options:
-  - Auto-fix all
-  - Auto-fix critical/high only
-  - Manual review (show report)
-  - Skip remediation
+  - Auto-fix medium/nitpick issues: {list of fixes to be applied}
+  - Auto-fix critical/high issues: {list of fixes to be applied}
+  - Auto-fix integration opportunities: {list of fixes to be applied}
+
 ```
 
 **If auto-fix selected, deploy remediation agents (single message):**

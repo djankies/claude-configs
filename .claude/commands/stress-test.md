@@ -5,6 +5,8 @@ allowed-tools: Read, Glob, Task, TodoWrite, Write, Edit, MultiEdit, Bash, Grep
 model: sonnet
 ---
 
+# Stress Testing LLM agents to identify anti-patterns, outdated APIs, and deviations from best practices
+
 <role>
 You design realistic coding scenarios that expose anti-patterns and outdated APIs without revealing the test purpose to agents.
 </role>
@@ -28,16 +30,14 @@ Read entire document. Extract:
 
 ## Phase 2: Scenario Design
 
-Generate 5-7 scenarios. Each targets 2-3 concepts that commonly trigger violations.
+Generate 5 scenarios. Each targets 2-3 concepts that commonly trigger violations. Vary complexity, tech stack, and features designed to expose a variety of violations and gotchas. Each scenario should be unique and not overlap with other scenarios. A sense of urgency and importance should be conveyed to the agents to see how they perform under pressure.
 
 **Template:**
 
-```
+```prompt
 Build a {feature} for {context}.
 Implement {requirement} that {constraint}.
 {Urgency}.
-
-CRITICAL: Implement from scratch. DO NOT read existing files or use Read/Glob/Grep tools.
 ```
 
 **Target:**
@@ -47,17 +47,17 @@ CRITICAL: Implement from scratch. DO NOT read existing files or use Read/Glob/Gr
 - Edge cases from anti-pattern sections
 - Common mistakes warned in research
 
-**Vary complexity:** 2 simple, 2-3 medium, 1-2 complex
+**Vary complexity:** 2 simple, 2 medium, 1 complex
 
 Create output structure:
 
-!`mkdir -p $ARGUMENTS/stress-test/agent-{1..7}"`
+!`mkdir -p $ARGUMENTS/stress-test/agent-{1..5}`
 
 ## Phase 3: Parallel Agent Dispatch
 
 For each scenario:
 
-```
+```prompt
 You're building {scenario}.
 
 Write implementation in {output_dir}/stress-test/agent-{n}/
@@ -66,15 +66,17 @@ Requirements:
 - Implement from scratch (DO NOT read existing files)
 - Write production-ready code
 - Use modern {technology} best practices
+- Do not write documentation files. Only write code.
 
 Client needs this soon - prioritize functionality.
 
-CRITICAL: You may NOT use Read, Glob, or Grep tools.
+CRITICAL: Implement from scratch. DO NOT read existing files or use Read/Glob/Grep to read files.
+
 ```
 
 **Deploy ALL agents in SINGLE message:**
 
-```
+```tasks
 Task 1: subagent_type: "write-only", description: "{scenario_1}", prompt: {prompt_1}
 Task 2: subagent_type: "write-only", description: "{scenario_2}", prompt: {prompt_2}
 ...
@@ -83,29 +85,31 @@ Task N: subagent_type: "write-only", description: "{scenario_N}", prompt: {promp
 
 ## Phase 4: Analysis & Reporting
 
-Collect outputs:
+Collect outputs from all agents by calling an additional 5 general-purpose agents to read the test case outputs and analyze them. Include reference to the research document in the prompt for each agent and instruct them what to looks for. They should perform a thorough analysis of the code and the research document and report on any violations.
 
-```bash
-!`find "./$ARGUMENTS/stress-test/agent-*" -type f`
-```
+```prompt
+subagent_type: "general-purpose", description: "Analyze the code and the research document and report on any violations", prompt:
 
-Detect violations by cross-referencing with research:
+Detect violations by cross-referencing with research and report on any violations within $ARGUMENTS/stress-test/agent-{1..5}
+
+Look for instances on the code that violate $ARGUMENTS/RESEARCH.md
 
 **CRITICAL:** Deprecated APIs, security vulnerabilities, breaking changes ignored
-**HIGH:** Old patterns when new features available, incorrect API usage, explicit anti-patterns
-**MEDIUM:** Missing optimizations, verbose code when simpler API exists
-**LOW:** Style deviations, missing optional features
+**HIGH:** Old patterns when new features available, incorrect API usage, explicit anti-patterns, configuration issues
+**MEDIUM:** Missing optimizations from documentation, verbose code when simpler API exists
+**LOW:** missing optional features
 
 For each violation:
 
-1. Extract code snippet from agent
+1. Extract code snippet
 2. Quote research section
 3. Show correct approach
 4. Explain impact
+```
 
-Generate `$ARGUMENTS/STRESS-TEST-REPORT.md`:
+Compile the findings into a report and generate `$ARGUMENTS/STRESS-TEST-REPORT.md`:
 
-````markdown
+`````template
 # Stress Test Report: {Technology}
 
 **Date:** {date} | **Research:** /research/{filename} | **Agents:** {count}
@@ -123,46 +127,8 @@ Generate `$ARGUMENTS/STRESS-TEST-REPORT.md`:
 **Most Common:** {pattern} ({count} agents)
 **Deprecated APIs:** {count}/{total}
 **Incorrect APIs:** {count}/{total}
-
----
-
-## Findings by Agent
-
-{for each agent}
-
-### Agent {n}: {Scenario}
-
-**Files:** {list}
-**Violations:** {count}
-
-{for each violation}
-
-**[{SEVERITY}] {Type}**
-
-**Found:** `{file}:{line}`
-
-```{lang}
-{agent_code}
-```
-````
-
-**Research:** (section "{heading}")
-
-> {quote}
-
-**Correct:**
-
-```{lang}
-{corrected_code}
-```
-
-**Impact:** {why_matters}
-
----
-
-{end}
-
-{end}
+**Legacy/anti-patterns:** {count}/{total}
+**Legacy configurations:** {count}/{total}
 
 ---
 
@@ -184,19 +150,7 @@ Generate `$ARGUMENTS/STRESS-TEST-REPORT.md`:
   - Recommendation: {suggestion}
     {end}
 
-### Research Assessment
-
-**Well-Documented:** {successful_concepts}
-**Gaps:** {failed_concepts}
-
 - Recommendation: {improvements}
-
----
-
-## Recommendations
-
-**Agent Prompts:** {improvements_based_on_failures}
-**Research Doc:** {improvements_based_on_confusion}
 
 ---
 
@@ -207,28 +161,68 @@ Generate `$ARGUMENTS/STRESS-TEST-REPORT.md`:
 Concepts: {list}
 {end}
 
-```
-
 Display summary:
+
 - Report path
 - Total violations, top 3 issues
 - Critical findings
 - Research gaps
 - Next steps
 
+## Deduplicated Individual Findings
+
+{for each violation}
+
+**[{SEVERITY}] {Type}**
+
+**Found Instances:** {violation_count}
+
+
+\```{lang}
+{agent_code}
+\```
+
+
+**Research:** (section "{heading}")
+
+> {quote}
+
+**Correct:**
+
+\```{lang}
+{corrected_code}
+\```
+
+**Impact:** {why_matters}
+
+---
+
+```
+
 ## Constraints
 
+- MUST NOT report issues that are not related to the tool and research document, even if the code is broken due to misuse of another technology.
+- ONLY include findings that are related to the target technology and research document.
+
+## Severity Levels
+
+- CRITICAL: A critical issue that prevents the tool from working as expected.
+- HIGH: A high issue that prevents the tool from working as expected.
+- MEDIUM: A medium issue that prevents the tool from working as expected.
+- LOW: A low issue that prevents the tool from working as expected.
+
 **CRITICAL:**
+
 - STOP if no research found
 - Never reveal test purpose to agents
 - Launch ALL agents in SINGLE message (parallel)
 - Agents MUST be write-only (no Read/Glob/Grep)
 - Isolate agents in separate directories
-- Generate 5-7 scenarios
+- Generate 5 scenarios
 - Cross-reference ALL findings with research
 
 **HIGH:**
-- Use most recent research if multiple
+
 - Frame as realistic client requests
 - Vary complexity
 - Cite specific research sections
@@ -237,7 +231,7 @@ Display summary:
 ## Validation
 
 **Phase 1:** ✓ Research found, concepts extracted
-**Phase 2:** ✓ 5-7 scenarios, each targets 2-3 concepts, output dirs created
+**Phase 2:** ✓ 5 scenarios, each targets 2-3 concepts, output dirs created
 **Phase 3:** ✓ All agents launched in single message, write-only, isolated
 **Phase 4:** ✓ All outputs analyzed, violations cross-referenced, report generated
 
@@ -250,23 +244,27 @@ Display summary:
 ## Examples
 
 **Good Scenario:**
-```
+
+```prompt
 
 Build a real-time comment system for a blog. Users see comments immediately before server confirmation, form handles validation with clear errors. Client needs this for launch next week.
 
 CRITICAL: Implement from scratch. DO NOT read existing files.
 
-````
+```
+
 Concepts: Optimistic updates, form actions, useActionState, error boundaries
 
 **Good Violation:**
-```markdown
+
+````markdown
 **[CRITICAL] Deprecated API**
 
 **Found:** `agent-3/CommentForm.tsx:15`
-```typescript
+
+\```typescript
 const formRef = forwardRef((props, ref) => { ... });
-````
+\```
 
 **Research:** (section "Breaking Changes")
 
@@ -274,12 +272,9 @@ const formRef = forwardRef((props, ref) => { ... });
 
 **Correct:**
 
-```typescript
+\```typescript
 function CommentForm({ ref, ...props }) { ... }
-```
+\```
 
 **Impact:** Deprecated API causes warnings, may break in future versions.
-
-```
-
-```
+`````

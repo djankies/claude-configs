@@ -1,6 +1,6 @@
 ---
 description: Generate comprehensive plugin design document from research and philosophy
-argument-hint: <plugin-name> [research-doc-path]
+argument-hint: <plugin-name>
 allowed-tools: Read, Glob, Write, TodoWrite, Bash
 ---
 
@@ -16,9 +16,9 @@ You are a Claude Code Plugin Architecture Specialist with deep expertise in:
 
 <context>
 ## Plugin Request
-Plugin name: $1
+Plugin name: $ARGUMENTS
 
-Research document: $2
+Research document: @$ARGUMENTS/RESEARCH.md
 
 ## Core Documents
 
@@ -26,7 +26,7 @@ Plugin Philosophy (decision framework):
 @docs/PLUGIN-PHILOSOPHY.md
 
 Stress test report (Actual failures this plugin should help prevent):
-@$ARGUMENTS/stress-test/STRESS-TEST-REPORT.md
+@$ARGUMENTS/STRESS-TEST-REPORT.md
 
 Reference example (design document structure):
 @docs/plans/2025-11-19-react-19-plugin-design.md
@@ -39,7 +39,7 @@ Per Claude Code documentation:
 - `commands/` - Auto-discovered slash commands
 - `agents/` - Auto-discovered agent definitions
 - `hooks/` - Must specify in hooks.json
-- `knowledge/` - Shared research/docs accessible to all components
+- `knowledge/` - Shared research accessible to all components
 - `scripts/` - Shared validation scripts used by hooks/skills
 
 ## Naming Convention
@@ -48,10 +48,6 @@ Per Claude Code documentation:
 - Topic: lowercase-with-hyphens
 - Format: `[CONCERN]-[topic]/`
 - Examples: `HOOKS-use-hook/`, `FORMS-server-actions/`, `STATE-context-api/`
-
-## Research Discovery
-
-If research document not provided, auto-discover in research/ directory by matching plugin name.
 
 ## Output Location
 
@@ -70,8 +66,7 @@ Think step-by-step to generate a comprehensive plugin design document following 
 
 2. **Load Research Document**
 
-   - If $2 provided, read that document
-   - Otherwise: !`find research/ -name "*$1*" -type f | head -1`
+   - If provided, read that document, otherwise STOP and ask the user to provide the research document.
    - Extract all API patterns, features, breaking changes, best practices
    - Identify distinct conceptual areas (these become concern prefixes)
 
@@ -83,15 +78,9 @@ Think step-by-step to generate a comprehensive plugin design document following 
 
 4. **Identify Problems This Plugin Solves**
 
-   - What gaps exist without this plugin?
-   - What mistakes do developers make in this domain?
-   - What outdated patterns need correction?
-   - What new patterns need teaching?
-
-5. **Define Target Users**
-   - Who benefits from this plugin?
-   - What level of expertise (beginner, intermediate, advanced)?
-   - What workflows does it support?
+   - What violations exist in the stress test report?
+   - What patterns need to be taught to prevent these violations?
+   - What are the most common workflows that developers perform that this plugin can help with?
 
 **Phase 3: Apply Decision Framework**
 
@@ -105,13 +94,13 @@ Work through the design hierarchy for each component type:
 
 7. **Level 2: Skills - What patterns to teach?**
 
-   - Extract teaching opportunities from research
+   - Extract teaching opportunities from research and the stress test report
    - Identify concerns (4-8 typical: HOOKS, FORMS, STATE, TESTING, etc.)
    - Design 6-10 teaching skills with concern prefixes
    - Design 1-2 review skills (prefix: `REVIEW-`)
    - For each skill: `[CONCERN]-[topic]/SKILL.md`
    - Each skill can have `references/` subdirectory for skill-specific docs
-   - Shared research goes in `knowledge/` directory
+   - Shared research goes in `$ARGUMENTS/knowledge/` directory
 
 8. **Level 3: Hooks - Intelligent skill activation with lifecycle management**
 
@@ -120,6 +109,7 @@ Work through the design hierarchy for each component type:
    - Based on file path patterns (app/page.tsx → nextjs skills)
    - Based on file content patterns (detected via grep/analysis)
    - Keep checks fast (< 100ms total)
+   - Early exit with no output if trigger condition is not met, ideally condition is placed within hooks.json to prevent the script from being called at all if the condition is not met.
    - Design 1-3 additional validation hooks if needed
    - Hooks use scripts from `scripts/` directory
 
@@ -132,6 +122,7 @@ Work through the design hierarchy for each component type:
      - Structure: `{"recommendations_shown": {"[type]": false, ...}}`
      - Runs once at session start
      - Fast: < 5ms (simple JSON write)
+     - should handle scenarios where file already exists from another session or plugin. all plugins should be able to share the same session state file.
 
      **PreToolUse hook** (`scripts/recommend-skills.sh`):
 
@@ -143,11 +134,19 @@ Work through the design hierarchy for each component type:
      - Prevents context bloat from repeated recommendations
 
    - **STRONGLY ENCOURAGE bash scripts over prompt-based hooks**:
+
      - Deterministic: Same input = same output
      - Optimizable: Can be cached, parallelized
      - Fast: No LLM inference overhead
      - Reusable: Share scripts across hooks/skills/commands
      - Example: File pattern detection, validation checks, code analysis
+
+     Best practices:
+
+     - Keep output as minimal as possible.
+     - ONLY output bare minimum and nothing else
+     - Keep scripts simple and focused on a single purpose.
+     - handle errors and edge cases gracefully -> output message "SHARE WITH USER: [script-filepath] failed to run"
 
 9. **Level 4: Commands - Frequent directives?**
 
