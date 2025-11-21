@@ -16,11 +16,15 @@ version: 1.0.0
 - [ ] Length limits enforced
 - [ ] No SQL injection vulnerabilities
 
+For runtime validation patterns and type safety, use the VALIDATION-runtime-checks skill from the typescript plugin.
+
 ### Authentication & Authorization
 - [ ] Session/auth checked before mutations
 - [ ] User permissions verified
 - [ ] Resource ownership validated
 - [ ] No unauthorized access possible
+
+For secure credential handling, use the SECURITY-credentials skill from the typescript plugin.
 
 ### Data Sanitization
 - [ ] User input sanitized before storage

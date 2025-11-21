@@ -45,4 +45,6 @@ version: 1.0.0
 - [ ] Database operations mocked
 - [ ] Error handling tested
 
+For typed test fixtures and mocks, use the TYPES-generics skill from the typescript plugin.
+
 For comprehensive testing patterns, see: `research/react-19-comprehensive.md`.
