@@ -17,8 +17,5 @@
     "best-practices",
     "hooks",
     "runtime-validation"
-  ],
-  "engines": {
-    "claude-code": ">=1.0.0"
-  }
+  ]
 }

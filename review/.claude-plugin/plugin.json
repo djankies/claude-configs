@@ -15,17 +15,5 @@
     "best-practices",
     "quality-assurance"
   ],
-  "engines": {
-    "claude-code": ">=1.0.0"
-  },
-  "peerPlugins": {
-    "react-19": "optional",
-    "typescript": "optional",
-    "nextjs-15": "optional",
-    "security": "optional"
-  },
-  "consumes": {
-    "review-skills": "*/concerns/*/skills/review-*.md"
-  },
   "commands": "./commands"
 }

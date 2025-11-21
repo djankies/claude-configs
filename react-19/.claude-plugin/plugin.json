@@ -16,21 +16,5 @@
     "forms",
     "state-management",
     "performance"
-  ],
-  "engines": {
-    "claude-code": ">=1.0.0"
-  },
-  "exports": {
-    "concerns": "./concerns",
-    "skills": "./concerns/*/skills",
-    "validation": "./concerns/*/validation",
-    "research": "./research"
-  },
-  "peerPlugins": {
-    "nextjs-15": "optional",
-    "remix-2": "optional",
-    "testing-tools": "optional",
-    "migration-tools": "optional",
-    "review": "optional"
-  }
+  ]
 }
