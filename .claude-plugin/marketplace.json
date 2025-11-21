@@ -14,7 +14,10 @@
       "source": "./react-19",
       "description": "React 19 patterns, hooks, and best practices for modern React applications",
       "version": "1.0.0",
-      "author": "Daniel Jankowski",
+      "author": {
+        "name": "Daniel Jankowski",
+        "email": "djank0113@gmail.com"
+      },
       "homepage": "https://github.com/djankies/claude-configs",
       "repository": "djankies/claude-configs",
       "license": "MIT",
@@ -26,7 +29,10 @@
       "source": "./review",
       "description": "Cross-cutting code review plugin that orchestrates review skills from tool plugins",
       "version": "1.0.0",
-      "author": "Daniel Jankowski",
+      "author": {
+        "name": "Daniel Jankowski",
+        "email": "djank0113@gmail.com"
+      },
       "homepage": "https://github.com/djankies/claude-configs",
       "repository": "djankies/claude-configs",
       "license": "MIT",
@@ -38,7 +44,10 @@
       "source": "./typescript",
       "description": "TypeScript 5.9 type safety, compiler configuration, and best practices based on real-world AI coding failures. Provides intelligent skill recommendations, type safety validation, and prevents common TypeScript anti-patterns.",
       "version": "1.0.0",
-      "author": "Daniel Jankowski",
+      "author": {
+        "name": "Daniel Jankowski",
+        "email": "djank0113@gmail.com"
+      },
       "homepage": "https://github.com/djankies/claude-configs",
       "repository": "djankies/claude-configs",
       "license": "MIT",
