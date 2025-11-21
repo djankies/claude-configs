@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "React 19 patterns, hooks, and best practices for modern React applications",
   "author": {
-    "name": "Plugin Author",
-    "email": "author@example.com"
+    "name": "Daniel Jankovic",
+    "email": "daniel@example.com"
   },
+  "repository": "djankies/claude-configs",
   "license": "MIT",
   "keywords": [
     "react",

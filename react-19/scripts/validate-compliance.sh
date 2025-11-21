@@ -1,6 +1,15 @@
 #!/bin/bash
 
-FILE_PATH="$1"
+if [ -t 0 ]; then
+  FILE_PATH="$1"
+else
+  INPUT=$(cat)
+  FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // empty' 2>/dev/null)
+
+  if [ -z "$FILE_PATH" ] && [ -n "$1" ]; then
+    FILE_PATH="$1"
+  fi
+fi
 
 if [ -z "$FILE_PATH" ]; then
   exit 0
@@ -19,15 +28,16 @@ strip_comments() {
 CODE_CONTENT=$(strip_comments "$FILE_PATH")
 
 ERRORS=()
+CRITICAL_VIOLATIONS=()
 RECOMMENDED_SKILLS=()
 
-if echo "$CODE_CONTENT" | grep -qE '\bforwardRef\s*\('; then
-  ERRORS+=("❌ forwardRef is deprecated in React 19. Use ref as a prop instead.")
+if echo "$CODE_CONTENT" | grep -qE '\bforwardRef\s*[<(]'; then
+  CRITICAL_VIOLATIONS+=("❌ CRITICAL: forwardRef is deprecated in React 19. Use ref as a prop instead.")
   RECOMMENDED_SKILLS+=("migrating-from-forwardref")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\.(propTypes|defaultProps)\s*='; then
-  ERRORS+=("❌ propTypes and defaultProps are deprecated in React 19.")
+  CRITICAL_VIOLATIONS+=("❌ CRITICAL: propTypes and defaultProps are deprecated in React 19.")
   RECOMMENDED_SKILLS+=("review-hook-patterns")
 fi
 
@@ -52,6 +62,15 @@ if echo "$CODE_CONTENT" | grep -qE '\b(useState|useEffect|useContext|useReducer|
         RECOMMENDED_SKILLS+=("server-vs-client-boundaries")
       fi
     fi
+  fi
+fi
+
+if echo "$CODE_CONTENT" | grep -qE 'onSubmit.*preventDefault'; then
+  if ! echo "$CODE_CONTENT" | grep -qE '\buseActionState\s*\('; then
+    echo "💡 TIP: Consider useActionState for form state"
+    echo "   → React 19's useActionState integrates with Server Actions"
+    echo "   → See: @react-19/HOOKS-action-state-patterns"
+    RECOMMENDED_SKILLS+=("action-state-patterns")
   fi
 fi
 
@@ -91,21 +110,46 @@ if echo "$CODE_CONTENT" | grep -qE '\buseFormStatus\s*\('; then
   fi
 fi
 
+if echo "$CODE_CONTENT" | grep -qE 'disabled=\{(pending|isSubmitting|isPending)'; then
+  if ! echo "$CODE_CONTENT" | grep -qE '\buseFormStatus\s*\('; then
+    echo "💡 TIP: Consider useFormStatus for form submission state"
+    echo "   → React 19's useFormStatus tracks parent form status automatically"
+    echo "   → See: @react-19/FORMS-form-status-tracking"
+    RECOMMENDED_SKILLS+=("form-status-tracking")
+  fi
+fi
+
 if echo "$CODE_CONTENT" | grep -qE '\buseOptimistic\s*\('; then
   RECOMMENDED_SKILLS+=("optimistic-updates")
+fi
+
+if echo "$CODE_CONTENT" | grep -qE 'useState.*(pending|optimistic)|setPending|setOptimistic'; then
+  if ! echo "$CODE_CONTENT" | grep -qE '\buseOptimistic\s*\('; then
+    echo "💡 TIP: Consider useOptimistic for optimistic updates"
+    echo "   → React 19's useOptimistic hook simplifies optimistic UI patterns"
+    echo "   → See: @react-19/HOOKS-optimistic-updates"
+    RECOMMENDED_SKILLS+=("optimistic-updates")
+  fi
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\buse\s*\('; then
   RECOMMENDED_SKILLS+=("using-use-hook")
 fi
 
+if echo "$CODE_CONTENT" | grep -qE '\buseDeferredValue\s*\(\s*\w+\s*\)([^,]|$)'; then
+  echo "💡 TIP: Add initialValue parameter to useDeferredValue"
+  echo "   → React 19 accepts initialValue to prevent layout shifts"
+  echo "   → useDeferredValue(value, initialValue)"
+  RECOMMENDED_SKILLS+=("using-use-hook")
+fi
+
 if echo "$CODE_CONTENT" | grep -qE '\bReactDOM\.render\s*\('; then
-  ERRORS+=("❌ ReactDOM.render is deprecated. Use ReactDOM.createRoot in React 19.")
+  CRITICAL_VIOLATIONS+=("❌ CRITICAL: ReactDOM.render is deprecated. Use ReactDOM.createRoot in React 19.")
   RECOMMENDED_SKILLS+=("server-vs-client-boundaries")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\buseFormState\s*\('; then
-  ERRORS+=("❌ useFormState is renamed to useActionState in React 19.")
+  CRITICAL_VIOLATIONS+=("❌ CRITICAL: useFormState is renamed to useActionState in React 19.")
   RECOMMENDED_SKILLS+=("action-state-patterns")
 fi
 
@@ -141,27 +185,27 @@ if echo "$CODE_CONTENT" | grep -qE '\bContext\.Consumer\b|<\w+\.Consumer>'; then
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\bfindDOMNode\s*\('; then
-  ERRORS+=("❌ findDOMNode is deprecated. Use refs instead.")
+  CRITICAL_VIOLATIONS+=("❌ CRITICAL: findDOMNode is deprecated. Use refs instead.")
   RECOMMENDED_SKILLS+=("migrating-from-forwardref")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\bunmountComponentAtNode\s*\('; then
-  ERRORS+=("❌ unmountComponentAtNode is deprecated. Use root.unmount() in React 19.")
+  CRITICAL_VIOLATIONS+=("❌ CRITICAL: unmountComponentAtNode is deprecated. Use root.unmount() in React 19.")
   RECOMMENDED_SKILLS+=("server-vs-client-boundaries")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\bReactDOM\.hydrate\s*\('; then
-  ERRORS+=("❌ ReactDOM.hydrate is deprecated. Use hydrateRoot in React 19.")
+  CRITICAL_VIOLATIONS+=("❌ CRITICAL: ReactDOM.hydrate is deprecated. Use hydrateRoot in React 19.")
   RECOMMENDED_SKILLS+=("server-vs-client-boundaries")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\bref\s*=\s*["\x27]\w+["\x27]'; then
-  ERRORS+=("❌ String refs are deprecated. Use ref callbacks or useRef.")
+  CRITICAL_VIOLATIONS+=("❌ CRITICAL: String refs are deprecated. Use ref callbacks or useRef.")
   RECOMMENDED_SKILLS+=("migrating-from-forwardref")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\b(componentWillMount|componentWillReceiveProps|componentWillUpdate)\s*\('; then
-  ERRORS+=("❌ Unsafe lifecycle methods detected. These are removed in React 19.")
+  CRITICAL_VIOLATIONS+=("❌ CRITICAL: Unsafe lifecycle methods detected. These are removed in React 19.")
   RECOMMENDED_SKILLS+=("using-use-hook")
 fi
 
@@ -175,7 +219,20 @@ if echo "$CODE_CONTENT" | grep -qE '\bgetDerivedStateFromProps\s*\('; then
   RECOMMENDED_SKILLS+=("using-use-hook")
 fi
 
-if [ ${#ERRORS[@]} -gt 0 ] || [ ${#RECOMMENDED_SKILLS[@]} -gt 0 ]; then
+if echo "$CODE_CONTENT" | grep -qE 'Math\.random\(\).*toString\('; then
+  ERRORS+=("⚠️  WARNING: Using Math.random() for ID generation")
+  ERRORS+=("   → Use React 19's useId() hook for component IDs")
+  ERRORS+=("   → See: @react-19/HOOKS-using-use-hook")
+  RECOMMENDED_SKILLS+=("using-use-hook")
+fi
+
+if [ ${#CRITICAL_VIOLATIONS[@]} -gt 0 ] || [ ${#ERRORS[@]} -gt 0 ] || [ ${#RECOMMENDED_SKILLS[@]} -gt 0 ]; then
+  if [ ${#CRITICAL_VIOLATIONS[@]} -gt 0 ]; then
+    echo "React 19 Compliance - CRITICAL VIOLATIONS:"
+    printf '%s\n' "${CRITICAL_VIOLATIONS[@]}"
+    echo ""
+  fi
+
   if [ ${#ERRORS[@]} -gt 0 ]; then
     echo "React 19 Compliance Issues:"
     printf '%s\n' "${ERRORS[@]}"
@@ -190,6 +247,10 @@ if [ ${#ERRORS[@]} -gt 0 ] || [ ${#RECOMMENDED_SKILLS[@]} -gt 0 ]; then
     done
     echo ""
   fi
+fi
+
+if [ ${#CRITICAL_VIOLATIONS[@]} -gt 0 ]; then
+  exit 2
 fi
 
 exit 0

@@ -1,6 +1,15 @@
 #!/bin/bash
 
-FILE_PATH="$1"
+if [ -t 0 ]; then
+  FILE_PATH="$1"
+else
+  INPUT=$(cat)
+  FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // empty' 2>/dev/null)
+
+  if [ -z "$FILE_PATH" ] && [ -n "$1" ]; then
+    FILE_PATH="$1"
+  fi
+fi
 
 if [ -z "$FILE_PATH" ]; then
   exit 0
@@ -19,20 +28,21 @@ strip_comments() {
 CODE_CONTENT=$(strip_comments "$FILE_PATH")
 
 WARNINGS=()
+CRITICAL_VIOLATIONS=()
 RECOMMENDED_SKILLS=()
 
-if echo "$CODE_CONTENT" | grep -qE '\bforwardRef\s*\('; then
-  WARNINGS+=("⚠️  Found forwardRef usage. React 19 supports ref as a prop.")
+if echo "$CODE_CONTENT" | grep -qE '\bforwardRef\s*[<(]'; then
+  CRITICAL_VIOLATIONS+=("❌ CRITICAL: forwardRef is deprecated in React 19. Use ref as a prop.")
   RECOMMENDED_SKILLS+=("migrating-from-forwardref")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\.(propTypes|defaultProps)\s*='; then
-  WARNINGS+=("⚠️  Found propTypes or defaultProps. These are deprecated in React 19.")
+  CRITICAL_VIOLATIONS+=("❌ CRITICAL: propTypes and defaultProps are deprecated in React 19.")
   RECOMMENDED_SKILLS+=("review-hook-patterns")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\bclass\s+\w+\s+extends\s+(React\.Component|Component|PureComponent|React\.PureComponent)\b'; then
-  WARNINGS+=("⚠️  Found class component. Migrate to function component with hooks.")
+  CRITICAL_VIOLATIONS+=("❌ CRITICAL: Class component found. Migrate to function component with hooks.")
   RECOMMENDED_SKILLS+=("using-use-hook")
 
   if echo "$CODE_CONTENT" | grep -qE '\bcomponent(Did|Will)Mount\b'; then
@@ -148,9 +158,22 @@ if echo "$CODE_CONTENT" | grep -qE '\bReact\.createClass\s*\('; then
   RECOMMENDED_SKILLS+=("component-composition")
 fi
 
-if [ ${#WARNINGS[@]} -gt 0 ] || [ ${#RECOMMENDED_SKILLS[@]} -gt 0 ]; then
+if echo "$CODE_CONTENT" | grep -qE 'Math\.random\(\).*toString\('; then
+  WARNINGS+=("⚠️  WARNING: Using Math.random() for ID generation")
+  WARNINGS+=("   → Use React 19's useId() hook for component IDs")
+  WARNINGS+=("   → See: @react-19/HOOKS-using-use-hook")
+  RECOMMENDED_SKILLS+=("using-use-hook")
+fi
+
+if [ ${#CRITICAL_VIOLATIONS[@]} -gt 0 ] || [ ${#WARNINGS[@]} -gt 0 ] || [ ${#RECOMMENDED_SKILLS[@]} -gt 0 ]; then
+  if [ ${#CRITICAL_VIOLATIONS[@]} -gt 0 ]; then
+    echo "React 19 Pattern Validation - CRITICAL VIOLATIONS:"
+    printf '%s\n' "${CRITICAL_VIOLATIONS[@]}"
+    echo ""
+  fi
+
   if [ ${#WARNINGS[@]} -gt 0 ]; then
-    echo "React 19 Pattern Validation:"
+    echo "React 19 Pattern Validation - Warnings:"
     printf '%s\n' "${WARNINGS[@]}"
     echo ""
   fi
@@ -163,6 +186,10 @@ if [ ${#WARNINGS[@]} -gt 0 ] || [ ${#RECOMMENDED_SKILLS[@]} -gt 0 ]; then
     done
     echo ""
   fi
+fi
+
+if [ ${#CRITICAL_VIOLATIONS[@]} -gt 0 ]; then
+  exit 2
 fi
 
 exit 0

@@ -2,24 +2,24 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Edit|Write",
+        "matcher": "Write|Edit",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/plugins/marketplaces/claude-configs/react-19/scripts/validate-react-patterns.sh",
-            "timeout": 30
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/validate-react-patterns.sh",
+            "timeout": 5000
           }
         ]
       }
     ],
     "PostToolUse": [
       {
-        "matcher": "Edit|Write",
+        "matcher": "Write|Edit",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/plugins/marketplaces/claude-configs/react-19/scripts/validate-compliance.sh",
-            "timeout": 30
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/validate-compliance.sh",
+            "timeout": 5000
           }
         ]
       }
@@ -29,8 +29,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/plugins/marketplaces/claude-configs/react-19/scripts/check-react-version.sh",
-            "timeout": 30
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/check-react-version.sh",
+            "timeout": 3000
           }
         ]
       }

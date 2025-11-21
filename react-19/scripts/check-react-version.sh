@@ -1,11 +1,24 @@
 #!/bin/bash
 
-if [ ! -f "package.json" ]; then
+if [ -t 0 ]; then
+  CWD="${1:-.}"
+else
+  INPUT=$(cat)
+  CWD=$(echo "$INPUT" | jq -r '.cwd // "."' 2>/dev/null)
+
+  if [ -z "$CWD" ] || [ "$CWD" = "null" ]; then
+    CWD="${1:-.}"
+  fi
+fi
+
+PACKAGE_JSON="$CWD/package.json"
+
+if [ ! -f "$PACKAGE_JSON" ]; then
   echo "⚠️  No package.json found. React 19 plugin activated but cannot verify React version."
   exit 0
 fi
 
-REACT_VERSION=$(grep -o '"react": *"[^"]*"' package.json | grep -o '[0-9][^"]*' | head -1)
+REACT_VERSION=$(grep -o '"react": *"[^"]*"' "$PACKAGE_JSON" | grep -o '[0-9][^"]*' | head -1)
 
 if [ -z "$REACT_VERSION" ]; then
   echo "⚠️  React not found in package.json. React 19 plugin activated."
