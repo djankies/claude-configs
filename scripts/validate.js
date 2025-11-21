@@ -63,9 +63,13 @@ const marketplaceSchema = {
         properties: {
           name: { type: 'string', pattern: '^[a-z0-9]+(-[a-z0-9]+)*$' },
           source: {
-            type: 'object',
             oneOf: [
               {
+                type: 'string',
+                description: 'Local path to plugin directory'
+              },
+              {
+                type: 'object',
                 properties: {
                   source: { type: 'string', enum: ['git'] },
                   url: { type: 'string', format: 'uri' }
@@ -73,6 +77,7 @@ const marketplaceSchema = {
                 required: ['source', 'url']
               },
               {
+                type: 'object',
                 properties: {
                   source: { type: 'string', enum: ['github'] },
                   repo: { type: 'string', pattern: '^[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+$' }
@@ -274,32 +279,43 @@ async function validateHooks() {
     }
     
     const hooks = JSON.parse(fs.readFileSync(fullPath, 'utf8'));
-    
-    // Basic validation
-    if (!hooks.hooks || !Array.isArray(hooks.hooks)) {
-      logError(`${file}: 'hooks' must be an array`);
+
+    if (!hooks.hooks || typeof hooks.hooks !== 'object') {
+      logError(`${file}: 'hooks' must be an object`);
       allValid = false;
       continue;
     }
-    
-    // Validate each hook
-    hooks.hooks.forEach((hook, index) => {
-      if (!hook.name) {
-        logError(`${file}: Hook at index ${index} missing 'name' field`);
-        allValid = false;
+
+    let totalHooks = 0;
+    const validEvents = [
+      'PreToolUse', 'PostToolUse', 'PermissionRequest', 'Notification',
+      'UserPromptSubmit', 'Stop', 'SubagentStop', 'PreCompact',
+      'SessionStart', 'SessionEnd'
+    ];
+
+    for (const [eventName, eventHandlers] of Object.entries(hooks.hooks)) {
+      if (!validEvents.includes(eventName)) {
+        logWarning(`${file}: Unknown event type '${eventName}'`);
       }
-      if (!hook.event) {
-        logError(`${file}: Hook '${hook.name || index}' missing 'event' field`);
+
+      if (!Array.isArray(eventHandlers)) {
+        logError(`${file}: Event '${eventName}' handlers must be an array`);
         allValid = false;
+        continue;
       }
-      if (!hook.handler) {
-        logError(`${file}: Hook '${hook.name || index}' missing 'handler' field`);
-        allValid = false;
-      }
-    });
-    
+
+      eventHandlers.forEach((handler, index) => {
+        if (!handler.hooks || !Array.isArray(handler.hooks)) {
+          logError(`${file}: Event '${eventName}' handler at index ${index} missing 'hooks' array`);
+          allValid = false;
+        } else {
+          totalHooks += handler.hooks.length;
+        }
+      });
+    }
+
     if (allValid) {
-      logSuccess(`${file} is valid (${hooks.hooks.length} hook(s))`);
+      logSuccess(`${file} is valid (${totalHooks} hook(s))`);
     }
   }
   
