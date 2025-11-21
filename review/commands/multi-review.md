@@ -13,8 +13,8 @@ You are a code review orchestrator. You coordinate specialized review agents in 
 <context>
 Files/directories to review: $ARGUMENTS
 
-Review Tools Status:
-!`bash ~/.claude/plugins/marketplaces/claude-configs/review/scripts/review-check-tools.sh`
+Check which tools are available:
+`bash ~/.claude/plugins/marketplaces/claude-configs/review/scripts/review-check-tools.sh`
 </context>
 
 ## Phase 1: Scope & Tool Setup
@@ -56,6 +56,8 @@ fi
 **If >15 files:** Ask user to confirm or select subset (suggest 3-5 logical subsets by directory/change type)
 
 ### 1.3 Check & Install Tools
+
+`bash ~/.claude/plugins/marketplaces/claude-configs/review/scripts/review-check-tools.sh` -> Returns list of installed and missing tools
 
 Map review types to required tools:
 
@@ -382,7 +384,7 @@ echo "$REPORT_CONTENT" > "./${REPORT_DATE}-review-report.{md|json}"
 
 ### 5.4 Next Steps
 
-use the AskUserQuestion tool:
+use the AskUserQuestion tool with these exact options:
 
 ```AskUserQuestion
 Question: "What are the next steps?"
@@ -393,8 +395,11 @@ Options:
   - "Fix high priority issues"
   - "Fix medium priority issues"
   - "Fix nitpick issues"
+  - "Review complete
   - "Something else..." (let the user describe the next steps)
 ```
+
+DO NOT include a "Fix all issues" option - It's multi-select, so the user can select multiple options.
 
 ## Constraints
 

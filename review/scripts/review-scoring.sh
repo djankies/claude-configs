@@ -14,10 +14,23 @@
 #       * "low" if there are nitpicks but no higher severity.
 #       * "none" if no issues.
 
-critical_count=$1
-high_count=$2
-medium_count=$3
-nitpick_count=$4
+# Validate input arguments
+if [ $# -ne 4 ]; then
+  echo "Error: Expected 4 arguments (critical_count high_count medium_count nitpick_count)" >&2
+  exit 1
+fi
+
+critical_count=${1:-0}
+high_count=${2:-0}
+medium_count=${3:-0}
+nitpick_count=${4:-0}
+
+# Validate that inputs are numbers
+if ! [[ "$critical_count" =~ ^[0-9]+$ ]] || ! [[ "$high_count" =~ ^[0-9]+$ ]] || \
+   ! [[ "$medium_count" =~ ^[0-9]+$ ]] || ! [[ "$nitpick_count" =~ ^[0-9]+$ ]]; then
+  echo "Error: All arguments must be non-negative integers" >&2
+  exit 1
+fi
 
 score=$((100 - critical_count*15 - high_count*8 - medium_count*3 - nitpick_count*1))
 if [ "$score" -lt 0 ]; then
@@ -40,13 +53,13 @@ else
 fi
 
 # Determine risk_level
-if (( critical_count > 0 )); then
+if [ "$critical_count" -gt 0 ]; then
   risk_level="critical"
-elif (( high_count > 1 )) || { (( high_count == 1 )) && (( medium_count > 0 )); }; then
+elif [ "$high_count" -gt 1 ] || { [ "$high_count" -eq 1 ] && [ "$medium_count" -gt 0 ]; }; then
   risk_level="high"
-elif (( medium_count > 4 )) || { (( medium_count > 1 )) && (( high_count > 0 )); }; then
+elif [ "$medium_count" -gt 4 ] || { [ "$medium_count" -gt 1 ] && [ "$high_count" -gt 0 ]; }; then
   risk_level="medium"
-elif (( nitpick_count > 0 )); then
+elif [ "$nitpick_count" -gt 0 ]; then
   risk_level="low"
 else
   risk_level="none"
