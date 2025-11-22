@@ -13,7 +13,7 @@ input=$(read_hook_input)
 
 file_path=$(get_input_field "parameters.file_path")
 
-[[ -z "$file_path" || ! -f "$file_path" ]] && pretooluse_respond "allow" && exit 0
+[[ -z "$file_path" || ! -f "$file_path" ]] && pretooluse_respond "allow" && finish_hook 0
 
 file_ext="${file_path##*.}"
 
@@ -22,7 +22,7 @@ case "$file_ext" in
     ;;
   *)
     pretooluse_respond "allow"
-    exit 0
+    finish_hook 0
     ;;
 esac
 
@@ -43,8 +43,9 @@ Use Skill tool to activate when needed."
     set_plugin_value "zod-4" "recommendations_shown.zod_skills" "true"
 
     pretooluse_respond "allow" "" "$(jq -n --argjson orig "$input" --arg ctx "$context" '$orig + {additionalContext: $ctx}')"
-    exit 0
+    finish_hook 0
   fi
 fi
 
 pretooluse_respond "allow"
+finish_hook 0

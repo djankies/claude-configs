@@ -16,3 +16,4 @@ set_plugin_value "zod-4" "recommendations_shown.zod_skills" "false"
 log_info "Session initialized for zod-4 plugin"
 
 echo "{}"
+finish_hook 0

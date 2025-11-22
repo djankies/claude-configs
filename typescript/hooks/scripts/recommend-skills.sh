@@ -12,7 +12,7 @@ read_hook_input > /dev/null
 FILE_PATH=$(get_input_field "tool_input.file_path")
 
 if [[ -z "$FILE_PATH" ]]; then
-  exit 0
+  finish_hook 0
 fi
 
 FILE_EXT="${FILE_PATH##*.}"
@@ -46,7 +46,7 @@ case "$FILE_EXT" in
 esac
 
 if [[ -z "$RECOMMENDATION_TYPE" ]]; then
-  exit 0
+  finish_hook 0
 fi
 
 if ! has_shown_recommendation "typescript" "$RECOMMENDATION_TYPE"; then
@@ -56,4 +56,4 @@ if ! has_shown_recommendation "typescript" "$RECOMMENDATION_TYPE"; then
 Use Skill tool to activate specific skills when needed."
 fi
 
-exit 0
+finish_hook 0

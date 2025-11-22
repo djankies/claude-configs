@@ -17,12 +17,12 @@ fi
 
 if [[ -z "$FILE_PATH" ]]; then
   posttooluse_respond
-  exit 0
+  finish_hook 0
 fi
 
 if [[ ! -f "$FILE_PATH" ]]; then
   posttooluse_respond
-  exit 0
+  finish_hook 0
 fi
 
 strip_comments() {
@@ -236,37 +236,46 @@ if [ ${#CRITICAL_VIOLATIONS[@]} -gt 0 ] || [ ${#ERRORS[@]} -gt 0 ] || [ ${#RECOM
   MESSAGE=""
 
   if [ ${#CRITICAL_VIOLATIONS[@]} -gt 0 ]; then
-    MESSAGE+="React 19 Compliance - CRITICAL VIOLATIONS:\n"
+    MESSAGE+="React 19 Compliance - CRITICAL VIOLATIONS:
+"
     for violation in "${CRITICAL_VIOLATIONS[@]}"; do
-      MESSAGE+="$violation\n"
+      MESSAGE+="$violation
+"
     done
-    MESSAGE+="\n"
+    MESSAGE+="
+"
     log_error "Critical compliance violations found in $FILE_PATH"
   fi
 
   if [ ${#ERRORS[@]} -gt 0 ]; then
-    MESSAGE+="React 19 Compliance Issues:\n"
+    MESSAGE+="React 19 Compliance Issues:
+"
     for error in "${ERRORS[@]}"; do
-      MESSAGE+="$error\n"
+      MESSAGE+="$error
+"
     done
-    MESSAGE+="\n"
+    MESSAGE+="
+"
     log_warn "Compliance issues found in $FILE_PATH"
   fi
 
   if [ ${#RECOMMENDED_SKILLS[@]} -gt 0 ]; then
     UNIQUE_SKILLS=($(printf '%s\n' "${RECOMMENDED_SKILLS[@]}" | sort -u))
-    MESSAGE+="💡 Recommended skills:\n"
+    MESSAGE+="💡 Recommended skills:
+"
     for skill in "${UNIQUE_SKILLS[@]}"; do
-      MESSAGE+="   • /skill $skill\n"
+      MESSAGE+="   • /skill $skill
+"
     done
-    MESSAGE+="\n"
+    MESSAGE+="
+"
   fi
 
   log_info "Injecting compliance context for $FILE_PATH"
-  posttooluse_respond "" "" "$(echo -e "$MESSAGE")"
-  exit 0
+  posttooluse_respond "" "" "$MESSAGE"
+  finish_hook 0
 fi
 
 log_info "No React 19 compliance issues in $FILE_PATH"
 posttooluse_respond
-exit 0
+finish_hook 0

@@ -13,7 +13,7 @@ INPUT=$(read_hook_input)
 if ! command -v grep &> /dev/null; then
   log_error "grep command not found"
   pretooluse_respond "allow"
-  exit 0
+  finish_hook 0
 fi
 
 TS_FILES=$(find . -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \) \
@@ -24,7 +24,7 @@ TS_FILES=$(find . -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -n
 
 if [ -z "$TS_FILES" ]; then
   pretooluse_respond "allow"
-  exit 0
+  finish_hook 0
 fi
 
 INSTANCES=$(echo "$TS_FILES" | xargs grep -n "new PrismaClient()" 2>/dev/null || true)
@@ -41,7 +41,7 @@ Use global singleton pattern to prevent connection pool exhaustion:
   const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined }
   export const prisma = globalForPrisma.prisma ?? new PrismaClient()
   if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma"
-    exit 0
+    finish_hook 0
   fi
 fi
 
@@ -71,7 +71,7 @@ if [ -n "$FUNCTION_SCOPED" ]; then
 This creates new instances on each function call, exhausting connections.
 
 Move PrismaClient to module scope with singleton pattern."
-    exit 0
+    finish_hook 0
   fi
 fi
 
@@ -85,8 +85,8 @@ if [ -n "$MISSING_GLOBAL" ]; then
 Recommended pattern for Next.js and serverless environments:
   const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined }
   export const prisma = globalForPrisma.prisma ?? new PrismaClient()"
-  exit 0
+  finish_hook 0
 fi
 
 pretooluse_respond "allow"
-exit 0
+finish_hook 0

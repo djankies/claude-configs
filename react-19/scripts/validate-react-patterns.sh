@@ -17,12 +17,12 @@ fi
 
 if [[ -z "$FILE_PATH" ]]; then
   pretooluse_respond "allow"
-  exit 0
+  finish_hook 0
 fi
 
 if [[ ! -f "$FILE_PATH" ]]; then
   pretooluse_respond "allow"
-  exit 0
+  finish_hook 0
 fi
 
 strip_comments() {
@@ -203,13 +203,13 @@ if [ ${#CRITICAL_VIOLATIONS[@]} -gt 0 ] || [ ${#WARNINGS[@]} -gt 0 ] || [ ${#REC
 
   if [ ${#CRITICAL_VIOLATIONS[@]} -gt 0 ]; then
     pretooluse_respond "block" "$(echo -e "$MESSAGE")"
-    exit 0
+    finish_hook 0
   else
     pretooluse_respond "allow" "$(echo -e "$MESSAGE")"
-    exit 0
+    finish_hook 0
   fi
 fi
 
 log_info "No React 19 pattern violations in $FILE_PATH"
 pretooluse_respond "allow"
-exit 0
+finish_hook 0

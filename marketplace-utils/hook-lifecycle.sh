@@ -36,6 +36,23 @@ init_hook() {
   log_debug "Hook initialized: $PLUGIN_NAME/$HOOK_NAME in ${elapsed}ms"
 }
 
+finish_hook() {
+  local exit_code="${1:-0}"
+
+  if [[ -n "${HOOK_START_TIME:-}" ]]; then
+    local end_time=$(date +%s%3N 2>/dev/null || date +%s000)
+    local total_elapsed=$((end_time - HOOK_START_TIME))
+
+    if [[ $exit_code -eq 0 ]]; then
+      log_info "Hook completed: $PLUGIN_NAME/$HOOK_NAME in ${total_elapsed}ms"
+    else
+      log_error "Hook failed: $PLUGIN_NAME/$HOOK_NAME after ${total_elapsed}ms with exit code $exit_code"
+    fi
+  fi
+
+  exit "$exit_code"
+}
+
 read_hook_input() {
   local input=""
 

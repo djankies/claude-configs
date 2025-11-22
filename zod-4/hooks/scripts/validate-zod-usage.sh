@@ -14,7 +14,7 @@ input=$(read_hook_input)
 file_path=$(get_input_field "parameters.file_path")
 file_ext="${file_path##*.}"
 
-[[ "$file_ext" != "ts" && "$file_ext" != "tsx" && "$file_ext" != "js" && "$file_ext" != "jsx" && "$file_ext" != "json" ]] && echo "{}" && exit 0
+[[ "$file_ext" != "ts" && "$file_ext" != "tsx" && "$file_ext" != "js" && "$file_ext" != "jsx" && "$file_ext" != "json" ]] && echo "{}" && finish_hook 0
 
 violations=""
 
@@ -31,7 +31,7 @@ if [[ "$file_ext" == "json" && "$file_path" == *"package.json" ]]; then
 fi
 
 if [[ "$file_ext" =~ ^(ts|tsx|js|jsx)$ ]]; then
-  grep -q "from ['\"]zod['\"]" "$file_path" 2>/dev/null || grep -q "import zod" "$file_path" 2>/dev/null || echo "{}" && exit 0
+  grep -q "from ['\"]zod['\"]" "$file_path" 2>/dev/null || grep -q "import zod" "$file_path" 2>/dev/null || echo "{}" && finish_hook 0
 
   if grep -E "z\.string\(\)\.email\(" "$file_path" >/dev/null 2>&1; then
     violations="${violations}❌ Deprecated: z.string().email() → Use z.email()\n"
@@ -110,7 +110,8 @@ ${violations}
 
   log_warn "Zod v4 compliance issues detected in $file_path"
   posttooluse_respond "" "" "$context"
-  exit 0
+  finish_hook 0
 fi
 
 echo "{}"
+finish_hook 0

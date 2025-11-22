@@ -11,4 +11,4 @@ init_hook "prisma-6" "SessionStart"
 log_info "Prisma 6 session initialized"
 
 inject_context "Prisma 6 plugin session started"
-exit 0
+finish_hook 0

@@ -75,21 +75,21 @@ init_session() {
     if [[ ! -f "$SESSION_FILE" ]]; then
         cat > "$SESSION_FILE" <<EOF
 {
-  "session_id": "$$-$(date +%s)",
-  "pid": $$,
+  "session_id": "${CLAUDE_SESSION_PID:-$PPID}-$(date +%s)",
+  "pid": ${CLAUDE_SESSION_PID:-$PPID},
   "started_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
   "plugins": {},
   "metadata": {
-    "log_file": "/tmp/claude-session-$$.log",
-    "error_journal": "/tmp/claude-errors-$$.jsonl",
+    "log_file": "/tmp/claude-session-${CLAUDE_SESSION_PID:-$PPID}.log",
+    "error_journal": "/tmp/claude-errors-${CLAUDE_SESSION_PID:-$PPID}.jsonl",
     "platform": "$(uname -s | tr '[:upper:]' '[:lower:]')"
   }
 }
 EOF
     fi
 
-    if ! acquire_lock "$SESSION_FILE"; then
-        log_error "Lock acquisition failed for session initialization after 5s timeout" "plugin=$plugin_name" "session_file=$SESSION_FILE"
+    if ! acquire_lock "$SESSION_FILE" 10; then
+        log_error "Lock acquisition failed for session initialization after 10s timeout" "plugin=$plugin_name" "session_file=$SESSION_FILE"
         return 1
     fi
 
@@ -154,8 +154,8 @@ set_session_value() {
         return 1
     fi
 
-    if ! acquire_lock "$session_file"; then
-        log_error "Lock acquisition failed for session update after 5s timeout" "key=$key" "session_file=$session_file"
+    if ! acquire_lock "$session_file" 10; then
+        log_error "Lock acquisition failed for session update after 10s timeout" "key=$key" "session_file=$session_file"
         return 1
     fi
 
@@ -236,8 +236,8 @@ mark_validation_passed() {
         return 1
     fi
 
-    if ! acquire_lock "$session_file"; then
-        log_error "Lock acquisition failed for validation update after 5s timeout" "validation=$validation_name" "file=$file_path"
+    if ! acquire_lock "$session_file" 10; then
+        log_error "Lock acquisition failed for validation update after 10s timeout" "validation=$validation_name" "file=$file_path"
         return 1
     fi
 
@@ -270,8 +270,8 @@ set_custom_data() {
         return 1
     fi
 
-    if ! acquire_lock "$session_file"; then
-        log_error "Lock acquisition failed for custom data update after 5s timeout" "key=$key" "session_file=$session_file"
+    if ! acquire_lock "$session_file" 10; then
+        log_error "Lock acquisition failed for custom data update after 10s timeout" "key=$key" "session_file=$session_file"
         return 1
     fi
 

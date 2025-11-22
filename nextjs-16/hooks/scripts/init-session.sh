@@ -11,4 +11,4 @@ init_hook "nextjs-16" "SessionStart"
 log_info "Next.js 16 plugin session initialized"
 
 inject_context "Next.js 16 plugin session started. Skills available: SECURITY-*, CACHING-*, MIGRATION-*, ROUTING-*, FORMS-*"
-exit 0
+finish_hook 0

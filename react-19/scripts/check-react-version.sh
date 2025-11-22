@@ -20,7 +20,7 @@ PACKAGE_JSON="$CWD/package.json"
 if [[ ! -f "$PACKAGE_JSON" ]]; then
   log_warn "No package.json found"
   inject_context "⚠️  No package.json found. React 19 plugin activated but cannot verify React version."
-  exit 0
+  finish_hook 0
 fi
 
 REACT_VERSION=$(grep -o '"react": *"[^"]*"' "$PACKAGE_JSON" | grep -o '[0-9][^"]*' | head -1)
@@ -28,7 +28,7 @@ REACT_VERSION=$(grep -o '"react": *"[^"]*"' "$PACKAGE_JSON" | grep -o '[0-9][^"]
 if [[ -z "$REACT_VERSION" ]]; then
   log_warn "React not found in package.json"
   inject_context "⚠️  React not found in package.json. React 19 plugin activated."
-  exit 0
+  finish_hook 0
 fi
 
 MAJOR_VERSION=$(echo "$REACT_VERSION" | grep -o '^[0-9]*' | head -1)
@@ -57,4 +57,4 @@ if [[ -f ".react-19-plugin/validation-rules.json" ]]; then
 fi
 
 inject_context "$CONTEXT_MESSAGE"
-exit 0
+finish_hook 0

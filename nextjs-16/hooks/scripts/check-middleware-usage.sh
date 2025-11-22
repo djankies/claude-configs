@@ -16,7 +16,7 @@ if [[ -f "$CWD/middleware.ts" ]] || [[ -f "$CWD/middleware.js" ]]; then
 
 Use MIGRATION-middleware-to-proxy skill for proper migration.
 Security: CVE-2025-29927 - middleware no longer safe for auth"
-  exit 0
+  finish_hook 0
 fi
 
-exit 0
+finish_hook 0

@@ -16,7 +16,7 @@ if [[ -z "$FILE_PATH" ]]; then
 fi
 
 if [[ -z "$FILE_PATH" ]]; then
-  exit 0
+  finish_hook 0
 fi
 
 FILE_NAME="${FILE_PATH##*/}"
@@ -60,7 +60,7 @@ elif [[ "$FILE_PATH" =~ \.(ts|js|tsx|jsx)$ ]]; then
 fi
 
 if [[ -z "$RECOMMENDATION_TYPE" ]]; then
-  exit 0
+  finish_hook 0
 fi
 
 if ! has_shown_recommendation "prisma-6" "$RECOMMENDATION_TYPE"; then
@@ -70,4 +70,4 @@ if ! has_shown_recommendation "prisma-6" "$RECOMMENDATION_TYPE"; then
 Use Skill tool to activate specific skills when needed."
 fi
 
-exit 0
+finish_hook 0

@@ -18,13 +18,13 @@ fi
 
 if [[ -z "$FILE_PATH" || -z "$NEW_STRING" ]]; then
   pretooluse_respond "allow"
-  exit 0
+  finish_hook 0
 fi
 
 FILE_EXT="${FILE_PATH##*.}"
 if [[ "$FILE_EXT" != "ts" && "$FILE_EXT" != "tsx" && "$FILE_EXT" != "js" && "$FILE_EXT" != "jsx" ]]; then
   pretooluse_respond "allow"
-  exit 0
+  finish_hook 0
 fi
 
 ISSUES=()
@@ -45,8 +45,8 @@ if [[ ${#ISSUES[@]} -gt 0 ]]; then
   WARNINGS=$(printf '%s\n' "${ISSUES[@]}")
   log_warn "Deprecated APIs detected in $FILE_PATH"
   pretooluse_respond "allow" "$WARNINGS"
-  exit 0
+  finish_hook 0
 fi
 
 pretooluse_respond "allow"
-exit 0
+finish_hook 0

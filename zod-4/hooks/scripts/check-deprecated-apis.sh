@@ -13,11 +13,11 @@ input=$(read_hook_input)
 
 file_path=$(get_input_field "parameters.file_path")
 
-[[ -z "$file_path" || ! -f "$file_path" ]] && echo "{}" && exit 0
+[[ -z "$file_path" || ! -f "$file_path" ]] && echo "{}" && finish_hook 0
 
 file_ext="${file_path##*.}"
 
-[[ "$file_ext" != "ts" && "$file_ext" != "tsx" && "$file_ext" != "js" && "$file_ext" != "jsx" ]] && echo "{}" && exit 0
+[[ "$file_ext" != "ts" && "$file_ext" != "tsx" && "$file_ext" != "js" && "$file_ext" != "jsx" ]] && echo "{}" && finish_hook 0
 
 violations=""
 
@@ -75,7 +75,8 @@ ${violations}"
 
   log_warn "Deprecated Zod API usage detected in $file_path"
   echo "$context"
-  exit 2
+  finish_hook 2
 fi
 
 echo "{}"
+finish_hook 0

@@ -12,11 +12,11 @@ INPUT=$(read_hook_input)
 FILE_PATH=$(get_input_field "tool_input.file_path")
 
 if [[ -z "$FILE_PATH" ]]; then
-  exit 0
+  finish_hook 0
 fi
 
 if [[ ! -f "$FILE_PATH" ]]; then
-  exit 0
+  finish_hook 0
 fi
 
 if grep -q "'use server'" "$FILE_PATH" 2>/dev/null || grep -q '"use server"' "$FILE_PATH" 2>/dev/null; then
@@ -29,4 +29,4 @@ See SECURITY-data-access-layer skill for proper patterns."
   fi
 fi
 
-exit 0
+finish_hook 0

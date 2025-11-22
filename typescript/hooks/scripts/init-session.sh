@@ -11,4 +11,4 @@ init_hook "typescript" "SessionStart"
 log_info "TypeScript plugin session initialized"
 
 inject_context "TypeScript plugin session started - type safety and deprecation checks enabled"
-exit 0
+finish_hook 0

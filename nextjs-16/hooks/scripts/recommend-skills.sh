@@ -12,7 +12,7 @@ INPUT=$(read_hook_input)
 FILE_PATH=$(get_input_field "tool_input.file_path")
 
 if [[ -z "$FILE_PATH" ]]; then
-  exit 0
+  finish_hook 0
 fi
 
 FILE_NAME=$(basename "$FILE_PATH")
@@ -27,7 +27,7 @@ if [[ "$FILE_NAME" == "middleware.ts" || "$FILE_NAME" == "middleware.js" ]]; the
 Use MIGRATION-middleware-to-proxy skill
 Security: CVE-2025-29927 - middleware no longer safe for auth"
   fi
-  exit 0
+  finish_hook 0
 fi
 
 RECOMMENDATION_TYPE=""
@@ -49,7 +49,7 @@ if [[ "$FILE_NAME" == *"action"* || "$FILE_NAME" == *"server"* ]] && [[ "$FILE_E
 fi
 
 if [[ -z "$RECOMMENDATION_TYPE" ]]; then
-  exit 0
+  finish_hook 0
 fi
 
 if ! has_shown_recommendation "nextjs-16" "$RECOMMENDATION_TYPE"; then
@@ -59,4 +59,4 @@ if ! has_shown_recommendation "nextjs-16" "$RECOMMENDATION_TYPE"; then
 Use Skill tool to activate specific skills when needed."
 fi
 
-exit 0
+finish_hook 0

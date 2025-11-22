@@ -14,14 +14,14 @@ CONTENT=$(get_input_field "tool_input.content")
 
 if [[ -z "$FILE_PATH" || -z "$CONTENT" ]]; then
   pretooluse_respond "allow"
-  exit 0
+  finish_hook 0
 fi
 
 FILE_EXT="${FILE_PATH##*.}"
 
 if [[ "$FILE_EXT" != "ts" && "$FILE_EXT" != "tsx" && "$FILE_EXT" != "js" && "$FILE_EXT" != "jsx" ]]; then
   pretooluse_respond "allow"
-  exit 0
+  finish_hook 0
 fi
 
 if echo "$CONTENT" | grep -q "DEPRECATED_PATTERN"; then
@@ -32,7 +32,7 @@ The pattern 'DEPRECATED_PATTERN' is deprecated.
 Please use 'NEW_PATTERN' instead.
 
 See: your-plugin/skills/your-migration-skill"
-  exit 0
+  finish_hook 0
 fi
 
 if echo "$CONTENT" | grep -q "UNSAFE_PATTERN"; then
@@ -42,8 +42,8 @@ if echo "$CONTENT" | grep -q "UNSAFE_PATTERN"; then
 Consider using a safer alternative.
 
 See: your-plugin/skills/your-security-skill"
-  exit 0
+  finish_hook 0
 fi
 
 pretooluse_respond "allow"
-exit 0
+finish_hook 0

@@ -18,13 +18,13 @@ fi
 
 if [[ -z "$FILE_PATH" || -z "$NEW_STRING" ]]; then
   pretooluse_respond "allow"
-  exit 0
+  finish_hook 0
 fi
 
 FILE_EXT="${FILE_PATH##*.}"
 if [[ "$FILE_EXT" != "ts" && "$FILE_EXT" != "tsx" ]]; then
   pretooluse_respond "allow"
-  exit 0
+  finish_hook 0
 fi
 
 ISSUES=()
@@ -53,7 +53,7 @@ if echo "$NEW_STRING" | grep -iq 'password.*=.*Buffer.*toString.*base64'; then
 Base64 is NOT encryption. Use bcrypt or argon2 for password hashing.
 
 See: @typescript/SECURITY-credentials skill"
-  exit 0
+  finish_hook 0
 fi
 
 if echo "$NEW_STRING" | grep -iq 'paypalPassword\|googlePassword\|facebookPassword'; then
@@ -63,15 +63,15 @@ if echo "$NEW_STRING" | grep -iq 'paypalPassword\|googlePassword\|facebookPasswo
 NEVER ask for passwords to other services. Use OAuth instead.
 
 See: @typescript/SECURITY-credentials skill"
-  exit 0
+  finish_hook 0
 fi
 
 if [[ ${#ISSUES[@]} -gt 0 ]]; then
   WARNINGS=$(printf '%s\n' "${ISSUES[@]}")
   log_warn "Type safety issues detected in $FILE_PATH"
   pretooluse_respond "allow" "$WARNINGS"
-  exit 0
+  finish_hook 0
 fi
 
 pretooluse_respond "allow"
-exit 0
+finish_hook 0
