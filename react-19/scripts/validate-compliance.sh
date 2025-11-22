@@ -1,21 +1,27 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-if [ -t 0 ]; then
-  FILE_PATH="$1"
-else
-  INPUT=$(cat)
-  FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // empty' 2>/dev/null)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CLAUDE_MARKETPLACE_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
-  if [ -z "$FILE_PATH" ] && [ -n "$1" ]; then
-    FILE_PATH="$1"
-  fi
+source "${CLAUDE_MARKETPLACE_ROOT}/marketplace-utils/hook-lifecycle.sh"
+
+init_hook "react-19" "PostToolUse"
+
+read_hook_input > /dev/null
+FILE_PATH=$(get_input_field "tool_input.file_path")
+
+if [[ -z "$FILE_PATH" ]]; then
+  FILE_PATH=$(get_input_field "tool_input.path")
 fi
 
-if [ -z "$FILE_PATH" ]; then
+if [[ -z "$FILE_PATH" ]]; then
+  posttooluse_respond
   exit 0
 fi
 
-if [ ! -f "$FILE_PATH" ]; then
+if [[ ! -f "$FILE_PATH" ]]; then
+  posttooluse_respond
   exit 0
 fi
 
@@ -67,9 +73,9 @@ fi
 
 if echo "$CODE_CONTENT" | grep -qE 'onSubmit.*preventDefault'; then
   if ! echo "$CODE_CONTENT" | grep -qE '\buseActionState\s*\('; then
-    echo "💡 TIP: Consider useActionState for form state"
-    echo "   → React 19's useActionState integrates with Server Actions"
-    echo "   → See: @react-19/HOOKS-action-state-patterns"
+    ERRORS+=("💡 TIP: Consider useActionState for form state")
+    ERRORS+=("   → React 19's useActionState integrates with Server Actions")
+    ERRORS+=("   → See: @react-19/HOOKS-action-state-patterns")
     RECOMMENDED_SKILLS+=("action-state-patterns")
   fi
 fi
@@ -112,9 +118,9 @@ fi
 
 if echo "$CODE_CONTENT" | grep -qE 'disabled=\{(pending|isSubmitting|isPending)'; then
   if ! echo "$CODE_CONTENT" | grep -qE '\buseFormStatus\s*\('; then
-    echo "💡 TIP: Consider useFormStatus for form submission state"
-    echo "   → React 19's useFormStatus tracks parent form status automatically"
-    echo "   → See: @react-19/FORMS-form-status-tracking"
+    ERRORS+=("💡 TIP: Consider useFormStatus for form submission state")
+    ERRORS+=("   → React 19's useFormStatus tracks parent form status automatically")
+    ERRORS+=("   → See: @react-19/FORMS-form-status-tracking")
     RECOMMENDED_SKILLS+=("form-status-tracking")
   fi
 fi
@@ -125,9 +131,9 @@ fi
 
 if echo "$CODE_CONTENT" | grep -qE 'useState.*(pending|optimistic)|setPending|setOptimistic'; then
   if ! echo "$CODE_CONTENT" | grep -qE '\buseOptimistic\s*\('; then
-    echo "💡 TIP: Consider useOptimistic for optimistic updates"
-    echo "   → React 19's useOptimistic hook simplifies optimistic UI patterns"
-    echo "   → See: @react-19/HOOKS-optimistic-updates"
+    ERRORS+=("💡 TIP: Consider useOptimistic for optimistic updates")
+    ERRORS+=("   → React 19's useOptimistic hook simplifies optimistic UI patterns")
+    ERRORS+=("   → See: @react-19/HOOKS-optimistic-updates")
     RECOMMENDED_SKILLS+=("optimistic-updates")
   fi
 fi
@@ -137,9 +143,9 @@ if echo "$CODE_CONTENT" | grep -qE '\buse\s*\('; then
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\buseDeferredValue\s*\(\s*\w+\s*\)([^,]|$)'; then
-  echo "💡 TIP: Add initialValue parameter to useDeferredValue"
-  echo "   → React 19 accepts initialValue to prevent layout shifts"
-  echo "   → useDeferredValue(value, initialValue)"
+  ERRORS+=("💡 TIP: Add initialValue parameter to useDeferredValue")
+  ERRORS+=("   → React 19 accepts initialValue to prevent layout shifts")
+  ERRORS+=("   → useDeferredValue(value, initialValue)")
   RECOMMENDED_SKILLS+=("using-use-hook")
 fi
 
@@ -227,30 +233,40 @@ if echo "$CODE_CONTENT" | grep -qE 'Math\.random\(\).*toString\('; then
 fi
 
 if [ ${#CRITICAL_VIOLATIONS[@]} -gt 0 ] || [ ${#ERRORS[@]} -gt 0 ] || [ ${#RECOMMENDED_SKILLS[@]} -gt 0 ]; then
+  MESSAGE=""
+
   if [ ${#CRITICAL_VIOLATIONS[@]} -gt 0 ]; then
-    echo "React 19 Compliance - CRITICAL VIOLATIONS:"
-    printf '%s\n' "${CRITICAL_VIOLATIONS[@]}"
-    echo ""
+    MESSAGE+="React 19 Compliance - CRITICAL VIOLATIONS:\n"
+    for violation in "${CRITICAL_VIOLATIONS[@]}"; do
+      MESSAGE+="$violation\n"
+    done
+    MESSAGE+="\n"
+    log_error "Critical compliance violations found in $FILE_PATH"
   fi
 
   if [ ${#ERRORS[@]} -gt 0 ]; then
-    echo "React 19 Compliance Issues:"
-    printf '%s\n' "${ERRORS[@]}"
-    echo ""
+    MESSAGE+="React 19 Compliance Issues:\n"
+    for error in "${ERRORS[@]}"; do
+      MESSAGE+="$error\n"
+    done
+    MESSAGE+="\n"
+    log_warn "Compliance issues found in $FILE_PATH"
   fi
 
   if [ ${#RECOMMENDED_SKILLS[@]} -gt 0 ]; then
     UNIQUE_SKILLS=($(printf '%s\n' "${RECOMMENDED_SKILLS[@]}" | sort -u))
-    echo "💡 Recommended skills:"
+    MESSAGE+="💡 Recommended skills:\n"
     for skill in "${UNIQUE_SKILLS[@]}"; do
-      echo "   • /skill $skill"
+      MESSAGE+="   • /skill $skill\n"
     done
-    echo ""
+    MESSAGE+="\n"
   fi
+
+  log_info "Injecting compliance context for $FILE_PATH"
+  posttooluse_respond "" "" "$(echo -e "$MESSAGE")"
+  exit 0
 fi
 
-if [ ${#CRITICAL_VIOLATIONS[@]} -gt 0 ]; then
-  exit 2
-fi
-
+log_info "No React 19 compliance issues in $FILE_PATH"
+posttooluse_respond
 exit 0

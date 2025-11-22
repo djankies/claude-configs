@@ -1,21 +1,27 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-if [ -t 0 ]; then
-  FILE_PATH="$1"
-else
-  INPUT=$(cat)
-  FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // empty' 2>/dev/null)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CLAUDE_MARKETPLACE_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
-  if [ -z "$FILE_PATH" ] && [ -n "$1" ]; then
-    FILE_PATH="$1"
-  fi
+source "${CLAUDE_MARKETPLACE_ROOT}/marketplace-utils/hook-lifecycle.sh"
+
+init_hook "react-19" "PreToolUse"
+
+read_hook_input > /dev/null
+FILE_PATH=$(get_input_field "tool_input.file_path")
+
+if [[ -z "$FILE_PATH" ]]; then
+  FILE_PATH=$(get_input_field "tool_input.path")
 fi
 
-if [ -z "$FILE_PATH" ]; then
+if [[ -z "$FILE_PATH" ]]; then
+  pretooluse_respond "allow"
   exit 0
 fi
 
-if [ ! -f "$FILE_PATH" ]; then
+if [[ ! -f "$FILE_PATH" ]]; then
+  pretooluse_respond "allow"
   exit 0
 fi
 
@@ -166,30 +172,44 @@ if echo "$CODE_CONTENT" | grep -qE 'Math\.random\(\).*toString\('; then
 fi
 
 if [ ${#CRITICAL_VIOLATIONS[@]} -gt 0 ] || [ ${#WARNINGS[@]} -gt 0 ] || [ ${#RECOMMENDED_SKILLS[@]} -gt 0 ]; then
+  MESSAGE=""
+
   if [ ${#CRITICAL_VIOLATIONS[@]} -gt 0 ]; then
-    echo "React 19 Pattern Validation - CRITICAL VIOLATIONS:"
-    printf '%s\n' "${CRITICAL_VIOLATIONS[@]}"
-    echo ""
+    MESSAGE+="React 19 Pattern Validation - CRITICAL VIOLATIONS:\n"
+    for violation in "${CRITICAL_VIOLATIONS[@]}"; do
+      MESSAGE+="$violation\n"
+    done
+    MESSAGE+="\n"
+    log_error "Critical violations found in $FILE_PATH"
   fi
 
   if [ ${#WARNINGS[@]} -gt 0 ]; then
-    echo "React 19 Pattern Validation - Warnings:"
-    printf '%s\n' "${WARNINGS[@]}"
-    echo ""
+    MESSAGE+="React 19 Pattern Validation - Warnings:\n"
+    for warning in "${WARNINGS[@]}"; do
+      MESSAGE+="$warning\n"
+    done
+    MESSAGE+="\n"
+    log_warn "Pattern warnings found in $FILE_PATH"
   fi
 
   if [ ${#RECOMMENDED_SKILLS[@]} -gt 0 ]; then
     UNIQUE_SKILLS=($(printf '%s\n' "${RECOMMENDED_SKILLS[@]}" | sort -u))
-    echo "💡 Recommended skills:"
+    MESSAGE+="💡 Recommended skills:\n"
     for skill in "${UNIQUE_SKILLS[@]}"; do
-      echo "   • /skill $skill"
+      MESSAGE+="   • /skill $skill\n"
     done
-    echo ""
+    MESSAGE+="\n"
+  fi
+
+  if [ ${#CRITICAL_VIOLATIONS[@]} -gt 0 ]; then
+    pretooluse_respond "block" "$(echo -e "$MESSAGE")"
+    exit 0
+  else
+    pretooluse_respond "allow" "$(echo -e "$MESSAGE")"
+    exit 0
   fi
 fi
 
-if [ ${#CRITICAL_VIOLATIONS[@]} -gt 0 ]; then
-  exit 2
-fi
-
+log_info "No React 19 pattern violations in $FILE_PATH"
+pretooluse_respond "allow"
 exit 0
