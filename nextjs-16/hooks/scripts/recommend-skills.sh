@@ -21,7 +21,7 @@ DIR_PATH=$(dirname "$FILE_PATH")
 
 if [[ "$FILE_NAME" == "middleware.ts" || "$FILE_NAME" == "middleware.js" ]]; then
   if ! has_shown_recommendation "nextjs-16" "middleware_warning"; then
-    log_warn "Middleware file detected: $FILE_PATH"
+    log_warn "Recommending skill: MIGRATION-middleware-to-proxy (CRITICAL) for $FILE_PATH"
     mark_recommendation_shown "nextjs-16" "middleware_warning"
     inject_context "⚠️  CRITICAL: middleware.ts is deprecated in Next.js 16
 Use MIGRATION-middleware-to-proxy skill
@@ -53,7 +53,7 @@ if [[ -z "$RECOMMENDATION_TYPE" ]]; then
 fi
 
 if ! has_shown_recommendation "nextjs-16" "$RECOMMENDATION_TYPE"; then
-  log_info "Showing recommendation: $RECOMMENDATION_TYPE"
+  log_info "Recommending skills: $SKILLS for $FILE_PATH"
   mark_recommendation_shown "nextjs-16" "$RECOMMENDATION_TYPE"
   inject_context "$MESSAGE
 Use Skill tool to activate specific skills when needed."

@@ -50,7 +50,7 @@ if [[ -z "$RECOMMENDATION_TYPE" ]]; then
 fi
 
 if ! has_shown_recommendation "typescript" "$RECOMMENDATION_TYPE"; then
-  log_info "Showing recommendation: $RECOMMENDATION_TYPE"
+  log_info "Recommending skills: $SKILLS for $FILE_PATH"
   mark_recommendation_shown "typescript" "$RECOMMENDATION_TYPE"
   inject_context "$MESSAGE
 Use Skill tool to activate specific skills when needed."

@@ -40,6 +40,7 @@ if grep -q "from ['\"]zod['\"]" "$file_path" 2>/dev/null || \
 
 Use Skill tool to activate when needed."
 
+    log_info "Recommending Zod 4 skills: VALIDATION-*, TRANSFORMATION-*, ERRORS-*, MIGRATION-* for $file_path"
     set_plugin_value "zod-4" "recommendations_shown.zod_skills" "true"
 
     pretooluse_respond "allow" "" "$(jq -n --argjson orig "$input" --arg ctx "$context" '$orig + {additionalContext: $ctx}')"

@@ -52,7 +52,7 @@ elif [[ "$FILE_PATH" =~ \.(ts|js|tsx|jsx)$ ]]; then
 
   if [[ "$FILE_PATH" == *"vercel"* || "$FILE_PATH" == *"lambda"* || "$FILE_PATH" == *"app/"* ]]; then
     if ! has_shown_recommendation "prisma-6" "serverless_context"; then
-      log_info "Serverless context detected"
+      log_info "Recommending skills: CLIENT-serverless-config, PERFORMANCE-connection-pooling for serverless context in $FILE_PATH"
       mark_recommendation_shown "prisma-6" "serverless_context"
       inject_context "Serverless Context: CLIENT-serverless-config, PERFORMANCE-connection-pooling"
     fi
@@ -64,7 +64,7 @@ if [[ -z "$RECOMMENDATION_TYPE" ]]; then
 fi
 
 if ! has_shown_recommendation "prisma-6" "$RECOMMENDATION_TYPE"; then
-  log_info "Showing recommendation: $RECOMMENDATION_TYPE"
+  log_info "Recommending skills: $SKILLS for $FILE_PATH"
   mark_recommendation_shown "prisma-6" "$RECOMMENDATION_TYPE"
   inject_context "$MESSAGE
 Use Skill tool to activate specific skills when needed."
