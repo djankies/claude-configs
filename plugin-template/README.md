@@ -61,6 +61,8 @@ Then in Claude Code, test your features.
 plugin-template/
 ├── .claude-plugin/
 │   └── plugin.json              # Plugin metadata (REQUIRED)
+├── knowledge/                   # Plugin-wide reference docs (REQUIRED)
+│   └── plugin-name-comprehensive.md
 ├── commands/
 │   └── example-command.md       # Slash command definition
 ├── agents/
@@ -68,11 +70,15 @@ plugin-template/
 ├── skills/
 │   └── example-skill/
 │       ├── SKILL.md             # Skill definition (REQUIRED)
+│       ├── references/          # Skill-specific docs (optional)
 │       └── templates/           # Supporting files (optional)
 │           └── example-template.txt
 ├── hooks/
 │   ├── hooks.json               # Hook configuration
 │   └── scripts/                 # Hook scripts (optional)
+│       ├── lib/                 # Shared utilities (optional)
+│       ├── init-session.sh
+│       └── recommend-skills.sh
 ├── .mcp.json                    # MCP server configuration
 ├── LICENSE
 └── README.md
@@ -453,11 +459,48 @@ rm -rf commands/ agents/ skills/ hooks/
 
 Keep only `.mcp.json` and `.claude-plugin/plugin.json`.
 
+## Marketplace Utilities
+
+The marketplace provides optional shared utilities to reduce code duplication:
+
+- **Session Management**: `marketplace-utils/session-management.sh`
+- **Frontmatter Parsing**: `marketplace-utils/frontmatter-parsing.sh`
+- **File Detection**: `marketplace-utils/file-detection.sh`
+- **JSON Utilities**: `marketplace-utils/json-utils.sh`
+- **Skill Discovery**: `marketplace-utils/skill-discovery.sh`
+
+**Usage:**
+
+```bash
+cp ../marketplace-utils/session-management.sh hooks/scripts/lib/
+```
+
+Or source directly (creates dependency):
+```bash
+source "$(dirname "$0")/../../../marketplace-utils/session-management.sh"
+```
+
+See [`marketplace-utils/README.md`](../marketplace-utils/README.md) for details.
+
+## Knowledge Structure Standard
+
+All plugins must follow the knowledge structure standard:
+
+- **Required**: `/knowledge/{plugin-name}-comprehensive.md`
+- **Optional**: `/skills/{skill-name}/references/` for skill-specific docs
+
+Skills should reference knowledge documents instead of duplicating content.
+
+See [`docs/KNOWLEDGE-STRUCTURE.md`](../docs/KNOWLEDGE-STRUCTURE.md) for the complete standard.
+
 ## Resources
 
 - [Claude Code Documentation](https://docs.claude.com/en/docs/claude-code)
 - [Model Context Protocol](https://modelcontextprotocol.io/)
 - [Plugin Development Guide](https://docs.claude.com/en/docs/claude-code/plugins)
+- [Plugin Philosophy](../docs/PLUGIN-PHILOSOPHY.md)
+- [Knowledge Structure Standard](../docs/KNOWLEDGE-STRUCTURE.md)
+- [Marketplace Utilities](../marketplace-utils/README.md)
 
 ## License
 
