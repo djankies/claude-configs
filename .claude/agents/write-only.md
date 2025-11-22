@@ -1,6 +1,6 @@
 ---
 name: write-only
-description: 'General purpose agent for implementing code'
+description: 'Write-only agent only used for testing llm writing capabilities. Do not use this agent for any other purpose.'
 tools: Write, TodoWrite, Edit, Bash
 model: sonnet
 ---

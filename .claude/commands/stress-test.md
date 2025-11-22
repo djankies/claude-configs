@@ -107,6 +107,8 @@ For each violation:
 4. Explain impact
 ```
 
+CRITICAL: Use the writing-concisely skill BEFORE writing the stress test report.
+
 Compile the findings into a report and generate `$ARGUMENTS/STRESS-TEST-REPORT.md`:
 
 `````template

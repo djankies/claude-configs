@@ -29,7 +29,7 @@ Stress test report (Actual failures this plugin should help prevent):
 @$ARGUMENTS/STRESS-TEST-REPORT.md
 
 Reference example (design document structure):
-@docs/plans/2025-11-19-react-19-plugin-design.md
+@typescript/PLUGIN-DESIGN.md
 
 ## Official Plugin Structure
 
@@ -831,6 +831,9 @@ If validation fails, you MUST:
   </validation>
 
 <output>
+
+**CRITICAL: Use the `writing-concisely` skill tool BEFORE writing the design document.**
+
 Save design document to: **$ARGUMENTS/PLUGIN-DESIGN.md**
 
 The document provides:

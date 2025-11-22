@@ -192,6 +192,8 @@ Options:
 
 **If auto-fix selected, deploy remediation agents (single message):**
 
+subagent_type: "general-purpose"
+
 ```text
 {for each issue in selected scope}
 Task {n}: Fix {issue.description}
@@ -227,7 +229,7 @@ Validate fixes:
 ## Validation
 
 **After review:** ✓ All JSON valid, all components reviewed, issues aggregated, philosophy checked
-**After remediation:** ✓ Fixes applied, files valid, issues resolved, no new issues
+**After remediation:** ✓ Fixes applied, files valid, issues resolved, no new issues, `pnpm run validate` passes
 **Before completing:** ✓ Report generated, summary presented
 
 ## Error Recovery
