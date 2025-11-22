@@ -2,8 +2,68 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/platform-compat.sh"
+
 declare STATE_FILE
 declare PLUGIN_NAME
+declare LOCK_FD
+declare LOCK_DIR
+
+acquire_lock() {
+    local file="${1:?File required}"
+    local timeout="${2:-5}"
+    local lock_file="${file}.lock"
+
+    if ! command -v flock >/dev/null 2>&1; then
+        acquire_lock_mkdir "$file" "$timeout"
+        return $?
+    fi
+
+    LOCK_FD=200
+    eval "exec $LOCK_FD>\"$lock_file\""
+
+    if ! flock -x -w "$timeout" "$LOCK_FD" 2>/dev/null; then
+        return 1
+    fi
+
+    trap "release_lock" EXIT INT TERM
+    return 0
+}
+
+release_lock() {
+    if [[ -n "${LOCK_FD:-}" ]]; then
+        flock -u "$LOCK_FD" 2>/dev/null || true
+        eval "exec ${LOCK_FD}>&-" 2>/dev/null || true
+        LOCK_FD=""
+    fi
+}
+
+acquire_lock_mkdir() {
+    local file="$1"
+    local timeout="${2:-5}"
+    LOCK_DIR="${file}.lock.d"
+    local waited=0
+
+    while ! mkdir "$LOCK_DIR" 2>/dev/null; do
+        sleep 0.1
+        waited=$((waited + 1))
+
+        if [[ $waited -gt $((timeout * 10)) ]]; then
+            return 1
+        fi
+    done
+
+    trap 'release_lock_mkdir' EXIT INT TERM
+    return 0
+}
+
+release_lock_mkdir() {
+    if [[ -n "${LOCK_DIR:-}" && -d "$LOCK_DIR" ]]; then
+        rmdir "$LOCK_DIR" 2>/dev/null || true
+        LOCK_DIR=""
+    fi
+}
 
 init_session() {
     local plugin_name="${1:?Plugin name required}"
@@ -163,12 +223,57 @@ get_session_age() {
     fi
 
     local started_epoch
-    started_epoch=$(date -j -f "%Y-%m-%dT%H:%M:%SZ" "$started_at" "+%s" 2>/dev/null || echo "0")
+    started_epoch=$(get_timestamp_epoch "$started_at")
+
+    if [[ "$started_epoch" == "0" ]]; then
+        echo "-1"
+        return
+    fi
 
     local now_epoch
-    now_epoch=$(date "+%s")
+    now_epoch=$(get_current_epoch)
 
     echo $((now_epoch - started_epoch))
+}
+
+cleanup_stale_sessions() {
+    local max_age_seconds="${1:-86400}"
+    local temp_dir
+    temp_dir=$(get_temp_dir)
+
+    find "$temp_dir" -name "claude-*-session-*.json" -type f 2>/dev/null | while read -r file; do
+        if [[ -f "$file" ]]; then
+            local file_age
+            file_age=$(get_file_age "$file")
+
+            if [[ $file_age -gt $max_age_seconds ]]; then
+                local pid
+                pid=$(echo "$file" | grep -o '[0-9]\+' | tail -1)
+
+                if [[ -n "$pid" ]] && ! ps -p "$pid" >/dev/null 2>&1; then
+                    rm -f "$file" "${file}.lock" "${file}.lock.d" 2>/dev/null || true
+                fi
+            fi
+        fi
+    done
+}
+
+register_cleanup_hook() {
+    trap cleanup_session EXIT INT TERM
+}
+
+cleanup_session() {
+    local session_file
+    session_file="$(get_session_file)"
+
+    if [[ -f "$session_file" ]]; then
+        rm -f "$session_file" "${session_file}.lock" 2>/dev/null || true
+        if [[ -d "${session_file}.lock.d" ]]; then
+            rmdir "${session_file}.lock.d" 2>/dev/null || true
+        fi
+    fi
+
+    release_lock 2>/dev/null || true
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
@@ -187,4 +292,9 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     echo "  get_custom_data <key>"
     echo "  clear_session"
     echo "  get_session_age"
+    echo "  acquire_lock <file> [timeout]"
+    echo "  release_lock"
+    echo "  cleanup_stale_sessions [max_age_seconds]"
+    echo "  register_cleanup_hook"
+    echo "  cleanup_session"
 fi
