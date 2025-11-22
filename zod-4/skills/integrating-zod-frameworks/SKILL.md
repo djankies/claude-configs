@@ -231,6 +231,11 @@ For complete implementation examples with all features, see:
 - Transformations: `@zod-4/skills/TRANSFORMATION-string-methods/SKILL.md`
 - Comprehensive docs: `@zod-4/knowledge/zod-4-comprehensive.md`
 
+**Prisma 6 Integration:**
+- `@prisma-6/skills/validating-query-inputs` - Complete Zod + Prisma 6 validation patterns for API routes, form data, and database operations
+- `@prisma-6/skills/ensuring-query-type-safety` - Type-safe Prisma queries with Zod runtime validation for database inputs and outputs
+- `@prisma-6/skills/preventing-sql-injection` - SQL injection prevention with parameterized queries and raw SQL safety in Prisma 6
+
 ## Success Criteria
 
 - ✅ Schemas integrated with framework validation

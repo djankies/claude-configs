@@ -283,6 +283,10 @@ export function ProfileForm() {
 - `@zod-4/skills/handling-zod-errors` - Error customization with unified error API, safeParse pattern, and error formatting for secure error responses
 - `@zod-4/skills/using-zod-v4-features` - Top-level string format functions (z.email(), z.uuid(), z.url()) for validating common input types
 
+**Prisma 6 Integration:**
+- `@prisma-6/skills/validating-query-inputs` - Validate external input with Zod before Prisma operations in server actions
+- `@prisma-6/skills/handling-transaction-errors` - Handle Prisma transaction errors with P-code checking and retry strategies for server action database operations
+
 ## Common Vulnerabilities
 
 Avoid these security mistakes:

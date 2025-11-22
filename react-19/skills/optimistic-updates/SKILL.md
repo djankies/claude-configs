@@ -99,3 +99,9 @@ For comprehensive useOptimistic documentation, see: `research/react-19-comprehen
 - Use for critical operations that must succeed
 - Skip error handling for failed optimistic updates
 </constraints>
+
+<related-skills>
+## Related Skills
+
+For handling transaction errors in optimistic updates, see @prisma-6/skills/handling-transaction-errors.
+</related-skills>

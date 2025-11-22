@@ -357,6 +357,13 @@ export async function DELETE(
 7. **Error Handling**: Wrap invalidation in try-catch blocks
 8. **Performance**: Batch revalidateTag() calls with Promise.all()
 
+## Query Optimization for Cached Data
+
+When caching database queries, optimize query selection and pagination to prevent performance issues:
+
+- For optimizing field selection in cached queries, see @prisma-6/skills/optimizing-query-selection
+- For implementing pagination in cached endpoints, see @prisma-6/skills/implementing-query-pagination
+
 ## Common Patterns
 
 ### Time-Based + Tag-Based Caching

@@ -172,6 +172,10 @@ export async function getPost(postId: string) {
 }
 ```
 
+### Multi-Step Atomic Operations
+
+For authenticated operations requiring atomicity (e.g., creating a post with tags, transferring ownership), see @prisma-6/skills/using-interactive-transactions.
+
 ### Public + Private Data
 
 ```typescript

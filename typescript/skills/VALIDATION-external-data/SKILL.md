@@ -699,6 +699,10 @@ Silently failing validation defeats its purpose.
 - `@zod-4/skills/using-zod-v4-features` - Top-level string format functions and v4 features for validating API responses and external data
 - `@zod-4/skills/handling-zod-errors` - SafeParse pattern, error handling strategies, and error formatting for robust external data validation
 
+**Prisma 6 Database Validation:**
+- `@prisma-6/skills/ensuring-query-type-safety` - Type-safe Prisma queries with runtime validation for database query results as external data sources
+- `@prisma-6/skills/validating-query-inputs` - Validate data before Prisma operations to ensure database integrity and prevent invalid data persistence
+
 ## Resources
 
 - [Zod Documentation](https://zod.dev/)

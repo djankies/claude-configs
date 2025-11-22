@@ -596,6 +596,10 @@ Before deploying any endpoint that processes user input:
 - `@zod-4/skills/using-zod-v4-features` - Top-level string format functions (z.email(), z.uuid(), z.url(), z.ipv4(), z.base64()) for validating common input formats
 - `@zod-4/skills/writing-zod-transformations` - Built-in string transformations (trim, toLowerCase, toUpperCase) for sanitizing and normalizing user input
 
+**Prisma 6 Security:**
+- `@prisma-6/skills/validating-query-inputs` - Zod validation patterns specifically for Prisma database operations and SQL injection prevention
+- `@prisma-6/skills/preventing-sql-injection` - Parameterized queries, raw query safety, and SQL injection prevention techniques in Prisma 6
+
 ## Resources
 
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
