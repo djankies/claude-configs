@@ -17,6 +17,5 @@
     "cve-2025-29927",
     "migration"
   ],
-  "hooks": "./hooks/hooks.json",
   "mcpServers": "./.mcp.json"
 }

@@ -347,6 +347,9 @@ async function validatePlugins() {
     if (plugin.skills === './skills' || plugin.skills === 'skills') {
       logWarning(`${file}: Redundant 'skills' path (skills/ is auto-discovered)`);
     }
+    if (plugin.hooks === './hooks/hooks.json' || plugin.hooks === 'hooks/hooks.json') {
+      logWarning(`${file}: Redundant 'hooks' path (hooks/hooks.json is auto-discovered)`);
+    }
 
     if (!isTemplate) {
       const validatePath = (pathValue, fieldName) => {
