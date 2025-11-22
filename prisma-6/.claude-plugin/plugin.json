@@ -1,0 +1,21 @@
+{
+  "name": "prisma-6",
+  "version": "1.0.0",
+  "description": "Prisma 6 ORM patterns, client management, query optimization, and security best practices based on real-world AI coding failures",
+  "author": {
+    "name": "Claude Code Plugin Marketplace",
+    "email": "plugins@claude.ai"
+  },
+  "repository": "djankies/claude-configs",
+  "license": "MIT",
+  "keywords": [
+    "prisma",
+    "orm",
+    "database",
+    "typescript",
+    "postgresql",
+    "mysql",
+    "security",
+    "performance"
+  ]
+}
