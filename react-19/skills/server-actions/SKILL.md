@@ -117,3 +117,8 @@ function Form() {
 ```
 
 For comprehensive Server Actions documentation, see: `research/react-19-comprehensive.md` lines 644-733.
+
+## Related Skills
+
+**Zod v4 Error Handling:**
+- `@zod-4/skills/handling-zod-errors` - SafeParse pattern, error flattening, and user-friendly error messages for server action validation

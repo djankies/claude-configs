@@ -277,6 +277,12 @@ export function ProfileForm() {
 }
 ```
 
+## Related Skills
+
+**Zod v4 Validation:**
+- `@zod-4/skills/handling-zod-errors` - Error customization with unified error API, safeParse pattern, and error formatting for secure error responses
+- `@zod-4/skills/using-zod-v4-features` - Top-level string format functions (z.email(), z.uuid(), z.url()) for validating common input types
+
 ## Common Vulnerabilities
 
 Avoid these security mistakes:

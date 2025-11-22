@@ -590,6 +590,12 @@ Before deploying any endpoint that processes user input:
 - [ ] Content Security Policy headers set
 - [ ] Error messages don't leak sensitive info
 
+## Related Skills
+
+**Zod v4 Validation:**
+- `@zod-4/skills/using-zod-v4-features` - Top-level string format functions (z.email(), z.uuid(), z.url(), z.ipv4(), z.base64()) for validating common input formats
+- `@zod-4/skills/writing-zod-transformations` - Built-in string transformations (trim, toLowerCase, toUpperCase) for sanitizing and normalizing user input
+
 ## Resources
 
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)

@@ -139,3 +139,9 @@ const schema = z.object({
 ```
 
 For comprehensive validation patterns, see: `research/react-19-comprehensive.md`.
+
+## Related Skills
+
+**Zod v4 Validation:**
+- `@zod-4/skills/handling-zod-errors` - Advanced error customization with unified error API, custom messages, and error formatting for better user feedback
+- `@zod-4/skills/writing-zod-transformations` - Built-in string transformations (trim, toLowerCase) for normalizing user input before validation

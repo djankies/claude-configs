@@ -693,6 +693,12 @@ Silently failing validation defeats its purpose.
 - [ ] Use `safeParse` for non-throwing validation
 - [ ] Provide user-friendly error messages
 
+## Related Skills
+
+**Zod v4 Features:**
+- `@zod-4/skills/using-zod-v4-features` - Top-level string format functions and v4 features for validating API responses and external data
+- `@zod-4/skills/handling-zod-errors` - SafeParse pattern, error handling strategies, and error formatting for robust external data validation
+
 ## Resources
 
 - [Zod Documentation](https://zod.dev/)
