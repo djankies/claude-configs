@@ -27,7 +27,6 @@ acquire_lock() {
         return 1
     fi
 
-    trap "release_lock" EXIT INT TERM
     return 0
 }
 
@@ -37,6 +36,7 @@ release_lock() {
         eval "exec ${LOCK_FD}>&-" 2>/dev/null || true
         LOCK_FD=""
     fi
+    release_lock_mkdir
 }
 
 acquire_lock_mkdir() {
@@ -54,7 +54,6 @@ acquire_lock_mkdir() {
         fi
     done
 
-    trap 'release_lock_mkdir' EXIT INT TERM
     return 0
 }
 
@@ -133,9 +132,21 @@ set_session_value() {
         return 1
     fi
 
+    if ! acquire_lock "$session_file"; then
+        echo "Cannot update session: lock acquisition failed" >&2
+        return 1
+    fi
+
     local temp_file="${session_file}.tmp"
-    jq ".${key} = ${value}" "$session_file" > "$temp_file"
+    if ! jq ".${key} = ${value}" "$session_file" > "$temp_file"; then
+        release_lock
+        echo "Failed to update session key: $key" >&2
+        return 1
+    fi
+
     mv "$temp_file" "$session_file"
+    release_lock
+    return 0
 }
 
 set_plugin_value() {
@@ -196,9 +207,21 @@ mark_validation_passed() {
         return 1
     fi
 
+    if ! acquire_lock "$session_file"; then
+        echo "Cannot update validation status: lock acquisition failed" >&2
+        return 1
+    fi
+
     local temp_file="${session_file}.tmp"
-    jq ".validations_passed.\"${file_path}\".\"${validation_name}\" = true" "$session_file" > "$temp_file"
+    if ! jq ".validations_passed.\"${file_path}\".\"${validation_name}\" = true" "$session_file" > "$temp_file"; then
+        release_lock
+        echo "Failed to mark validation passed: $validation_name" >&2
+        return 1
+    fi
+
     mv "$temp_file" "$session_file"
+    release_lock
+    return 0
 }
 
 set_custom_data() {
@@ -211,9 +234,21 @@ set_custom_data() {
         return 1
     fi
 
+    if ! acquire_lock "$session_file"; then
+        echo "Cannot update custom data: lock acquisition failed" >&2
+        return 1
+    fi
+
     local temp_file="${session_file}.tmp"
-    jq ".custom_data.\"${key}\" = ${value}" "$session_file" > "$temp_file"
+    if ! jq ".custom_data.\"${key}\" = ${value}" "$session_file" > "$temp_file"; then
+        release_lock
+        echo "Failed to set custom data: $key" >&2
+        return 1
+    fi
+
     mv "$temp_file" "$session_file"
+    release_lock
+    return 0
 }
 
 get_custom_data() {
