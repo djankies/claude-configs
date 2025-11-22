@@ -7,355 +7,233 @@ version: 1.0.0
 
 # Query Result Caching with Redis
 
-This skill teaches how to implement efficient query result caching for Prisma 6 applications using Redis, including cache key generation, invalidation strategies, and TTL management.
+Efficient query result caching for Prisma 6 applications using Redis: cache key generation, invalidation strategies, TTL management, and when caching provides value.
 
 ---
 
 <role>
-This skill teaches Claude how to implement query result caching with Redis for Prisma 6 applications, following best practices for cache key generation, invalidation, TTL strategies, and determining when caching provides value.
+Implement query result caching with Redis for Prisma 6, covering cache key generation, invalidation, TTL strategies, and identifying when caching delivers value.
 </role>
 
 <when-to-activate>
-This skill activates when:
-
-- User mentions caching, Redis, performance optimization, or slow queries
-- Working with read-heavy applications or frequently accessed data
-- Request involves reducing database load or improving response times
-- Implementing cache invalidation or cache warming strategies
-- Optimizing Prisma queries with caching layers
+User mentions: caching, Redis, performance optimization, slow queries, read-heavy applications, frequently accessed data, reducing database load, improving response times, cache invalidation, cache warming, or optimizing Prisma queries.
 </when-to-activate>
 
 <overview>
-Query result caching with Redis reduces database load and improves response times for read-heavy operations. However, caching adds complexity through cache invalidation, consistency challenges, and infrastructure requirements.
-
-Key capabilities:
-
-1. Redis integration with Prisma queries
-2. Consistent cache key generation patterns
-3. Cache invalidation on mutations
-4. TTL strategies (time-based vs event-based)
-5. Identifying when caching provides value
+Query caching reduces database load and improves read response times, but adds complexity: cache invalidation, consistency challenges, infrastructure. Key capabilities: Redis-Prisma integration, consistent cache key patterns, mutation-triggered invalidation, TTL strategies (time/event-based), and identifying when caching provides value.
 </overview>
 
 <workflow>
-## Standard Workflow
-
 **Phase 1: Identify Cache Candidates**
-
-1. Analyze query patterns to find read-heavy operations
-2. Identify data with acceptable staleness tolerance
-3. Measure query performance without caching (baseline)
-4. Estimate cache hit rate and performance improvement
+Analyze query patterns for read-heavy operations; identify data with acceptable staleness; measure baseline query performance; estimate cache hit rate and improvement.
 
 **Phase 2: Implement Cache Layer**
-
-1. Set up Redis client with connection pooling
-2. Create cache wrapper around Prisma queries
-3. Implement consistent cache key generation
-4. Add cache read with fallback to database
+Set up Redis with connection pooling; create cache wrapper around Prisma queries; implement consistent cache key generation; add cache read with database fallback.
 
 **Phase 3: Implement Invalidation**
+Identify mutations affecting cached data; add invalidation to update/delete operations; handle bulk operations and cascading invalidation; test across scenarios.
 
-1. Identify mutations that affect cached data
-2. Add cache invalidation to update/delete operations
-3. Handle bulk operations and cascading invalidation
-4. Test invalidation across different scenarios
-
-**Phase 4: Configure TTL Strategy**
-
-1. Determine appropriate TTL for each data type
-2. Implement time-based expiration
-3. Add event-based invalidation for critical data
-4. Monitor cache hit rates and adjust
+**Phase 4: Configure TTL**
+Determine appropriate TTL per data type; implement time-based expiration; add event-based invalidation for critical data; monitor hit rates and adjust.
 </workflow>
 
 <decision-tree>
 ## When to Cache
 
-### Strong Cache Candidates
+**Strong Candidates:**
 
-**Read-heavy data (read/write ratio > 10:1):**
-- User profiles
-- Product catalogs
-- Configuration data
-- Popular content lists
+- Read-heavy data (>10:1 ratio): user profiles, product catalogs, configuration, content lists
+- Expensive queries: large aggregations, multi-join, complex filtering, computed values
+- High-frequency access
 
-**Expensive queries:**
-- Aggregations across large datasets
-- Multi-join queries
-- Complex filtering with multiple conditions
-- Computed/derived values
+: homepage data, navigation, popular results, trending content
 
-**High-frequency access:**
-- Homepage data
-- Navigation menus
-- Popular search results
-- Trending content
+**Weak Candidates:**
 
-### Weak Cache Candidates
+- Write-heavy data (<3:1 ratio): analytics, activity logs, messages, live updates
+- Frequently changing: stock prices, inventory, bids, live scores
+- User-specific: shopping carts, drafts, recommendations, sessions
+- Fast simple queries: primary key lookups, indexed queries, already in DB cache
 
-**Write-heavy data (read/write ratio < 3:1):**
-- Real-time analytics
-- User activity logs
-- Chat messages
-- Live updates
-
-**Frequently changing data:**
-- Stock prices
-- Inventory counts
-- Auction bids
-- Live sports scores
-
-**User-specific data:**
-- Shopping carts
-- Draft content
-- Personalized recommendations
-- Session data
-
-**Small result sets with fast queries:**
-- Single record lookups by primary key
-- Simple queries with database indexes
-- Data already in database cache
-
-### Cache Strategy Decision Tree
+**Decision Tree:**
 
 ```
-Is read/write ratio > 10:1?
-├─ Yes: Strong cache candidate
-│  └─ Can data be stale for 1+ minutes?
-│     ├─ Yes: Use long TTL (5-60 min) + event invalidation
-│     └─ No: Use short TTL (10-60 sec) + aggressive invalidation
-│
-└─ No: Is read/write ratio > 3:1?
-   ├─ Yes: Moderate cache candidate
-   │  └─ Is query expensive (> 100ms)?
-   │     ├─ Yes: Cache with short TTL (30-120 sec)
-   │     └─ No: Skip caching, optimize query instead
-   │
-   └─ No: Skip caching
-      └─ Consider query optimization, database indexes, or connection pooling
+Read/write ratio > 10:1?
+├─ Yes: Strong candidate
+│  └─ Data stale 1+ minutes acceptable?
+│     ├─ Yes: Long TTL (5-60min) + event invalidation
+│     └─ No: Short TTL (10-60sec) + aggressive invalidation
+└─ No: Ratio > 3:1?
+   ├─ Yes: Moderate candidate, if query > 100ms → short TTL (30-120sec)
+   └─ No: Skip; optimize query/indexes/pooling instead
 ```
+
 </decision-tree>
 
 <examples>
-## Basic Examples
+## Basic Cache Implementation
 
-### Example 1: Cache Wrapper
-
-**Cache-aside pattern with automatic fallback:**
+**Example 1: Cache-Aside Pattern**
 
 ```typescript
-import { PrismaClient } from '@prisma/client'
-import { Redis } from 'ioredis'
+import { PrismaClient } from '@prisma/client';
+import { Redis } from 'ioredis';
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 const redis = new Redis({
   host: process.env.REDIS_HOST,
   port: parseInt(process.env.REDIS_PORT || '6379'),
   maxRetriesPerRequest: 3,
-})
+});
 
 async function getCachedUser(userId: string) {
-  const cacheKey = `user:${userId}`
-
-  const cached = await redis.get(cacheKey)
-  if (cached) {
-    return JSON.parse(cached)
-  }
+  const cacheKey = `user:${userId}`;
+  const cached = await redis.get(cacheKey);
+  if (cached) return JSON.parse(cached);
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { id: true, email: true, name: true, role: true },
-  })
+  });
 
-  if (user) {
-    await redis.setex(cacheKey, 300, JSON.stringify(user))
-  }
-
-  return user
+  if (user) await redis.setex(cacheKey, 300, JSON.stringify(user));
+  return user;
 }
 ```
 
-### Example 2: Cache Key Generation
-
-**Consistent key generation for complex queries:**
+**Example 2: Consistent Key Generation**
 
 ```typescript
-import crypto from 'crypto'
+import crypto from 'crypto';
 
-function generateCacheKey(
-  entity: string,
-  query: Record<string, unknown>
-): string {
+function generateCacheKey(entity: string, query: Record<string, unknown>): string {
   const sortedQuery = Object.keys(query)
     .sort()
     .reduce((acc, key) => {
-      acc[key] = query[key]
-      return acc
-    }, {} as Record<string, unknown>)
+      acc[key] = query[key];
+      return acc;
+    }, {} as Record<string, unknown>);
 
   const queryHash = crypto
     .createHash('sha256')
     .update(JSON.stringify(sortedQuery))
     .digest('hex')
-    .slice(0, 16)
-
-  return `${entity}:${queryHash}`
+    .slice(0, 16);
+  return `${entity}:${queryHash}`;
 }
 
 async function getCachedPosts(filters: {
-  authorId?: string
-  published?: boolean
-  tags?: string[]
+  authorId?: string;
+  published?: boolean;
+  tags?: string[];
 }) {
-  const cacheKey = generateCacheKey('posts', filters)
-
-  const cached = await redis.get(cacheKey)
-  if (cached) {
-    return JSON.parse(cached)
-  }
+  const cacheKey = generateCacheKey('posts', filters);
+  const cached = await redis.get(cacheKey);
+  if (cached) return JSON.parse(cached);
 
   const posts = await prisma.post.findMany({
     where: filters,
     select: { id: true, title: true, createdAt: true },
-  })
+  });
 
-  await redis.setex(cacheKey, 120, JSON.stringify(posts))
-  return posts
+  await redis.setex(cacheKey, 120, JSON.stringify(posts));
+  return posts;
 }
 ```
 
-### Example 3: Cache Invalidation
-
-**Invalidate related cache entries when data changes:**
+**Example 3: Cache Invalidation on Mutation**
 
 ```typescript
 async function updatePost(postId: string, data: { title?: string; content?: string }) {
-  const post = await prisma.post.update({
-    where: { id: postId },
-    data,
-  })
+  const post = await prisma.post.update({ where: { id: postId }, data });
 
   await Promise.all([
     redis.del(`post:${postId}`),
     redis.del(`posts:author:${post.authorId}`),
-    redis.keys('posts:*').then(keys => {
-      if (keys.length > 0) return redis.del(...keys)
-    }),
-  ])
-
-  return post
+    redis.keys('posts:*').then((keys) => keys.length > 0 && redis.del(...keys)),
+  ]);
+  return post;
 }
 ```
 
-**Warning:** Using `redis.keys()` with pattern matching can be slow with many keys. Consider using Redis SCAN or maintaining key sets for invalidation.
+**Note:** redis.keys() with patterns is slow on large keysets; use SCAN or maintain key sets.
 
-### Example 4: TTL Strategies
-
-**Different TTL strategies for different data types:**
+**Example 4: TTL Strategy**
 
 ```typescript
-const TTL_STRATEGIES = {
+const TTL = {
   user_profile: 600,
   user_settings: 300,
   posts_list: 120,
   post_detail: 180,
   popular_posts: 60,
   real_time_stats: 10,
-}
+};
 
 async function cacheWithTTL<T>(
   key: string,
-  ttlType: keyof typeof TTL_STRATEGIES,
+  ttlType: keyof typeof TTL,
   fetchFn: () => Promise<T>
 ): Promise<T> {
-  const cached = await redis.get(key)
-  if (cached) {
-    return JSON.parse(cached)
-  }
+  const cached = await redis.get(key);
+  if (cached) return JSON.parse(cached);
 
-  const data = await fetchFn()
-  const ttl = TTL_STRATEGIES[ttlType]
-
-  await redis.setex(key, ttl, JSON.stringify(data))
-  return data
+  const data = await fetchFn();
+  await redis.setex(key, TTL[ttlType], JSON.stringify(data));
+  return data;
 }
 ```
+
 </examples>
 
 <constraints>
-## Constraints and Guidelines
-
 **MUST:**
-
-- Use cache-aside pattern (not cache-through) for Prisma queries
-- Implement consistent cache key generation (no random/timestamp components)
-- Invalidate cache on all mutations affecting cached data
-- Handle Redis connection failures gracefully (fallback to database)
-- Use JSON.parse/stringify for serialization (consistent with Prisma types)
-- Set TTL on all cached values (no infinite TTL)
-- Test cache invalidation thoroughly
+* Use cache-aside pattern (not cache-through)
+* Consistent cache key generation (no random/timestamp components)
+* Invalidate cache on all mutations affecting cached data
+* Graceful Redis failure handling with database fallback
+* JSON serialization (consistent with Prisma types)
+* TTL on all cached values (never infinite)
+* Thorough cache invalidation testing
 
 **SHOULD:**
 
-- Use Redis connection pooling (ioredis library)
-- Separate cache logic from business logic (wrapper functions)
-- Monitor cache hit rates and adjust TTL accordingly
-- Use shorter TTL for frequently changing data
-- Implement cache warming for predictably popular data
+- Redis connection pooling (ioredis)
+- Separate cache logic from business logic
+- Monitor cache hit rates; adjust TTL accordingly
+- Shorter TTL for frequently changing data
+- Cache warming for predictably popular data
 - Document cache key patterns and invalidation rules
-- Consider using Redis SCAN instead of KEYS for pattern matching
+- Use
+
+Redis SCAN vs KEYS for pattern matching
 
 **NEVER:**
 
 - Cache authentication tokens or sensitive credentials
-- Use infinite TTL (always set expiration)
-- Invalidate cache by pattern matching in hot paths (slow with many keys)
-- Cache Prisma queries with skip/take without including pagination in key
-- Assume cache is always available (always have database fallback)
-- Store Prisma model instances directly (serialize to JSON first)
-- Use cache for write-heavy data (read/write ratio < 3:1)
-</constraints>
+- Use infinite TTL
+- Pattern-match invalidation in hot paths
+- Cache Prisma queries with skip/take without pagination in key
+- Assume cache always available
+- Store Prisma instances directly (serialize first)
+- Cache write-heavy data
+  </constraints>
 
 <validation>
-## Validation
+**Cache Hit Rate:** Monitor >60% for effective caching; <40% signals strategy reconsideration or TTL adjustment.
 
-After implementing caching:
+**Invalidation Testing:** Verify all mutations invalidate correct keys; test cascading invalidation for related entities; confirm bulk operations invalidate list caches; ensure no stale data post-mutation.
 
-1. **Cache Hit Rate:**
+**Performance:** Measure query latency with/without cache; target >50% latency reduction; monitor P95/P99 improvements; verify caching doesn't increase memory pressure.
 
-   - Monitor cache hit rate > 60% for effective caching
-   - If hit rate < 40%, reconsider cache strategy or TTL
-   - Log cache hits/misses during development
-
-2. **Invalidation Testing:**
-
-   - Test all mutation paths invalidate correct keys
-   - Verify cascading invalidation for related entities
-   - Check bulk operations invalidate list caches
-   - Ensure no stale data after mutations
-
-3. **Performance Improvement:**
-
-   - Measure query latency with and without cache
-   - Target > 50% latency reduction for cached queries
-   - Monitor P95/P99 latency improvements
-   - Verify caching doesn't increase memory pressure
-
-4. **Redis Health:**
-   - Monitor Redis connection pool utilization
-   - Check Redis memory usage (set maxmemory-policy)
-   - Alert on Redis connection failures
-   - Test application behavior when Redis is down
+**Redis Health:** Monitor connection pool utilization, memory usage (set maxmemory-policy), connection failures; test application behavior when Redis is unavailable.
 </validation>
 
 ---
 
 ## References
 
-For additional implementation details and patterns, see:
-
-- [Redis Configuration](./references/redis-configuration.md) - Connection setup, serverless considerations
-- [Invalidation Patterns](./references/invalidation-patterns.md) - Event-based, time-based, hybrid strategies
-- [Advanced Examples](./references/advanced-examples.md) - Bulk invalidation, cache warming
-- [Common Pitfalls](./references/common-pitfalls.md) - Infinite TTL, key inconsistency, missing invalidation
+- [Redis Configuration](./references/redis-configuration.md) — Connection setup, serverless
+- [Invalidation Patterns](./references/invalidation-patterns.md) — Event-based, time-based, hybrid
+- [Advanced Examples](./references/advanced-examples.md) — Bulk invalidation, cache warming
+- [Common Pitfalls](./references/common-pitfalls.md) — Infinite TTL, key inconsistency, missing invalidation

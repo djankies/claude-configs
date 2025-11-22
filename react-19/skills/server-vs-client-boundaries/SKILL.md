@@ -7,58 +7,39 @@ version: 1.0.0
 
 # Server vs Client Component Boundaries
 
-<role>
-This skill teaches you how to choose between Server and Client Components and manage the boundaries between them effectively.
-</role>
+**Role**: Choose between Server and Client Components effectively and manage boundaries between them.
 
-<when-to-activate>
-This skill activates when:
+## When to Activate
 
 - User mentions Server Components, Client Components, or `'use client'`
 - Architecting component hierarchy
-- Need to access server-only APIs or client-only APIs
-- Working with frameworks supporting React Server Components (Next.js, Remix)
-- Encountering errors about hooks or browser APIs in Server Components
-</when-to-activate>
+- Accessing server-only or client-only APIs
+- Working with React Server Components frameworks (Next.js, Remix)
+- Errors about hooks or browser APIs in Server Components
 
-<overview>
-React 19 supports two component types:
+## Component Comparison
 
-**Server Components (default):**
-- Render on the server before being sent to client
-- Can access databases, file systems, server-only APIs directly
-- Cannot use hooks (useState, useEffect, etc.)
-- Cannot access browser APIs
-- Reduce JavaScript bundle size by 20%-90%
-- No `'use client'` directive needed (default)
+| Feature                             | Server Component | Client Component      |
+| ----------------------------------- | ---------------- | --------------------- |
+| Directive                           | None (default)   | `'use client'`        |
+| Hooks; Event handlers; Browser APIs | ❌               | ✅                    |
+| Async/await (top-level)             | ✅               | ⚠️ Limited            |
+| Database/server APIs                | ✅ Direct        | ❌ Use Server Actions |
+| Import Server Components            | ✅               | ❌ Pass as children   |
+| Bundle impact                       | 📦 Zero          | 📦 Sent to client     |
+| Bundle reduction                    | 20%-90%          | —                     |
 
-**Client Components:**
-- Render on client (can also pre-render on server for HTML)
-- Can use hooks and browser APIs
-- Support interactivity (onClick, onChange, etc.)
-- Larger JavaScript bundle (sent to browser)
-- Require `'use client'` directive at top of file
+**Key Decision**: Needs interactivity/hooks/browser APIs → Client Component; static/server-only data → Server Component
 
-**Key Decision:**
-- If needs interactivity/hooks/browser → Client Component
-- If can be static/server-only data → Server Component
-</overview>
+## Quick Checklist
 
-<workflow>
-## Decision Flow
+Choose **Client Component** if: needs hooks, event handlers, browser APIs, or state management.
 
-**Step 1: Identify Component Requirements**
+Choose **Server Component** if: purely presentational, fetches server data, accesses databases/server APIs.
 
-Ask these questions:
-1. Does it need hooks? → Client Component
-2. Does it need event handlers? → Client Component
-3. Does it access browser APIs? → Client Component
-4. Does it access server APIs/databases directly? → Server Component
-5. Is it purely presentational with no interactivity? → Server Component
+## Implementing Components
 
-**Step 2: Place `'use client'` Directive**
-
-Only where needed:
+**Step 1: Add `'use client'` at file top** (Client Components only)
 
 ```javascript
 'use client';
@@ -67,25 +48,20 @@ import { useState } from 'react';
 
 export function Counter() {
   const [count, setCount] = useState(0);
-
-  return (
-    <button onClick={() => setCount(count + 1)}>
-      Count: {count}
-    </button>
-  );
+  return <button onClick={() => setCount(count + 1)}>Count: {count}</button>;
 }
 ```
 
-**Step 3: Compose Server and Client**
+**Step 2: Compose Server + Client**
 
-Server Components can import Client Components:
+Server Components import Client Components; pass Server Components as children to avoid circular imports:
 
 ```javascript
+// Server Component: Can fetch data, import CC
 import { Counter } from './Counter';
 
 async function Page() {
   const data = await db.getData();
-
   return (
     <div>
       <h1>{data.title}</h1>
@@ -93,41 +69,24 @@ async function Page() {
     </div>
   );
 }
-```
 
-**Step 4: Avoid Common Mistakes**
+// ❌ WRONG: Client Component importing Server Component
+('use client');
+import ServerComponent from './ServerComponent'; // ERROR
 
-❌ Client Components cannot import Server Components:
-
-```javascript
-'use client';
-
-import ServerComponent from './ServerComponent';
-
-export function ClientComponent() {
-  return <ServerComponent />;
-}
-```
-
-✅ Pass Server Components as children:
-
-```javascript
+// ✅ RIGHT: Pass Server Component as children
 <ClientWrapper>
   <ServerComponent />
-</ClientWrapper>
+</ClientWrapper>;
 ```
 
-</workflow>
+## Common Patterns
 
-<conditional-workflows>
-## Boundary Patterns
-
-**If you need interactivity at leaf nodes:**
+**Interactivity at leaf nodes**: Server Component fetches data, passes to Client Component for interaction
 
 ```javascript
 async function ProductPage({ id }) {
   const product = await db.products.find(id);
-
   return (
     <>
       <ProductDetails product={product} />
@@ -137,21 +96,16 @@ async function ProductPage({ id }) {
 }
 ```
 
-**If you need server data in client component:**
-
-Pass data as props (not import):
+**Server data in Client Component**: Pass as props (serialize data)
 
 ```javascript
 async function ServerComponent() {
   const data = await fetchData();
-
   return <ClientComponent data={data} />;
 }
 ```
 
-**If you need to share server logic:**
-
-Use Server Actions:
+**Server logic from Client**: Use Server Actions
 
 ```javascript
 async function ServerComponent() {
@@ -159,30 +113,16 @@ async function ServerComponent() {
     'use server';
     await db.update(...);
   }
+  return <ClientForm action
 
-  return <ClientForm action={serverAction} />;
+={serverAction} />;
 }
 ```
 
-</conditional-workflows>
-
-<progressive-disclosure>
-## Reference Files
-
-For detailed information:
-
-- **Server Components**: See `../../../research/react-19-comprehensive.md` (lines 71-82)
-- **Server Actions**: See `../../forms/skills/server-actions/SKILL.md`
-- **Component Composition**: See `../component-composition/SKILL.md`
-
-Load references when specific patterns are needed.
-</progressive-disclosure>
-
-<examples>
-## Example 1: Product Page Architecture
+## Example: Product Page with Cart
 
 ```javascript
-import { ProductImage } from './ProductImage';
+// Server Component
 import { AddToCart } from './AddToCart';
 import { Reviews } from './Reviews';
 
@@ -192,25 +132,20 @@ async function ProductPage({ productId }) {
 
   return (
     <main>
-      <ProductImage src={product.image} alt={product.name} />
-
+      <img src={product.image} alt={product.name} />
       <section>
         <h1>{product.name}</h1>
         <p>{product.description}</p>
         <p>${product.price}</p>
-
         <AddToCart productId={productId} />
       </section>
-
       <Reviews reviews={reviews} />
     </main>
   );
 }
-```
 
-```javascript
-'use client';
-
+// Client Component
+('use client');
 import { useState } from 'react';
 
 export function AddToCart({ productId }) {
@@ -231,30 +166,20 @@ export function AddToCart({ productId }) {
     </button>
   );
 }
-```
 
-## Example 2: Dashboard with Real-Time Updates
-
-```javascript
-import { DashboardStats } from './DashboardStats';
-import { LiveMetrics } from './LiveMetrics';
-
+// Server Component with real-time Client
 async function Dashboard() {
   const stats = await db.stats.getLatest();
-
   return (
     <>
       <DashboardStats stats={stats} />
-
       <LiveMetrics />
     </>
   );
 }
-```
 
-```javascript
-'use client';
-
+// Client Component with WebSocket
+('use client');
 import { useEffect, useState } from 'react';
 
 export function LiveMetrics() {
@@ -262,31 +187,21 @@ export function LiveMetrics() {
 
   useEffect(() => {
     const ws = new WebSocket('/api/metrics');
-
-    ws.onmessage = (event) => {
-      setMetrics(JSON.parse(event.data));
-    };
-
+    ws.onmessage = (event) => setMetrics(JSON.parse(event.data));
     return () => ws.close();
   }, []);
 
-  if (!metrics) return <div>Connecting...</div>;
-
-  return <div>Active Users: {metrics.activeUsers}</div>;
+  return metrics ? <div>Active Users: {metrics.activeUsers}</div> : <div>Connecting...</div>;
 }
-```
 
-## Example 3: Form with Server Action
-
-```javascript
+// Server Component with Server Action
 async function ContactPage() {
   async function submitContact(formData) {
     'use server';
-
-    const email = formData.get('email');
-    const message = formData.get('message');
-
-    await db.contacts.create({ email, message });
+    await db.contacts.create({
+      email: formData.get('email'),
+      message: formData.get('message'),
+    });
   }
 
   return (
@@ -299,72 +214,25 @@ async function ContactPage() {
 }
 ```
 
-</examples>
+## Requirements
 
-<constraints>
-## MUST
+**MUST**: `'use client'` at file top for Client Components; before any imports; serialize props (Server → Client); use Server Actions for server-side logic from Client
 
-- Add `'use client'` directive at top of file for Client Components
-- Place `'use client'` before any imports
-- Pass data from Server to Client as props (serialize)
-- Use Server Actions for server-side logic called from Client
+**SHOULD**: Keep most components as Server Components (smaller bundle); place `'use client'` at leaf nodes (smallest boundary); use Server Components for data fetching; use Client Components only for interactivity
 
-## SHOULD
+**NEVER**: Import Server Components into Client Components; use hooks in Server Components; access browser APIs in Server Components; pass non-serializable props (functions, classes, symbols); om
 
-- Keep most components as Server Components (smaller bundle)
-- Push `'use client'` to leaf nodes (smallest boundary)
-- Use Server Components for data fetching
-- Use Client Components only for interactivity
+it `'use client'` directive
 
-## NEVER
+## Validation Checklist
 
-- Import Server Components into Client Components
-- Use hooks in Server Components
-- Access browser APIs in Server Components
-- Pass non-serializable props (functions, classes, symbols)
-- Forget `'use client'` directive (will fail at runtime)
+1. **Component Types**: Client Components have `'use client'` at top; Server Components have no directive; no hooks/event handlers in Server Components
+2. **Data Flow**: Server → Client props are serializable; Client → Server uses Server Actions; no Server Components imported in Client
+3. **Functionality**: Server Components fetch data correctly; Client Components handle interaction; no hydration mismatches; no runtime errors about hooks/browser APIs
+4. **Bundle**: Only necessary components are Client Components; most stay on server; JavaScript minimized
 
-</constraints>
+## References
 
-<validation>
-## After Implementation
-
-1. **Verify Component Type**:
-   - Client Components have `'use client'` at top
-   - Server Components have NO directive (default)
-   - No hooks/event handlers in Server Components
-
-2. **Check Data Flow**:
-   - Server → Client: Props are serializable
-   - Client → Server: Use Server Actions
-   - No Server Components imported in Client
-
-3. **Test Functionality**:
-   - Server Components fetch data correctly
-   - Client Components handle interaction
-   - No hydration mismatches
-   - No runtime errors about hooks/browser APIs
-
-4. **Review Bundle Size**:
-   - Only necessary components are Client Components
-   - Most components stay on server
-   - JavaScript bundle is minimized
-
-</validation>
-
----
-
-## Quick Reference
-
-| Feature | Server Component | Client Component |
-|---------|------------------|------------------|
-| Directive | None (default) | `'use client'` |
-| Hooks | ❌ No | ✅ Yes |
-| Event handlers | ❌ No | ✅ Yes |
-| Browser APIs | ❌ No | ✅ Yes |
-| Async/await | ✅ Yes (top-level) | ⚠️ Limited |
-| Database access | ✅ Yes | ❌ No (use Server Actions) |
-| Import Server Components | ✅ Yes | ❌ No (use children) |
-| Bundle size | 📦 Zero | 📦 Sent to client |
-
-For comprehensive Server Components documentation, see: `research/react-19-comprehensive.md` lines 71-82, 644-730.
+- **Server Components**: `research/react-19-comprehensive.md` (lines 71-82)
+- **Server Actions**: `forms/skills/server-actions/SKILL.md`
+- **Component Composition**: `component-composition/SKILL.md`

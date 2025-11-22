@@ -8,34 +8,21 @@ version: 1.0.0
 # useActionState Patterns for Forms
 
 <role>
-This skill teaches you how to use React 19's `useActionState` hook for form state management with Server Actions.
+Teaches React 19's `useActionState` hook for form state management with Server Actions.
 </role>
 
 <when-to-activate>
-This skill activates when:
-
-- User mentions `useActionState`, form state, or form handling
-- Working with Server Actions or Server Functions
-- Need to track form pending state or submission status
-- Implementing progressive enhancement
-- Need form validation with server-side logic
+When: mentioning `useActionState`, form state/handling, Server Actions/Functions; tracking pending/submission status; implementing progressive enhancement; server-side form validation.
 </when-to-activate>
 
 <overview>
-`useActionState` is React 19's solution for managing form state based on action results:
-
-1. **Tracks Pending State** - Automatic `isPending` flag during submission
-2. **Manages Form State** - Returns current state from action results
-3. **Server Action Integration** - Works seamlessly with `'use server'` functions
-4. **Progressive Enhancement** - Optional permalink for no-JS submissions
-
-Replaces manual state management for form submissions.
+`useActionState` manages form state based on action results: tracks pending state (automatic `isPending`), manages form state (returns action results), integrates Server Actions (`'use server'`), enables progressive enhancement (optional no-JS permalink). Replaces manual form submission state management.
 </overview>
 
 <workflow>
 ## Standard Form with useActionState
 
-**Step 1: Create Server Action**
+**Server Action:**
 
 ```javascript
 'use server';
@@ -52,7 +39,9 @@ export async function submitForm(previousState, formData) {
 }
 ```
 
-**Step 2: Use in Component with useActionState**
+````
+
+**Component:**
 
 ```javascript
 'use client';
@@ -83,48 +72,27 @@ function ContactForm() {
 <conditional-workflows>
 ## Decision Points
 
-**If you need progressive enhancement:**
+**Progressive Enhancement:** Add permalink as third argument: `useActionState(submitForm, null, '/api/submit')`. Form submits to URL before JS loads; server handles both cases.
 
-1. Add permalink as third argument to `useActionState`
-2. Form submits to URL before JavaScript loads
-3. Server handles both JS and no-JS submissions
+**Validation:** Server Action receives previousState, returns error object for failures, success object when valid; component renders errors from state.
 
-```javascript
-const [state, formAction] = useActionState(
-  submitForm,
-  null,
-  '/api/submit'
-);
-```
-
-**If you need validation before submission:**
-
-1. Server Action receives previous state
-2. Return error object for validation failures
-3. Return success object when valid
-4. Component renders errors from state
-
-**If you need multi-step forms:**
-
-1. Track step in state
-2. Server Action advances step or returns errors
-3. Component renders current step based on state
+**Multi-Step Forms:** Track step in state; Server Action advances step or returns errors; component renders current step.
 </conditional-workflows>
 
 <progressive-disclosure>
-## Reference Files
+## References
 
-For detailed information:
+- **Server Actions**: `../../forms/skills/server-actions/SKILL.md`
+- **Form Validation**: `../../forms/skills/form-validation/SKILL.md`
+- **Progressive Enhancement**: `../../../research/react-19-comprehensive.md` (lines 715-722)
 
-- **Server Actions**: See `../../forms/skills/server-actions/SKILL.md`
-- **Form Validation**: See `../../forms/skills/form-validation/SKILL.md`
-- **Progressive Enhancement**: See `../../../research/react-19-comprehensive.md` (lines 715-722)
-
-Load references when specific patterns are needed.
+Load as needed for specific patterns.
 </progressive-disclosure>
 
 <examples>
-## Example 1: Simple Form with Validation
+## Example 1: Validation with
+
+Zod
 
 ```javascript
 'use server';
@@ -175,17 +143,13 @@ export default function ContactForm() {
       <div>
         <label htmlFor="email">Email</label>
         <input id="email" name="email" type="email" required />
-        {state?.errors?.email && (
-          <span className="error">{state.errors.email}</span>
-        )}
+        {state?.errors?.email && <span className="error">{state.errors.email}</span>}
       </div>
 
       <div>
         <label htmlFor="message">Message</label>
         <textarea id="message" name="message" required />
-        {state?.errors?.message && (
-          <span className="error">{state.errors.message}</span>
-        )}
+        {state?.errors?.message && <span className="error">{state.errors.message}</span>}
       </div>
 
       <button type="submit" disabled={isPending}>
@@ -217,7 +181,7 @@ export async function multiStepAction(previousState, formData) {
   if (step === 2) {
     const email = formData.get('email');
     if (!email?.includes('@')) {
-      return { step: 2, error: 'Valid email is required', data: previousState.data };
+      return { step: 2, error: 'Valid email required', data: previousState.data };
     }
 
     await db.users.create({
@@ -272,73 +236,36 @@ export default function MultiStepForm() {
 </examples>
 
 <constraints>
-## MUST
+**MUST**: First parameter
 
-- Server Action first parameter MUST be `previousState`
-- Server Action second parameter MUST be `formData`
-- Return serializable values from Server Actions (no functions, symbols)
-- Use `formData.get('fieldName')` to access form values
-- Mark functions with `'use server'` directive
+is `previousState`, second is `formData`; return serializable values (no functions, symbols); access form values via `formData.get('fieldName')`; mark functions with `'use server'` directive.
 
-## SHOULD
+**SHOULD**: Validate inputs server-side; return structured error objects for field errors; disable submit button on `isPending`; show loading indicators; use validation libraries (zod, yup).
 
-- Validate inputs on server (never trust client)
-- Return structured error objects for field-specific errors
-- Disable submit button when `isPending` is true
-- Show loading indicators during submission
-- Use validation libraries (zod, yup) for robust validation
-
-## NEVER
-
-- Trust client-side validation alone
-- Return sensitive data in error messages
-- Mutate `previousState` directly (return new object)
-- Forget to handle errors from async operations
-- Skip authentication/authorization checks in Server Actions
+**NEVER**: Trust client-side validation alone; return sensitive data in errors; mutate `previousState` directly; skip error handling for async operations; omit authentication/authorization checks.
 </constraints>
 
 <validation>
-## After Implementation
-
-1. **Test Form Submission**:
-   - Submit valid data → success state
-   - Submit invalid data → error state
-   - Check `isPending` during submission
-
-2. **Verify Server Action**:
-   - Receives `previousState` and `formData` correctly
-   - Returns serializable objects
-   - Handles errors gracefully
-
-3. **Check Security**:
-   - Server validates all inputs
-   - Authentication/authorization implemented
-   - No sensitive data in error messages
-
-4. **Test Progressive Enhancement** (if used):
-   - Disable JavaScript in browser
-   - Form still submits to permalink
-   - Server handles both JS and no-JS cases
+**After Implementation**: Test form submission (valid data → success, invalid → errors, check `isPending`); verify Server Action (receives `previousState` and `formData`, returns serializable objects, handles errors); check security (server validates all inputs, authentication/authorization implemented, no sensitive data exposed); test progressive enhancement (disable JS, form submits to permalink, server handles both cases).
 </validation>
 
 ---
 
 ## Common Patterns
 
-### Pattern 1: Optimistic Updates with useActionState
-
-Combine with `useOptimistic` for immediate UI feedback:
+**Optimistic Updates**: Combine with `useOptimistic` for immediate UI feedback:
 
 ```javascript
 const [state, formAction] = useActionState(addTodo, null);
-const [optimisticTodos, addOptimisticTodo] = useOptimistic(todos, (state, newTodo) =>
-  [...state, newTodo]
-);
+const [optimisticTodos, addOptimisticTodo] = useOptimistic(todos, (state, newTodo) => [
+  ...state,
+  newTodo,
+]);
 ```
 
-See `../optimistic-updates/SKILL.md` for details.
+See `../optimistic-updates/SKILL.md`.
 
-### Pattern 2: Reset Form on Success
+**Reset Form on Success**:
 
 ```javascript
 const formRef = useRef();
@@ -351,7 +278,12 @@ const [state, formAction] = useActionState(async (prev, formData) => {
   return result;
 }, null);
 
-return <form ref={formRef} action={formAction}>...</form>;
+return (
+  <form ref={formRef} action={formAction}>
+    ...
+  </form>
+);
 ```
 
-For comprehensive useActionState documentation, see: `research/react-19-comprehensive.md` lines 135-180.
+For comprehensive documentation: `research/react-19-comprehensive.md` lines 135-180.
+````

@@ -10,22 +10,18 @@ Configure Prisma Client connection pools for optimal performance and resource ut
 
 ## Pool Sizing Formula
 
-**Standard environments:**
-```
-connection_limit = (number_of_physical_cpus × 2) + 1
-```
+**Standard environments:** `connection_limit = (num_cpus × 2) + 1`
 
-**Calculation examples:**
-- 4 CPU machine: `4 × 2 + 1 = 9 connections`
-- 8 CPU machine: `8 × 2 + 1 = 17 connections`
-- 16 CPU machine: `16 × 2 + 1 = 33 connections`
+Examples: 4 CPU → 9, 8 CPU → 17, 16 CPU → 33 connections
 
 **Configure in DATABASE_URL:**
+
 ```
 DATABASE_URL="postgresql://user:pass@host:5432/db?connection_limit=9&pool_timeout=20"
 ```
 
 **Configure in schema.prisma:**
+
 ```prisma
 datasource db {
   provider = "postgresql"
@@ -40,39 +36,26 @@ generator client {
 
 ## Serverless Environments
 
-**Rule: Always use connection_limit=1 per function instance**
-
-Serverless platforms scale horizontally by creating many function instances. Each instance should use a single connection to avoid exhausting database connection limits.
+**Always use `connection_limit=1` per instance**: Serverless platforms scale horizontally; total connections = instances × limit. Example: 100 Lambda instances × 1 = 100 DB connections (safe) vs. 100 × 10 = 1,000 (exhausted).
 
 **AWS Lambda / Vercel / Netlify:**
+
 ```
 DATABASE_URL="postgresql://user:pass@host:5432/db?connection_limit=1&pool_timeout=0&connect_timeout=10"
 ```
 
-**Why connection_limit=1:**
-- Functions are short-lived and stateless
-- Platform creates many concurrent instances
-- Total connections = instances × connection_limit
-- Example: 100 Lambda instances × 1 = 100 DB connections (manageable)
-- Anti-pattern: 100 instances × 10 = 1000 connections (exhausted)
+**Additional optimizations:**
 
-**Additional serverless optimizations:**
-```
-pool_timeout=0          # Don't wait for connections
-connect_timeout=10      # Timeout connecting to DB
-pgbouncer=true          # Use PgBouncer transaction mode
-```
+- `pool_timeout=0`: Fail fast instead of waiting for connections
+- `connect_timeout=10`: Timeout initial DB connection
+- `pgbouncer=true`: Use PgBouncer transaction mode
 
 ## PgBouncer for High Concurrency
 
-**When to use an external connection pooler:**
-- More than 100 application instances
-- Serverless with unpredictable scaling
-- Multiple applications sharing one database
-- Database connection limit exhaustion
-- P1017 errors occurring frequently
+**Deploy external pooler when:** >100 application instances, unpredictable serverless scaling, multiple apps sharing one database, connection exhaustion, frequent P1017 errors
 
-**PgBouncer configuration:**
+**Configuration:**
+
 ```ini
 [databases]
 mydb = host=postgres.internal port=5432 dbname=production
@@ -85,163 +68,92 @@ reserve_pool_size = 5
 reserve_pool_timeout = 3
 ```
 
-**Prisma with PgBouncer:**
+\*\*Prisma with
+
+PgBouncer:\*\*
+
 ```
 DATABASE_URL="postgresql://user:pass@pgbouncer:6432/db?pgbouncer=true&connection_limit=10"
 ```
 
-**Transaction mode requirements:**
-```prisma
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-```
-
-**Avoid in transaction mode:**
-- Prepared statements (disabled with `pgbouncer=true`)
-- SET variables that persist across queries
-- LISTEN/NOTIFY
-- Advisory locks
-- Temporary tables
+**Avoid in transaction mode:** Prepared statements (disabled with `pgbouncer=true`), persistent SET variables, LISTEN/NOTIFY, advisory locks, temporary tables
 
 ## Bottleneck Identification
 
-**P1017: Connection pool timeout**
-```
-Error: P1017
-Can't reach database server at `localhost:5432`
-Please make sure your database server is running at `localhost:5432`.
-```
+**P1017 Error (Connection pool timeout)**: "Can't reach database server at `localhost:5432`"
 
-**Causes:**
-- Connection limit too low
-- Slow queries holding connections
-- Missing connection cleanup
-- Database at max_connections limit
+Causes: connection_limit too low, slow queries holding connections, missing cleanup, database at max_connections limit
 
 **Diagnosis:**
+
 ```typescript
-import { Prisma } from '@prisma/client'
+import { Prisma } from '@prisma/client';
 
 const prisma = new Prisma.PrismaClient({
-  log: [
-    { emit: 'event', level: 'query' },
-  ],
-})
+  log: [{ emit: 'event', level: 'query' }],
+});
 
 prisma.$on('query', (e) => {
-  console.log('Query duration:', e.duration)
-})
+  console.log('Query duration:', e.duration);
+});
 
-const metrics = await prisma.$metrics.json()
-console.log('Pool metrics:', metrics)
+const metrics = await prisma.$metrics.json();
+console.log('Pool metrics:', metrics);
 ```
 
 **Check pool status:**
-```sql
-SELECT
-  count(*) as connections,
-  state,
-  wait_event_type,
-  wait_event
-FROM pg_stat_activity
-WHERE datname = 'your_database'
-GROUP BY state, wait_event_type, wait_event;
-```
 
-**Check max connections:**
 ```sql
+SELECT count(*) as connections, state, wait_event_type, wait_event
+FROM pg_stat_activity WHERE datname = 'your_database'
+GROUP BY state, wait_event_type, wait_event;
+
 SHOW max_connections;
 SELECT count(*) FROM pg_stat_activity;
 ```
 
 ## Pool Configuration Parameters
 
-**connection_limit:**
-- Default: `num_physical_cpus × 2 + 1`
-- Serverless: `1`
-- With PgBouncer: `10-20`
+| Parameter          | Standard         | Serverless    | PgBouncer | Notes                                                |
+| ------------------ | ---------------- | ------------- | --------- | ---------------------------------------------------- |
+| `connection_limit` | num_cpus × 2 + 1 | 1             | 10–20     | Total connections = instances × limit                |
+| `pool_timeout`     | 20–30 sec        | 0 (fail fast) | —         | Wait time for available connection                   |
+| `connect_timeout`  | 5 sec            | 10 sec        | —         | Initial connection timeout; 15–30 for network issues |
 
-**pool_timeout:**
-- Time to wait for available connection (seconds)
-- Default: `10`
-- Serverless: `0` (fail fast)
-- Standard: `20-30` (wait for connections)
+**Complete URL example:**
 
-**connect_timeout:**
-- Time to wait for initial connection (seconds)
-- Default: `5`
-- Recommended: `10`
-- Network issues: `15-30`
-
-**Complete configuration:**
 ```
 postgresql://user:pass@host:5432/db?connection_limit=9&pool_timeout=20&connect_timeout=10&socket_timeout=0&statement_cache_size=100
 ```
 
 ## Production Deployment Checklist
 
-**Before deploying:**
-- [ ] Calculate connection_limit based on CPU count or instance count
-- [ ] Configure pool_timeout appropriately for your environment
-- [ ] Enable query logging to identify slow queries
-- [ ] Monitor P1017 errors in application logs
+- [ ] Calculate `connection_limit` based on CPU/instance count
+- [ ] Set `pool_timeout` appropriately for environment
+- [ ] Enable query logging to identify
+
+slow queries
+
+- [ ] Monitor P1017 errors
 - [ ] Set up database connection monitoring
-- [ ] Configure PgBouncer if using serverless or high concurrency
-- [ ] Test under expected load with realistic connection counts
-- [ ] Document pool settings in deployment runbook
+- [ ] Configure PgBouncer if serverless/high concurrency
+- [ ] Load test with realistic connection counts
+- [ ] Document pool settings in runbook
 
 **Environment-specific settings:**
 
-Traditional servers:
-```
-DATABASE_URL="postgresql://user:pass@host:5432/db?connection_limit=17&pool_timeout=20"
-```
-
-Containers with PgBouncer:
-```
-DATABASE_URL="postgresql://user:pass@pgbouncer:6432/db?pgbouncer=true&connection_limit=10"
-```
-
-Serverless functions:
-```
-DATABASE_URL="postgresql://user:pass@host:5432/db?connection_limit=1&pool_timeout=0"
-```
+| Environment               | URL Pattern                                                                   |
+| ------------------------- | ----------------------------------------------------------------------------- |
+| Traditional servers       | `postgresql://user:pass@host:5432/db?connection_limit=17&pool_timeout=20`     |
+| Containers with PgBouncer | `postgresql://user:pass@pgbouncer:6432/db?pgbouncer=true&connection_limit=10` |
+| Serverless functions      | `postgresql://user:pass@host:5432/db?connection_limit=1&pool_timeout=0`       |
 
 ## Common Mistakes
 
-**Mistake: Using default connection limit in serverless**
-```typescript
-const prisma = new PrismaClient()
-```
-Problem: Each Lambda instance uses ~10 connections, exhausting database with 50+ concurrent functions.
+**Default limit in serverless**: Each Lambda instance uses ~10 connections, exhausting DB with 50+ concurrent functions. **Fix:** `connection_limit=1`
 
-**Solution:**
-```
-DATABASE_URL="postgresql://user:pass@host:5432/db?connection_limit=1"
-```
+**High pool_timeout in serverless**: Functions wait 30s for connections, hitting timeout. **Fix:** `pool_timeout=0`
 
-**Mistake: Pool timeout too high in serverless**
-```
-?connection_limit=1&pool_timeout=30
-```
-Problem: Functions wait 30s for connections, hitting function timeout.
+**No PgBouncer with high concurrency**: 200+ application instances with direct connections = exhaustion. **Fix:** Deploy PgBouncer with transaction pooling.
 
-**Solution:**
-```
-?connection_limit=1&pool_timeout=0
-```
-
-**Mistake: Not using PgBouncer with high concurrency**
-Direct connections with 200+ application instances = connection exhaustion.
-
-**Solution:** Deploy PgBouncer with transaction pooling.
-
-**Mistake: Setting connection_limit higher than database max_connections**
-```
-DATABASE_URL="?connection_limit=200"
-```
-Database max_connections: 100
-
-**Solution:** Use PgBouncer or reduce connection_limit to stay under database limit.
+**Connection_limit exceeds database max_connections**: Setting `connection_limit=200` when DB max is 100. **Fix:** Use PgBouncer or reduce limit below database maximum.

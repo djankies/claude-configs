@@ -7,67 +7,30 @@ version: 1.0.0
 
 # Query Select Optimization
 
-This skill guides optimization of Prisma 6 queries through strategic field selection and relation loading to avoid N+1 problems and reduce data transfer.
+Optimize Prisma 6 queries through selective field loading and relation batching to prevent N+1 problems and reduce data transfer.
 
 ---
 
 <role>
-This skill teaches Claude how to optimize Prisma 6 queries by selecting only required fields and properly loading relations to prevent N+1 query problems while minimizing data transfer and memory usage.
+Optimize Prisma 6 queries by selecting required fields only, properly loading relations to prevent N+1 problems while minimizing data transfer and memory usage.
 </role>
 
 <when-to-activate>
-This skill activates when:
-- Writing queries that fetch user-facing data
+- Writing user-facing data queries
 - Loading models with relations
 - Building API endpoints or GraphQL resolvers
-- Optimizing slow queries
-- Reducing database load and network transfer
+- Optimizing slow queries; reducing database load
 - Working with large result sets
 </when-to-activate>
-
-<overview>
-Query optimization in Prisma centers on two key practices:
-
-1. **Select only required fields** - Reduce bandwidth, memory, and serialization overhead
-2. **Prevent N+1 queries** - Load relations efficiently in a single query
-
-These practices work together to create performant, scalable queries that minimize database load and response times.
-</overview>
 
 <workflow>
 ## Optimization Workflow
 
-**Phase 1: Identify Requirements**
-
-1. Determine which fields are needed for the use case
-2. Identify relations that must be loaded
-3. Check if relation counts are needed (use `_count`)
-4. Assess whether full models or specific fields suffice
-
-**Phase 2: Choose Selection Strategy**
-
-- **Include:** Quick prototyping, need most model fields
-- **Select:** Production code, API responses, performance-critical
-
-**Phase 3: Implement Selection**
-
-1. Use `select` for precise field control
-2. Include relations with nested `select`
-3. Use `_count` for relation counts instead of loading all records
-4. Add `take` limits on relations to prevent over-fetching
-
-**Phase 4: Add Indexes**
-
-1. Index fields used in `where` clauses
-2. Index fields used in `orderBy`
-3. Create composite indexes for filtered relations
-
-**Phase 5: Validate**
-
-1. Enable query logging to verify single query
-2. Test with realistic data volumes
-3. Measure response payload size
-4. Monitor query duration
+1. **Identify:** Determine required fields, relations to load, relation count needs, full vs. specific fields
+2. **Choose:** `include` (prototyping, most fields) vs. `select` (production, API responses, performance-critical)
+3. **Implement:** Use `select` for precise control, nest relations with `select`, use `_count` instead of loading all records, limit relation results with `take`
+4. **Index:** Fields in `where` clauses, `orderBy` fields, composite indexes for filtered relations
+5. **Validate:** Enable query logging for single-query verification, test with realistic data volumes, measure payload size and query duration
 </workflow>
 
 <core-principles>

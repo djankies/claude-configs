@@ -1,6 +1,6 @@
 ---
 name: review-react-hook-patterns
-description: Review React hook usage for React 19 compliance and best practices. Use when reviewing code, checking for deprecated patterns, or validating hook usage.
+description: Review React hook usage for React 19 compliance and best practices
 review: true
 allowed-tools: Read, Grep, Glob
 version: 1.0.0
@@ -8,210 +8,150 @@ version: 1.0.0
 
 # Review: React Hook Patterns
 
-<role>
-This skill provides comprehensive criteria for reviewing React hook usage in React 19 codebases.
-</role>
+Reviews React hook patterns for React 19 compliance, deprecated APIs, and best practices.
 
-<when-to-activate>
-This skill activates when:
+**Activates:** Code reviews, compliance validation, React 19 migration checks, hook-related PRs
 
-- Code review is requested for React components
-- Need to validate hook usage compliance
-- Checking for React 19 migration readiness
-- Reviewing pull requests with hook changes
-</when-to-activate>
+**Scope:** New hooks (`use()`, `useActionState`, `useOptimistic`), deprecated patterns (forwardRef, propTypes, defaultProps), hook rules, best practices, TypeScript compliance
 
-<overview>
-This review skill checks for:
+**Focus:** Correctness, security (Server Actions), performance (re-renders), React 19 compliance
 
-1. **New React 19 Hooks** - Proper usage of `use()`, `useActionState`, `useOptimistic`
-2. **Deprecated Patterns** - Identifies forwardRef, propTypes, defaultProps
-3. **Hook Rules** - Verifies dependencies, top-level calls, conditionals
-4. **Best Practices** - Checks for common mistakes and anti-patterns
-5. **TypeScript Compliance** - Validates types for React 19 patterns
-
-**Review Focus:**
-- Correctness over style
-- Security issues (especially Server Actions)
-- Performance problems (unnecessary re-renders)
-- React 19 compliance (deprecated API usage)
-</overview>
-
-<workflow>
 ## Review Process
 
-**Phase 1: Search for Deprecated Patterns**
+### Phase 1: Find Deprecated APIs
 
-Use Grep to find deprecated APIs:
+Use Grep (output_mode: "content"):
 
-```bash
-# Search for forwardRef usage
-pattern: "forwardRef"
-output_mode: "content"
+- `forwardRef`
+- `\.propTypes\s*=` (removed in React 19)
+- `\.defaultProps\s*=` (deprecated on function components)
 
-# Search for propTypes (removed in React 19)
-pattern: "\.propTypes\s*="
-output_mode: "content"
+### Phase 2: Validate Hook Usage
 
-# Search for defaultProps on function components (deprecated)
-pattern: "\.defaultProps\s*="
-output_mode: "content"
+**use() API**
+
+- ✅ Promises or Context, Suspense-wrapped (Promises), Error Boundary (Promises)
+- ❌ NOT in try-catch; Promises must be stable (outside component)
+
+**useActionState**
+
+- ✅ Server Action receives (previousState, formData), returns serializable values, has error handling, validates inputs server-side
+- ❌ Missing authentication checks
+
+**useOptimistic**
+
+- ✅ Pure update function, paired with startTransition, visual pending indicator
+- ❌ NOT for critical operations
+
+**Standard Hooks** (useState, useEffect, etc.)
+
+- ✅ Top-level calls, all dependencies included, cleanup functions for effects
+- ❌ Missing dependencies, direct state mutation
+
+### Phase 3: TypeScript Validation
+
+**useRef** requires initial value:
+
+```typescript
+// ✅ Correct
+const ref = useRef<HTMLDivElement>(null);
+
+// ❌ Incorrect (React 19)
+const ref = useRef<HTMLDivElement>();
 ```
 
-**Phase 2: Review Hook Usage**
+**Ref as prop** typed correctly:
 
-Check each hook usage for:
+```typescript
+// ✅ Correct
+interface Props {
+  ref?: Ref<HTMLButtonElement>;
+}
 
-1. **use() API**:
-   - ✅ Used with Promises or Context
-   - ✅ Wrapped in Suspense (for Promises)
-   - ✅ Has Error Boundary (for Promises)
-   - ❌ NOT called in try-catch
-   - ❌ Promises created outside component (stable)
+// ❌ Incorrect (using forwardRef)
+const Comp = forwardRef<HTMLButtonElement, Props>(...);
+```
 
-2. **useActionState**:
-   - ✅ Server Action receives (previousState, formData)
-   - ✅ Returns serializable values
-   - ✅ Has error handling
-   - ✅ Validates inputs on server
-   - ❌ NOT missing authentication checks
+### Phase 4: Identify Anti-Patterns
 
-3. **useOptimistic**:
-   - ✅ Update function is pure
-   - ✅ Paired with startTransition
-   - ✅ Has visual pending indicator
-   - ❌ NOT used for critical operations
+**Array index as key:**
 
-4. **Standard Hooks** (useState, useEffect, etc.):
-   - ✅ Called at top level (not conditional)
-   - ✅ All dependencies included in arrays
-   - ✅ Cleanup functions for effects
-   - ❌ NOT missing dependencies
-   - ❌ NOT directly mutating state
+```javascript
+// ❌ Bad
+{
+  items.map((item, index) => <div key={index}>{item}</div>);
+}
 
-**Phase 3: Check TypeScript Types**
+// ✅ Good
+{
+  items.map((item) => <div key={item.id}>{item}</div>);
+}
+```
 
-For TypeScript projects:
+**Direct state mutation:**
 
-1. **useRef** requires initial value:
-   ```typescript
-   // ✅ Correct
-   const ref = useRef<HTMLDivElement>(null);
+```javascript
+// ❌ Bad
+const [items, setItems] = useState([]);
+items.push(newItem);
+setItems(items);
 
-   // ❌ Incorrect (React 19)
-   const ref = useRef<HTMLDivElement>();
-   ```
+// ✅ Good
+setItems([...items, newItem]);
+```
 
-2. **Ref as prop** typed correctly:
-   ```typescript
-   // ✅ Correct
-   interface Props {
-     ref?: Ref<HTMLButtonElement>;
-   }
+**Missing dependencies:**
 
-   // ❌ Incorrect (using forwardRef)
-   const Comp = forwardRef<HTMLButtonElement, Props>(...);
-   ```
+```javascript
+// ❌ Bad
+useEffect(() => {
+  fetchData(userId);
+}, []);
 
-**Phase 4: Identify Anti-Patterns**
+// ✅ Good
+useEffect(() => {
+  fetchData(userId);
+}, [userId]);
+```
 
-Common mistakes to flag:
+**Missing cleanup:**
 
-1. **Array index as key**:
-   ```javascript
-   // ❌ Bad
-   {items.map((item, index) => <div key={index}>{item}</div>)}
+```javascript
+// ❌ Bad
+useEffect(() => {
+  const timer = setInterval(() => {}, 1000);
+}, []);
 
-   // ✅ Good
-   {items.map(item => <div key={item.id}>{item}</div>)}
-   ```
+// ✅ Good
+useEffect(() => {
+  const timer = setInterval(() => {}, 1000);
+  return () => clearInterval(timer);
+}, []);
+```
 
-2. **Direct state mutation**:
-   ```javascript
-   // ❌ Bad
-   const [items, setItems] = useState([]);
-   items.push(newItem);
-   setItems(items);
-
-   // ✅ Good
-   setItems([...items, newItem]);
-   ```
-
-3. **Missing dependencies**:
-   ```javascript
-   // ❌ Bad
-   useEffect(() => {
-     fetchData(userId);
-   }, []);
-
-   // ✅ Good
-   useEffect(() => {
-     fetchData(userId);
-   }, [userId]);
-   ```
-
-4. **Missing cleanup**:
-   ```javascript
-   // ❌ Bad
-   useEffect(() => {
-     const timer = setInterval(() => {}, 1000);
-   }, []);
-
-   // ✅ Good
-   useEffect(() => {
-     const timer = setInterval(() => {}, 1000);
-     return () => clearInterval(timer);
-   }, []);
-   ```
-
-</workflow>
-
-<output>
-## Review Report Format
-
-Structure your review findings as:
+## Report Format
 
 ### ✅ Compliant Patterns
 
-- List React 19 patterns used correctly
-- Highlight good practices found
-- Note proper hook usage
+List correct React 19 usage, good practices, proper hooks.
 
 ### ⚠️ Warnings (Non-blocking)
 
-- Deprecated APIs still functional but should migrate:
-  - `forwardRef` usage (works but deprecated)
-  - Manual memoization when React Compiler available
-  - Older patterns that have better React 19 alternatives
+Deprecated APIs still functional but require migration: forwardRef, manual memoization (when React Compiler available), patterns with better React 19 alternatives.
 
 ### ❌ Issues (Must Fix)
 
-- Removed APIs that will break:
-  - `propTypes` on function components
-  - `defaultProps` on function components
-  - String refs
-- Security issues:
-  - Server Actions without validation
-  - Missing authentication checks
-  - XSS vulnerabilities
-- Hook rule violations:
-  - Conditional hook calls
-  - Missing dependencies
-  - Hooks called outside components
+- **Removed APIs:** propTypes, defaultProps on function components, string refs
+- **Security:** Unvalidated Server Actions, missing authentication, XSS vulnerabilities
+- **Hook Rules:** Conditional calls, missing dependencies, hooks outside components
 
 ### 📝 Recommendations
 
-- Migration paths for deprecated APIs
-- Performance improvements
-- Best practice suggestions
-- Links to relevant skills for fixes
+Migration paths, performance improvements, best practices, relevant skill references.
 
-</output>
-
-<examples>
 ## Example Review: Form Component
 
-**Code Being Reviewed:**
+**Code:**
 
 ```javascript
 import { useState } from 'react';
@@ -230,41 +170,22 @@ function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <input value={email} onChange={e => setEmail(e.target.value)} />
-      <textarea value={message} onChange={e => setMessage(e.target.value)} />
+      <input value={email} onChange={(e) => setEmail(e.target.value)} />
+      <textarea value={message} onChange={(e) => setMessage(e.target.value)} />
       <button type="submit">Send</button>
     </form>
   );
 }
 ```
 
-**Review Report:**
+### ❌ Issues
 
-### ❌ Issues (Must Fix)
+1. **Missing Server Action Pattern** — Use `useActionState` with server validation instead of client-side fetch
+2. **No Validation** — Add server-side validation (security risk)
+3. **No Loading State** — Use `isPending` for UX feedback
+4. **No Error Handling** — Return error state from Server Action
 
-1. **Missing Server Action Pattern**
-   - File: `ContactForm.jsx`
-   - Issue: Using client-side fetch instead of Server Actions
-   - Fix: Migrate to `useActionState` with Server Action
-   - Reference: `concerns/hooks/skills/action-state-patterns/SKILL.md`
-
-2. **No Validation**
-   - Issue: No email or message validation
-   - Security Risk: Can submit invalid or malicious data
-   - Fix: Add server-side validation in Server Action
-
-3. **No Loading State**
-   - Issue: No feedback during submission
-   - UX Problem: User doesn't know if form is processing
-   - Fix: Use `isPending` from `useActionState`
-
-4. **No Error Handling**
-   - Issue: Failed submissions show no error
-   - Fix: Return error state from Server Action
-
-### 📝 Recommendations
-
-**Recommended Implementation:**
+### 📝 Corrected Implementation
 
 ```javascript
 'use client';
@@ -289,7 +210,7 @@ function ContactForm() {
 }
 ```
 
-**Server Action (`actions.js`):**
+**Server Action (actions.js):**
 
 ```javascript
 'use server';
@@ -308,10 +229,7 @@ export async function submitContact(previousState, formData) {
   };
 
   const result = schema.safeParse(data);
-
-  if (!result.success) {
-    return { error: 'Invalid input' };
-  }
+  if (!result.success) return { error: 'Invalid input' };
 
   try {
     await db.contacts.create({ data: result.data });
@@ -324,7 +242,7 @@ export async function submitContact(previousState, formData) {
 
 ## Example Review: forwardRef Component
 
-**Code Being Reviewed:**
+**Code:**
 
 ```javascript
 import { forwardRef } from 'react';
@@ -338,20 +256,11 @@ const Button = forwardRef((props, ref) => (
 Button.displayName = 'Button';
 ```
 
-**Review Report:**
+### ⚠️ Warnings
 
-### ⚠️ Warnings (Non-blocking)
+**Deprecated forwardRef Usage** — Still functional in React 19 but deprecated. Migrate to ref-as-prop pattern.
 
-1. **Deprecated forwardRef Usage**
-   - File: `Button.jsx`
-   - Issue: Using deprecated `forwardRef` API
-   - Status: Still functional in React 19 but deprecated
-   - Migration: Convert to ref-as-prop pattern
-   - Reference: `concerns/hooks/skills/migrating-from-forwardref/SKILL.md`
-
-### 📝 Recommendations
-
-**React 19 Migration:**
+### 📝 React 19 Migration
 
 ```javascript
 function Button({ children, ref, ...props }) {
@@ -363,34 +272,27 @@ function Button({ children, ref, ...props }) {
 }
 ```
 
-**Benefits:**
-- Simpler API (no wrapper function)
-- Better TypeScript inference
-- Follows React 19 patterns
-- Less boilerplate
+**Benefits:** Simpler API, better TypeScript inference, follows React 19 patterns, less boilerplate.
 
-</examples>
-
-<constraints>
 ## Review Standards
 
 **MUST Flag:**
 
-- Removed APIs (`propTypes`, `defaultProps` on function components, string refs)
+- Removed APIs (propTypes, defaultProps on functions, string refs)
 - Hook rule violations (conditional calls, missing dependencies)
 - Security issues (unvalidated Server Actions, missing auth)
 - Missing Suspense/Error Boundaries for `use()` with Promises
 
 **SHOULD Flag:**
 
-- Deprecated APIs (`forwardRef`)
+- Deprecated APIs (forwardRef)
 - Performance issues (unnecessary re-renders, missing memoization when needed)
 - Missing TypeScript types for React 19 patterns
 - Anti-patterns (array index keys, direct state mutation)
 
 **MAY Suggest:**
 
-- Better patterns available in React 19
+- Better React 19 patterns available
 - Component architecture improvements
 - Code organization enhancements
 
@@ -398,68 +300,65 @@ function Button({ children, ref, ...props }) {
 
 - Enforce personal style preferences
 - Require changes that don't improve correctness/security/performance
-- Flag patterns that work correctly in React 19
+- Flag patterns working correctly in React 19
 - Demand premature optimization
 
-</constraints>
-
-<validation>
 ## Review Checklist
 
-Before completing review, verify you checked:
-
 ### New React 19 Features
-- [ ] `use()` usage with Promises has Suspense + Error Boundary
-- [ ] `use()` with Context used appropriately
-- [ ] `useActionState` Server Actions validate inputs
-- [ ] `useOptimistic` paired with `startTransition`
-- [ ] `useFormStatus` called inside form components
+
+- [ ] `use()` + Promises: Suspense + Error Boundary
+- [ ] `use()` + Context: appropriate usage
+- [ ] `useActionState`: Server Actions validate inputs
+- [ ] `useOptimistic`: paired with `startTransition`
+- [ ] `useFormStatus`: inside form components
 
 ### Deprecated Patterns
-- [ ] No `forwardRef` (or flagged for migration)
-- [ ] No `propTypes` on function components
-- [ ] No `defaultProps` on function components
+
+- [ ] No forwardRef or flagged for migration
+- [ ] No propTypes on function components
+- [ ] No defaultProps on function components
 - [ ] No string refs
 
 ### Hook Rules
-- [ ] All hooks called at top level
+
+- [ ] All hooks at top level
 - [ ] No conditional hook calls
-- [ ] All dependencies included in arrays
-- [ ] Cleanup functions present for subscriptions
+- [ ] All dependencies included
+- [ ] Cleanup functions for subscriptions
 
 ### TypeScript (if applicable)
+
 - [ ] `useRef` has initial value
 - [ ] Ref props typed with `Ref<HTMLElement>`
-- [ ] Server Actions have proper types
-- [ ] No usage of deprecated type patterns
+- [ ] Server Actions properly typed
+- [ ] No deprecated type patterns
 
 ### Security
-- [ ] Server Actions validate all inputs
+
+- [ ] Server Actions validate inputs
 - [ ] Authentication checks present where needed
-- [ ] No XSS vulnerabilities (`dangerouslySetInnerHTML` sanitized)
-- [ ] No exposed sensitive data in client code
+- [ ] `dangerouslySetInnerHTML` sanitized
+- [ ] No sensitive data exposed to client
 
 ### Performance
+
 - [ ] No array index as key
 - [ ] No direct state mutation
-- [ ] No missing dependencies causing stale closures
-- [ ] Reasonable component structure (not god components)
+- [ ] No missing dependencies (stale closures)
+- [ ] Reasonable component structure
 
-</validation>
+## Common Issues Reference
 
----
+| Issue                       | Search Pattern       | Fix                     |
+| --------------------------- | -------------------- | ----------------------- |
+| forwardRef usage            | `forwardRef`         | Convert to ref-as-prop  |
+| propTypes                   | `\.propTypes\s*=`    | Remove (use TypeScript) |
+| defaultProps                | `\.defaultProps\s*=` | Use ES6 defaults        |
+| Missing dependencies        | Manual review        | Add to dependency array |
+| Array index keys            | `key={.*index}`      | Use stable ID           |
+| Direct mutation             | Manual review        | Use immutable updates   |
+| use() without Suspense      | Manual review        | Add Suspense boundary   |
+| Server Action no validation | Manual review        | Add zod/yup validation  |
 
-## Quick Reference: Common Issues
-
-| Issue | Search Pattern | Fix Reference |
-|-------|---------------|---------------|
-| forwardRef usage | `forwardRef` | `migrating-from-forwardref/SKILL.md` |
-| propTypes | `\.propTypes\s*=` | Remove (use TypeScript) |
-| defaultProps | `\.defaultProps\s*=` | Use ES6 defaults |
-| Missing dependencies | Manual review | Add to dependency array |
-| Array index keys | `key={.*index}` | Use stable ID |
-| Direct mutation | Manual review | Use immutable updates |
-| use() without Suspense | Manual review | Add Suspense boundary |
-| Server Action no validation | Manual review | Add zod/yup validation |
-
-For comprehensive React 19 patterns and migration guides, see: `research/react-19-comprehensive.md`.
+For comprehensive React 19 patterns and migration guides, see: `research/react-19-comprehensive.md`
