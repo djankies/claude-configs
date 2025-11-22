@@ -1,22 +1,14 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-STATE_FILE="/tmp/claude-typescript-session-$$.json"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CLAUDE_MARKETPLACE_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 
-cat > "$STATE_FILE" <<EOF
-{
-  "session_id": "$$-$(date +%s)",
-  "pid": $$,
-  "started_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-  "recommendations_shown": {
-    "typescript_files": false,
-    "config_files": false,
-    "test_files": false,
-    "migration_context": false
-  }
-}
-EOF
+source "${CLAUDE_MARKETPLACE_ROOT}/marketplace-utils/hook-lifecycle.sh"
 
-echo "TypeScript plugin session initialized"
-echo "Session state: $STATE_FILE"
+init_hook "typescript" "SessionStart"
 
+log_info "TypeScript plugin session initialized"
+
+inject_context "TypeScript plugin session started - type safety and deprecation checks enabled"
 exit 0

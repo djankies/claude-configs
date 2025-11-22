@@ -1,13 +1,15 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-STATE_FILE="/tmp/claude-typescript-session-$$.json"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CLAUDE_MARKETPLACE_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 
-if [[ ! -f "$STATE_FILE" ]]; then
-  exit 0
-fi
+source "${CLAUDE_MARKETPLACE_ROOT}/marketplace-utils/hook-lifecycle.sh"
 
-INPUT=$(cat)
-FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+init_hook "typescript" "PreToolUse"
+
+read_hook_input > /dev/null
+FILE_PATH=$(get_input_field "tool_input.file_path")
 
 if [[ -z "$FILE_PATH" ]]; then
   exit 0
@@ -47,14 +49,11 @@ if [[ -z "$RECOMMENDATION_TYPE" ]]; then
   exit 0
 fi
 
-SHOWN=$(jq -r ".recommendations_shown.${RECOMMENDATION_TYPE}" "$STATE_FILE" 2>/dev/null)
-
-if [[ "$SHOWN" == "false" ]]; then
-  echo "$MESSAGE"
-  echo "Use Skill tool to activate specific skills when needed."
-
-  jq ".recommendations_shown.${RECOMMENDATION_TYPE} = true" "$STATE_FILE" > "${STATE_FILE}.tmp"
-  mv "${STATE_FILE}.tmp" "$STATE_FILE"
+if ! has_shown_recommendation "typescript" "$RECOMMENDATION_TYPE"; then
+  log_info "Showing recommendation: $RECOMMENDATION_TYPE"
+  mark_recommendation_shown "typescript" "$RECOMMENDATION_TYPE"
+  inject_context "$MESSAGE
+Use Skill tool to activate specific skills when needed."
 fi
 
 exit 0

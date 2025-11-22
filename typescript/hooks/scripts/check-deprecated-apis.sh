@@ -1,15 +1,29 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-INPUT=$(cat)
-FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
-NEW_STRING=$(echo "$INPUT" | jq -r '.tool_input.new_string // .tool_input.content // empty')
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CLAUDE_MARKETPLACE_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+
+source "${CLAUDE_MARKETPLACE_ROOT}/marketplace-utils/hook-lifecycle.sh"
+
+init_hook "typescript" "PreToolUse"
+
+read_hook_input > /dev/null
+FILE_PATH=$(get_input_field "tool_input.file_path")
+NEW_STRING=$(get_input_field "tool_input.new_string")
+
+if [[ -z "$NEW_STRING" ]]; then
+  NEW_STRING=$(get_input_field "tool_input.content")
+fi
 
 if [[ -z "$FILE_PATH" || -z "$NEW_STRING" ]]; then
+  pretooluse_respond "allow"
   exit 0
 fi
 
 FILE_EXT="${FILE_PATH##*.}"
 if [[ "$FILE_EXT" != "ts" && "$FILE_EXT" != "tsx" && "$FILE_EXT" != "js" && "$FILE_EXT" != "jsx" ]]; then
+  pretooluse_respond "allow"
   exit 0
 fi
 
@@ -28,7 +42,11 @@ if echo "$NEW_STRING" | grep -q '\bunescape('; then
 fi
 
 if [[ ${#ISSUES[@]} -gt 0 ]]; then
-  printf '%s\n' "${ISSUES[@]}"
+  WARNINGS=$(printf '%s\n' "${ISSUES[@]}")
+  log_warn "Deprecated APIs detected in $FILE_PATH"
+  pretooluse_respond "allow" "$WARNINGS"
+  exit 0
 fi
 
+pretooluse_respond "allow"
 exit 0
