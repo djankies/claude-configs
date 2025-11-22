@@ -5,20 +5,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/init-session.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/init-session.sh",
             "timeout": 5000
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/recommend-skills.sh",
-            "timeout": 10000
           }
         ]
       }
@@ -29,19 +17,22 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/check-middleware-usage.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/recommend-skills.sh",
+            "timeout": 10000
+          },
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check-middleware-usage.sh",
             "timeout": 5000
           },
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/check-cache-patterns.sh",
-            "args": ["${CLAUDE_FILE_PATH}"],
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check-cache-patterns.sh",
             "timeout": 5000
           },
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/check-security-patterns.sh",
-            "args": ["${CLAUDE_FILE_PATH}"],
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check-security-patterns.sh",
             "timeout": 5000
           }
         ]
