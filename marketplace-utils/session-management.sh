@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+trap 'echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) [DEBUG] SIGPIPE received in session-management.sh at line $LINENO, exiting gracefully" >&2; exit 0' PIPE
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/platform-compat.sh"
+source "$SCRIPT_DIR/logging.sh"
 
 declare SESSION_FILE
 declare PLUGIN_NAME
@@ -24,6 +26,7 @@ acquire_lock() {
     eval "exec $LOCK_FD>\"$lock_file\""
 
     if ! flock -x -w "$timeout" "$LOCK_FD" 2>/dev/null; then
+        eval "exec ${LOCK_FD}>&-" 2>/dev/null || true
         return 1
     fi
 
@@ -85,15 +88,34 @@ init_session() {
 EOF
     fi
 
-    local temp_file="${SESSION_FILE}.tmp"
-    jq ".plugins.\"${plugin_name}\" = {
+    if ! acquire_lock "$SESSION_FILE"; then
+        log_error "Lock acquisition failed for session initialization after 5s timeout" "plugin=$plugin_name" "session_file=$SESSION_FILE"
+        return 1
+    fi
+
+    local temp_file="${SESSION_FILE}.tmp.$$.$RANDOM"
+    local file_size=$(stat -f%z "$SESSION_FILE" 2>/dev/null || stat -c%s "$SESSION_FILE" 2>/dev/null || echo "unknown")
+    if ! jq ".plugins.\"${plugin_name}\" = {
       \"plugin\": \"${plugin_name}\",
       \"started_at\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",
       \"recommendations_shown\": {},
       \"validations_passed\": {},
       \"custom_data\": {}
-    }" "$SESSION_FILE" > "$temp_file"
-    mv "$temp_file" "$SESSION_FILE"
+    }" "$SESSION_FILE" > "$temp_file" 2>&1; then
+        release_lock
+        rm -f "$temp_file"
+        log_error "jq operation failed during session initialization" "plugin=$plugin_name" "session_file_size=${file_size}bytes" "temp_file=$temp_file"
+        return 1
+    fi
+
+    if ! mv "$temp_file" "$SESSION_FILE" 2>&1; then
+        release_lock
+        rm -f "$temp_file"
+        echo "Failed to update session file: $SESSION_FILE" >&2
+        return 1
+    fi
+
+    release_lock
 
     export CLAUDE_SESSION_FILE="$SESSION_FILE"
     export CLAUDE_PLUGIN_NAME="$PLUGIN_NAME"
@@ -133,18 +155,25 @@ set_session_value() {
     fi
 
     if ! acquire_lock "$session_file"; then
-        echo "Cannot update session: lock acquisition failed" >&2
+        log_error "Lock acquisition failed for session update after 5s timeout" "key=$key" "session_file=$session_file"
         return 1
     fi
 
-    local temp_file="${session_file}.tmp"
-    if ! jq ".${key} = ${value}" "$session_file" > "$temp_file"; then
+    local temp_file="${session_file}.tmp.$$.$RANDOM"
+    local file_size=$(stat -f%z "$session_file" 2>/dev/null || stat -c%s "$session_file" 2>/dev/null || echo "unknown")
+    if ! jq ".${key} = ${value}" "$session_file" > "$temp_file" 2>&1; then
         release_lock
-        echo "Failed to update session key: $key" >&2
+        rm -f "$temp_file"
+        log_error "jq operation failed during session update" "key=$key" "session_file_size=${file_size}bytes"
         return 1
     fi
 
-    mv "$temp_file" "$session_file"
+    if ! mv "$temp_file" "$session_file" 2>&1; then
+        release_lock
+        rm -f "$temp_file"
+        echo "Failed to move temp file to session file" >&2
+        return 1
+    fi
     release_lock
     return 0
 }
@@ -208,18 +237,25 @@ mark_validation_passed() {
     fi
 
     if ! acquire_lock "$session_file"; then
-        echo "Cannot update validation status: lock acquisition failed" >&2
+        log_error "Lock acquisition failed for validation update after 5s timeout" "validation=$validation_name" "file=$file_path"
         return 1
     fi
 
-    local temp_file="${session_file}.tmp"
-    if ! jq ".validations_passed.\"${file_path}\".\"${validation_name}\" = true" "$session_file" > "$temp_file"; then
+    local temp_file="${session_file}.tmp.$$.$RANDOM"
+    local file_size=$(stat -f%z "$session_file" 2>/dev/null || stat -c%s "$session_file" 2>/dev/null || echo "unknown")
+    if ! jq ".validations_passed.\"${file_path}\".\"${validation_name}\" = true" "$session_file" > "$temp_file" 2>&1; then
         release_lock
-        echo "Failed to mark validation passed: $validation_name" >&2
+        rm -f "$temp_file"
+        log_error "jq operation failed marking validation passed" "validation=$validation_name" "file=$file_path" "session_file_size=${file_size}bytes"
         return 1
     fi
 
-    mv "$temp_file" "$session_file"
+    if ! mv "$temp_file" "$session_file" 2>&1; then
+        release_lock
+        rm -f "$temp_file"
+        echo "Failed to move temp file to session file" >&2
+        return 1
+    fi
     release_lock
     return 0
 }
@@ -235,18 +271,25 @@ set_custom_data() {
     fi
 
     if ! acquire_lock "$session_file"; then
-        echo "Cannot update custom data: lock acquisition failed" >&2
+        log_error "Lock acquisition failed for custom data update after 5s timeout" "key=$key" "session_file=$session_file"
         return 1
     fi
 
-    local temp_file="${session_file}.tmp"
-    if ! jq ".custom_data.\"${key}\" = ${value}" "$session_file" > "$temp_file"; then
+    local temp_file="${session_file}.tmp.$$.$RANDOM"
+    local file_size=$(stat -f%z "$session_file" 2>/dev/null || stat -c%s "$session_file" 2>/dev/null || echo "unknown")
+    if ! jq ".custom_data.\"${key}\" = ${value}" "$session_file" > "$temp_file" 2>&1; then
         release_lock
-        echo "Failed to set custom data: $key" >&2
+        rm -f "$temp_file"
+        log_error "jq operation failed setting custom data" "key=$key" "session_file_size=${file_size}bytes"
         return 1
     fi
 
-    mv "$temp_file" "$session_file"
+    if ! mv "$temp_file" "$session_file" 2>&1; then
+        release_lock
+        rm -f "$temp_file"
+        echo "Failed to move temp file to session file" >&2
+        return 1
+    fi
     release_lock
     return 0
 }

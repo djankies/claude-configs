@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+trap 'exit 0' PIPE
 
 is_typescript_file() {
     local path="${1:?File path required}"

@@ -7,9 +7,12 @@ source "${SCRIPT_DIR}/logging.sh"
 source "${SCRIPT_DIR}/error-reporting.sh"
 source "${SCRIPT_DIR}/session-management.sh"
 
+trap 'log_debug "SIGPIPE received in hook-lifecycle.sh at line $LINENO, exiting gracefully"; exit 0' PIPE
+
 init_hook() {
   local plugin_name="$1"
   local hook_name="$2"
+  local start_time=$(date +%s%3N 2>/dev/null || date +%s000)
 
   if [[ ! "$plugin_name" =~ ^[a-zA-Z0-9_-]+$ ]]; then
     fatal_error "INVALID_PLUGIN_NAME" "Invalid plugin name: $plugin_name"
@@ -27,8 +30,10 @@ init_hook() {
   export HOOK_NAME="$hook_name"
   export HOOK_EVENT="${HOOK_EVENT:-unknown}"
   export SESSION_FILE="${CLAUDE_SESSION_FILE:-}"
+  export HOOK_START_TIME="$start_time"
 
-  log_debug "Hook initialized: $PLUGIN_NAME/$HOOK_NAME"
+  local elapsed=$(($(date +%s%3N 2>/dev/null || date +%s000) - start_time))
+  log_debug "Hook initialized: $PLUGIN_NAME/$HOOK_NAME in ${elapsed}ms"
 }
 
 read_hook_input() {
@@ -37,7 +42,14 @@ read_hook_input() {
   if [[ -t 0 ]]; then
     input=""
   else
-    input=$(cat)
+    if command -v timeout >/dev/null 2>&1; then
+      if ! input=$(timeout 10s cat 2>/dev/null); then
+        log_warning "Stdin read timed out after 10s" "hook=$HOOK_NAME" "plugin=$PLUGIN_NAME"
+        input=""
+      fi
+    else
+      input=$(cat 2>/dev/null || echo "")
+    fi
   fi
 
   export HOOK_INPUT="$input"

@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+trap 'exit 0' PIPE
 
 json_escape() {
     local str="${1:-}"
 
-    echo "$str" | sed 's/\\/\\\\/g; s/"/\\"/g; s/$/\\n/g' | tr -d '\n' | sed 's/\\n$//'
+    printf '%s' "$str" | sed 's/\\/\\\\/g; s/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g'
 }
 
 json_bool() {

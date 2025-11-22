@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+trap 'exit 0' PIPE
+
 detect_platform() {
   case "$OSTYPE" in
     darwin*)
