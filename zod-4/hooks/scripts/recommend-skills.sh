@@ -1,38 +1,50 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-STATE_FILE="/tmp/claude-zod-4-session.json"
+set -euo pipefail
 
-[[ ! -f "$STATE_FILE" ]] && exit 0
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+MARKETPLACE_UTILS="$(cd "${SCRIPT_DIR}/../../../marketplace-utils" && pwd)"
 
-FILE_PATH="$1"
-[[ -z "$FILE_PATH" || ! -f "$FILE_PATH" ]] && exit 0
+source "${MARKETPLACE_UTILS}/hook-lifecycle.sh"
 
-FILE_EXT="${FILE_PATH##*.}"
+init_hook "zod-4" "recommend-skills"
 
-case "$FILE_EXT" in
+input=$(read_hook_input)
+
+file_path=$(get_input_field "parameters.file_path")
+
+[[ -z "$file_path" || ! -f "$file_path" ]] && pretooluse_respond "allow" && exit 0
+
+file_ext="${file_path##*.}"
+
+case "$file_ext" in
   ts|tsx|js|jsx)
     ;;
   *)
+    pretooluse_respond "allow"
     exit 0
     ;;
 esac
 
-if grep -q "from ['\"]zod['\"]" "$FILE_PATH" 2>/dev/null || \
-   grep -q "import zod" "$FILE_PATH" 2>/dev/null; then
+if grep -q "from ['\"]zod['\"]" "$file_path" 2>/dev/null || \
+   grep -q "import zod" "$file_path" 2>/dev/null; then
 
-  SHOWN=$(grep -o '"zod_skills": true' "$STATE_FILE" 2>/dev/null)
+  shown=$(get_plugin_value "zod-4" "recommendations_shown.zod_skills")
 
-  if [[ -z "$SHOWN" ]]; then
-    echo "📚 Zod 4 Skills Available:"
-    echo "  VALIDATION-*: Schema basics, string formats (z.email, z.uuid)"
-    echo "  TRANSFORMATION-*: String methods (.trim, .toLowerCase), codecs"
-    echo "  ERRORS-*: Unified error customization API"
-    echo "  MIGRATION-*: v3 to v4 breaking changes"
-    echo ""
-    echo "Use Skill tool to activate when needed."
+  if [[ "$shown" != "true" ]]; then
+    context="📚 Zod 4 Skills Available:
+  VALIDATION-*: Schema basics, string formats (z.email, z.uuid)
+  TRANSFORMATION-*: String methods (.trim, .toLowerCase), codecs
+  ERRORS-*: Unified error customization API
+  MIGRATION-*: v3 to v4 breaking changes
 
-    jq '.recommendations_shown.zod_skills = true' "$STATE_FILE" > "$STATE_FILE.tmp" && mv "$STATE_FILE.tmp" "$STATE_FILE"
+Use Skill tool to activate when needed."
+
+    set_plugin_value "zod-4" "recommendations_shown.zod_skills" "true"
+
+    pretooluse_respond "allow" "" "$(jq -n --argjson orig "$input" --arg ctx "$context" '$orig + {additionalContext: $ctx}')"
+    exit 0
   fi
 fi
 
-exit 0
+pretooluse_respond "allow"

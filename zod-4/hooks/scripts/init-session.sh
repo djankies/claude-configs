@@ -1,19 +1,18 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-STATE_FILE="/tmp/claude-zod-4-session.json"
+set -euo pipefail
 
-if [[ -f "$STATE_FILE" ]]; then
-  rm "$STATE_FILE"
-fi
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+MARKETPLACE_UTILS="$(cd "${SCRIPT_DIR}/../../../marketplace-utils" && pwd)"
 
-cat > "$STATE_FILE" <<EOF
-{
-  "session_id": "$$-$(date +%s)",
-  "plugin": "zod-4",
-  "recommendations_shown": {
-    "zod_skills": false
-  }
-}
-EOF
+source "${MARKETPLACE_UTILS}/hook-lifecycle.sh"
 
-exit 0
+init_hook "zod-4" "init-session"
+
+read_hook_input > /dev/null
+
+set_plugin_value "zod-4" "recommendations_shown.zod_skills" "false"
+
+log_info "Session initialized for zod-4 plugin"
+
+echo "{}"

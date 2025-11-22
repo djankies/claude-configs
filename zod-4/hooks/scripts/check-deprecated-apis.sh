@@ -1,66 +1,81 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-FILE_PATH="$1"
-[[ -z "$FILE_PATH" || ! -f "$FILE_PATH" ]] && exit 0
+set -euo pipefail
 
-FILE_EXT="${FILE_PATH##*.}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+MARKETPLACE_UTILS="$(cd "${SCRIPT_DIR}/../../../marketplace-utils" && pwd)"
 
-[[ "$FILE_EXT" != "ts" && "$FILE_EXT" != "tsx" && "$FILE_EXT" != "js" && "$FILE_EXT" != "jsx" ]] && exit 0
+source "${MARKETPLACE_UTILS}/hook-lifecycle.sh"
 
-VIOLATIONS=""
+init_hook "zod-4" "check-deprecated-apis"
 
-if grep -q "z\.string()\.email(" "$FILE_PATH" 2>/dev/null; then
-  VIOLATIONS="${VIOLATIONS}Deprecated: z.string().email() → Use z.email()\n"
+input=$(read_hook_input)
+
+file_path=$(get_input_field "parameters.file_path")
+
+[[ -z "$file_path" || ! -f "$file_path" ]] && echo "{}" && exit 0
+
+file_ext="${file_path##*.}"
+
+[[ "$file_ext" != "ts" && "$file_ext" != "tsx" && "$file_ext" != "js" && "$file_ext" != "jsx" ]] && echo "{}" && exit 0
+
+violations=""
+
+if grep -q "z\.string()\.email(" "$file_path" 2>/dev/null; then
+  violations="${violations}Deprecated: z.string().email() → Use z.email()\n"
 fi
 
-if grep -q "z\.string()\.uuid(" "$FILE_PATH" 2>/dev/null; then
-  VIOLATIONS="${VIOLATIONS}Deprecated: z.string().uuid() → Use z.uuid()\n"
+if grep -q "z\.string()\.uuid(" "$file_path" 2>/dev/null; then
+  violations="${violations}Deprecated: z.string().uuid() → Use z.uuid()\n"
 fi
 
-if grep -q "z\.string()\.datetime(" "$FILE_PATH" 2>/dev/null; then
-  VIOLATIONS="${VIOLATIONS}Deprecated: z.string().datetime() → Use z.iso.datetime()\n"
+if grep -q "z\.string()\.datetime(" "$file_path" 2>/dev/null; then
+  violations="${violations}Deprecated: z.string().datetime() → Use z.iso.datetime()\n"
 fi
 
-if grep -q "z\.string()\.url(" "$FILE_PATH" 2>/dev/null; then
-  VIOLATIONS="${VIOLATIONS}Deprecated: z.string().url() → Use z.url()\n"
+if grep -q "z\.string()\.url(" "$file_path" 2>/dev/null; then
+  violations="${violations}Deprecated: z.string().url() → Use z.url()\n"
 fi
 
-if grep -q "z\.string()\.ipv4(" "$FILE_PATH" 2>/dev/null; then
-  VIOLATIONS="${VIOLATIONS}Deprecated: z.string().ipv4() → Use z.ipv4()\n"
+if grep -q "z\.string()\.ipv4(" "$file_path" 2>/dev/null; then
+  violations="${violations}Deprecated: z.string().ipv4() → Use z.ipv4()\n"
 fi
 
-if grep -q "z\.string()\.ipv6(" "$FILE_PATH" 2>/dev/null; then
-  VIOLATIONS="${VIOLATIONS}Deprecated: z.string().ipv6() → Use z.ipv6()\n"
+if grep -q "z\.string()\.ipv6(" "$file_path" 2>/dev/null; then
+  violations="${violations}Deprecated: z.string().ipv6() → Use z.ipv6()\n"
 fi
 
-if grep -q "z\.string()\.base64(" "$FILE_PATH" 2>/dev/null; then
-  VIOLATIONS="${VIOLATIONS}Deprecated: z.string().base64() → Use z.base64()\n"
+if grep -q "z\.string()\.base64(" "$file_path" 2>/dev/null; then
+  violations="${violations}Deprecated: z.string().base64() → Use z.base64()\n"
 fi
 
-if grep -q "z\.string()\.jwt(" "$FILE_PATH" 2>/dev/null; then
-  VIOLATIONS="${VIOLATIONS}Deprecated: z.string().jwt() → Use z.jwt()\n"
+if grep -q "z\.string()\.jwt(" "$file_path" 2>/dev/null; then
+  violations="${violations}Deprecated: z.string().jwt() → Use z.jwt()\n"
 fi
 
-if grep -Eq "message:\s*['\"]" "$FILE_PATH" 2>/dev/null && grep -q "z\." "$FILE_PATH" 2>/dev/null; then
-  VIOLATIONS="${VIOLATIONS}Deprecated: { message: '...' } → Use { error: '...' }\n"
+if grep -Eq "message:\s*['\"]" "$file_path" 2>/dev/null && grep -q "z\." "$file_path" 2>/dev/null; then
+  violations="${violations}Deprecated: { message: '...' } → Use { error: '...' }\n"
 fi
 
-if grep -q "errorMap:" "$FILE_PATH" 2>/dev/null && grep -q "z\." "$FILE_PATH" 2>/dev/null; then
-  VIOLATIONS="${VIOLATIONS}Deprecated: { errorMap: ... } → Use { error: ... }\n"
+if grep -q "errorMap:" "$file_path" 2>/dev/null && grep -q "z\." "$file_path" 2>/dev/null; then
+  violations="${violations}Deprecated: { errorMap: ... } → Use { error: ... }\n"
 fi
 
-if grep -q "invalid_type_error:" "$FILE_PATH" 2>/dev/null; then
-  VIOLATIONS="${VIOLATIONS}Deprecated: { invalid_type_error: '...' } → Use { error: '...' }\n"
+if grep -q "invalid_type_error:" "$file_path" 2>/dev/null; then
+  violations="${violations}Deprecated: { invalid_type_error: '...' } → Use { error: '...' }\n"
 fi
 
-if grep -q "required_error:" "$FILE_PATH" 2>/dev/null; then
-  VIOLATIONS="${VIOLATIONS}Deprecated: { required_error: '...' } → Use { error: '...' }\n"
+if grep -q "required_error:" "$file_path" 2>/dev/null; then
+  violations="${violations}Deprecated: { required_error: '...' } → Use { error: '...' }\n"
 fi
 
-if [[ -n "$VIOLATIONS" ]]; then
-  echo "⚠️  Zod v4 Deprecated API Usage Detected:"
-  echo -e "$VIOLATIONS"
+if [[ -n "$violations" ]]; then
+  context="⚠️  Zod v4 Deprecated API Usage Detected:
+${violations}"
+
+  log_warn "Deprecated Zod API usage detected in $file_path"
+  echo "$context"
   exit 2
 fi
 
-exit 0
+echo "{}"
