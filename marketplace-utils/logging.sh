@@ -2,7 +2,7 @@
 
 trap 'echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) [DEBUG] SIGPIPE received in logging.sh at line $LINENO, exiting gracefully" >&2; exit 0' PIPE
 
-CLAUDE_SESSION_PID="${CLAUDE_SESSION_PID:-$$}"
+CLAUDE_SESSION_PID="${CLAUDE_SESSION_PID:-$PPID}"
 LOG_FILE="${LOG_FILE:-/tmp/claude-session-${CLAUDE_SESSION_PID}.log}"
 PLUGIN_NAME="${PLUGIN_NAME:-unknown}"
 HOOK_NAME="${HOOK_NAME:-unknown}"

@@ -70,7 +70,7 @@ release_lock_mkdir() {
 init_session() {
     local plugin_name="${1:?Plugin name required}"
     PLUGIN_NAME="$plugin_name"
-    SESSION_FILE="/tmp/claude-session-${CLAUDE_SESSION_PID:-$$}.json"
+    SESSION_FILE="/tmp/claude-session-${CLAUDE_SESSION_PID:-$PPID}.json"
 
     if [[ ! -f "$SESSION_FILE" ]]; then
         cat > "$SESSION_FILE" <<EOF
