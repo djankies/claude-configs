@@ -5,7 +5,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/platform-compat.sh"
 
-declare STATE_FILE
+declare SESSION_FILE
 declare PLUGIN_NAME
 declare LOCK_FD
 declare LOCK_DIR
@@ -68,31 +68,45 @@ release_lock_mkdir() {
 init_session() {
     local plugin_name="${1:?Plugin name required}"
     PLUGIN_NAME="$plugin_name"
-    STATE_FILE="/tmp/claude-${plugin_name}-session-$$.json"
+    SESSION_FILE="/tmp/claude-session-${CLAUDE_SESSION_PID:-$$}.json"
 
-    cat > "$STATE_FILE" <<EOF
+    if [[ ! -f "$SESSION_FILE" ]]; then
+        cat > "$SESSION_FILE" <<EOF
 {
-  "plugin": "${plugin_name}",
   "session_id": "$$-$(date +%s)",
   "pid": $$,
   "started_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-  "recommendations_shown": {},
-  "validations_passed": {},
-  "custom_data": {}
+  "plugins": {},
+  "metadata": {
+    "log_file": "/tmp/claude-session-$$.log",
+    "error_journal": "/tmp/claude-errors-$$.jsonl",
+    "platform": "$(uname -s | tr '[:upper:]' '[:lower:]')"
+  }
 }
 EOF
+    fi
 
-    export CLAUDE_SESSION_FILE="$STATE_FILE"
+    local temp_file="${SESSION_FILE}.tmp"
+    jq ".plugins.\"${plugin_name}\" = {
+      \"plugin\": \"${plugin_name}\",
+      \"started_at\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",
+      \"recommendations_shown\": {},
+      \"validations_passed\": {},
+      \"custom_data\": {}
+    }" "$SESSION_FILE" > "$temp_file"
+    mv "$temp_file" "$SESSION_FILE"
+
+    export CLAUDE_SESSION_FILE="$SESSION_FILE"
     export CLAUDE_PLUGIN_NAME="$PLUGIN_NAME"
 }
 
 get_session_file() {
-    if [[ -n "${STATE_FILE:-}" ]]; then
-        echo "$STATE_FILE"
+    if [[ -n "${SESSION_FILE:-}" ]]; then
+        echo "$SESSION_FILE"
     elif [[ -n "${CLAUDE_SESSION_FILE:-}" ]]; then
         echo "$CLAUDE_SESSION_FILE"
     else
-        echo "/tmp/claude-${PLUGIN_NAME:-unknown}-session-$$.json"
+        echo "/tmp/claude-session-${CLAUDE_SESSION_PID:-$$}.json"
     fi
 }
 
@@ -124,30 +138,41 @@ set_session_value() {
     mv "$temp_file" "$session_file"
 }
 
+set_plugin_value() {
+    local plugin="${1:?Plugin name required}"
+    local key="${2:?Key required}"
+    local value="${3:?Value required}"
+    set_session_value "plugins.\"${plugin}\".${key}" "$value"
+}
+
+get_plugin_value() {
+    local plugin="${1:?Plugin name required}"
+    local key="${2:?Key required}"
+    get_session_value "plugins.\"${plugin}\".${key}"
+}
+
+has_session_key() {
+    local key="${1:?Key required}"
+    local session_file
+    session_file="$(get_session_file)"
+    [[ -f "$session_file" ]] && jq -e ".${key}" "$session_file" >/dev/null 2>&1
+}
+
 has_shown_recommendation() {
-    local file_path="${1:?File path required}"
+    local plugin="${1:?Plugin name required}"
     local skill_name="${2:?Skill name required}"
-    local key="recommendations_shown.\"${file_path}\".\"${skill_name}\""
+    local key="recommendations_shown.\"${skill_name}\""
 
     local shown
-    shown="$(get_session_value "$key")"
+    shown="$(get_plugin_value "$plugin" "$key")"
 
     [[ "$shown" == "true" ]]
 }
 
 mark_recommendation_shown() {
-    local file_path="${1:?File path required}"
+    local plugin="${1:?Plugin name required}"
     local skill_name="${2:?Skill name required}"
-    local session_file
-    session_file="$(get_session_file)"
-
-    if [[ ! -f "$session_file" ]]; then
-        return 1
-    fi
-
-    local temp_file="${session_file}.tmp"
-    jq ".recommendations_shown.\"${file_path}\".\"${skill_name}\" = true" "$session_file" > "$temp_file"
-    mv "$temp_file" "$session_file"
+    set_plugin_value "$plugin" "recommendations_shown.\"${skill_name}\"" "true"
 }
 
 has_passed_validation() {
@@ -241,7 +266,7 @@ cleanup_stale_sessions() {
     local temp_dir
     temp_dir=$(get_temp_dir)
 
-    find "$temp_dir" -name "claude-*-session-*.json" -type f 2>/dev/null | while read -r file; do
+    find "$temp_dir" -name "claude-session-*.json" -type f 2>/dev/null | while read -r file; do
         if [[ -f "$file" ]]; then
             local file_age
             file_age=$(get_file_age "$file")
@@ -284,8 +309,11 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     echo "  init_session <plugin_name>"
     echo "  get_session_value <key>"
     echo "  set_session_value <key> <value>"
-    echo "  has_shown_recommendation <file_path> <skill_name>"
-    echo "  mark_recommendation_shown <file_path> <skill_name>"
+    echo "  set_plugin_value <plugin> <key> <value>"
+    echo "  get_plugin_value <plugin> <key>"
+    echo "  has_session_key <key>"
+    echo "  has_shown_recommendation <plugin> <skill_name>"
+    echo "  mark_recommendation_shown <plugin> <skill_name>"
     echo "  has_passed_validation <validation_name> [file_path]"
     echo "  mark_validation_passed <validation_name> [file_path]"
     echo "  set_custom_data <key> <value>"

@@ -61,6 +61,7 @@ assert_true() {
 
 cleanup_test_files() {
   rm -f /tmp/claude-test-*.json /tmp/claude-test-*.lock
+  rm -f /tmp/claude-session-*.json /tmp/claude-session-*.lock
 }
 
 trap cleanup_test_files EXIT
@@ -70,7 +71,7 @@ echo
 
 echo "Test: Session initialization"
 init_session "test-plugin"
-assert_file_exists "$STATE_FILE" "Session file created"
+assert_file_exists "$SESSION_FILE" "Session file created"
 assert_equals "test-plugin" "$PLUGIN_NAME" "Plugin name set"
 echo
 
@@ -83,15 +84,15 @@ echo
 
 echo "Test: Recommendation tracking"
 init_session "test-plugin-3"
-if has_shown_recommendation "/path/to/file" "skill-name"; then
+if has_shown_recommendation "test-plugin-3" "skill-name"; then
   assert_equals "false" "true" "Recommendation should not be shown initially"
 else
   assert_equals "true" "true" "Recommendation not shown initially"
 fi
 
-mark_recommendation_shown "/path/to/file" "skill-name"
+mark_recommendation_shown "test-plugin-3" "skill-name"
 
-if has_shown_recommendation "/path/to/file" "skill-name"; then
+if has_shown_recommendation "test-plugin-3" "skill-name"; then
   assert_equals "true" "true" "Recommendation marked as shown"
 else
   assert_equals "true" "false" "Recommendation should be marked as shown"
@@ -151,9 +152,29 @@ echo
 
 echo "Test: Cleanup session"
 init_session "test-plugin-7"
-SESSION_FILE_TO_CLEAN="$STATE_FILE"
+SESSION_FILE_TO_CLEAN="$SESSION_FILE"
 clear_session
 assert_true '[[ ! -f "$SESSION_FILE_TO_CLEAN" ]]' "Session file removed"
+echo
+
+echo "Test: Multi-plugin session"
+rm -f "$SESSION_FILE"
+init_session "plugin-a"
+init_session "plugin-b"
+
+assert_file_exists "$SESSION_FILE" "Session file created"
+
+if jq -e '.plugins."plugin-a"' "$SESSION_FILE" >/dev/null 2>&1; then
+  assert_equals "true" "true" "plugin-a in session"
+else
+  assert_equals "true" "false" "plugin-a should be in session"
+fi
+
+if jq -e '.plugins."plugin-b"' "$SESSION_FILE" >/dev/null 2>&1; then
+  assert_equals "true" "true" "plugin-b in session"
+else
+  assert_equals "true" "false" "plugin-b should be in session"
+fi
 echo
 
 echo "================================"

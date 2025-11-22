@@ -5,7 +5,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 run_test() {
   local test_file="$1"
-  local test_name=$(basename "$test_file" .sh)
+  local test_name
+  test_name=$(basename "$test_file" .sh)
 
   echo ""
   echo "========================================="
