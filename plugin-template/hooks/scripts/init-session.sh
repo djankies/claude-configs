@@ -1,26 +1,14 @@
 #!/usr/bin/env bash
-
 set -euo pipefail
 
-PLUGIN_NAME="YOUR_PLUGIN_NAME"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CLAUDE_MARKETPLACE_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 
-STATE_FILE="/tmp/claude-${PLUGIN_NAME}-session-$$.json"
+source "${CLAUDE_MARKETPLACE_ROOT}/marketplace-utils/hook-lifecycle.sh"
 
-cat > "$STATE_FILE" <<EOF
-{
-  "plugin": "${PLUGIN_NAME}",
-  "session_id": "$$-$(date +%s)",
-  "pid": $$,
-  "started_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-  "recommendations_shown": {},
-  "validations_passed": {},
-  "custom_data": {}
-}
-EOF
+init_hook "plugin-template" "SessionStart"
 
-export CLAUDE_SESSION_FILE="$STATE_FILE"
-export CLAUDE_PLUGIN_NAME="$PLUGIN_NAME"
+log_info "Plugin session initialized"
 
-echo "${PLUGIN_NAME} plugin session initialized"
-
+inject_context "plugin-template plugin session started"
 exit 0
