@@ -28,7 +28,7 @@ init_hook() {
 
   export PLUGIN_NAME="$plugin_name"
   export HOOK_NAME="$hook_name"
-  export HOOK_EVENT="${HOOK_EVENT:-unknown}"
+  export HOOK_EVENT="$hook_name"
   export SESSION_FILE="${CLAUDE_SESSION_FILE:-}"
   export HOOK_START_TIME="$start_time"
 
