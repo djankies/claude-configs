@@ -63,6 +63,7 @@ Task 1: Review plugin.json
 Task 2: Review skills
 - Check: frontmatter (name gerund, description specific, allowed-tools), <500 lines, focused scope, progressive disclosure, no duplication
 - Cross-ref design: matches spec, justification preserved
+- Gerund form: both skill folder name and metadata name contain a gerund (verb + -ing) (e.g., "reviewing-react-hooks")
 - provides accurate knowledge that aligns with $ARGUMENTS/RESEARCH.md
 - Plugin has at least one REVIEW skill
 - Philosophy alignment: Each skill justified against cognitive load (discovery cost + usage cost < value provided)

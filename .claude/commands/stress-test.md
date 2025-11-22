@@ -146,7 +146,7 @@ Compile the findings into a report and generate `$ARGUMENTS/STRESS-TEST-REPORT.m
 
 - **{concept}**: {count} agents struggled
   - Common mistake: {what_wrong}
-  - Research coverage: {assessment}
+  - Research says: {quote}
   - Recommendation: {suggestion}
     {end}
 
@@ -177,13 +177,13 @@ Display summary:
 
 **Found Instances:** {violation_count}
 
-
+(only one example code snippet)
 \```{lang}
 {agent_code}
 \```
 
 
-**Research:** (section "{heading}")
+**Research Doc says:** (section "{heading}")
 
 > {quote}
 

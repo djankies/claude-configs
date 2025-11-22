@@ -1,7 +1,7 @@
 ---
-allowed-tools: ["Bash", "Task"]
-description: "Analyze code changes and create logical, well-structured commits"
-argument-hint: "<special instructions> (optional)"
+allowed-tools: ['Bash', 'Task']
+description: 'Analyze code changes and create logical, well-structured commits'
+argument-hint: '<special instructions> (optional)'
 ---
 
 <role>
@@ -25,16 +25,22 @@ Special instructions from the user, if any: ${ARGUMENTS}
 Perform intelligent commit creation by following these steps:
 
 1. **Analyze Repository State**
+   Use Explore subagent to perform the following and report on the results:
+
    - Review all modified, staged, and untracked files
    - Identify the scope and nature of changes
    - Determine if changes span multiple logical units
+   - Identify changes that together form a single logical unit
 
 2. **Group Changes Logically**
+   Now you reason through the changes and group them logically:
+
    - Separate changes by feature, fix, refactor, docs, tests, etc.
    - Ensure each group represents an atomic, deployable change
    - Consider dependencies between changes
 
 3. **Generate Commit Strategy**
+
    - Create descriptive commit messages following repository conventions
    - Order commits logically (e.g., tests before implementation, deps before features)
    - Ensure each commit maintains a working state
@@ -43,7 +49,7 @@ Perform intelligent commit creation by following these steps:
    - Stage and commit each logical group
    - Validate each commit maintains repository integrity
    - Provide summary of created commits
-</task>
+     </task>
 
 <constraints>
 - Each commit MUST be atomic and represent a single logical change
@@ -74,7 +80,7 @@ Provide a structured commit plan including:
 
 - Commit 1: "misc updates" (too vague, mixed changes)
 - Commit 2: "fix tests and add feature and update docs" (not atomic)
-</examples>
+  </examples>
 
 **Validation Commands:**
 You MUST run these validation commands after commit creation:
@@ -88,7 +94,7 @@ You MUST run these validation commands after commit creation:
 - `/commit` - Analyze all changes and create commits
 - `/commit src/` - Focus on changes in src directory
 - `/commit --interactive` - Review commit groups before execution
-</commentary>
+  </commentary>
 
 Think step-by-step through the change analysis and commit grouping process.
 
