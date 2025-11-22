@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+
+detect_platform() {
+  case "$OSTYPE" in
+    darwin*)
+      echo "macos"
+      ;;
+    linux*)
+      echo "linux"
+      ;;
+    msys*|cygwin*)
+      echo "windows"
+      ;;
+    *)
+      echo "unknown"
+      ;;
+  esac
+}
+
+is_remote_execution() {
+  [[ "${CLAUDE_CODE_REMOTE:-}" == "true" ]]
+}
+
+get_execution_environment() {
+  if is_remote_execution; then
+    echo "remote"
+  else
+    echo "local"
+  fi
+}
+
+get_timestamp_epoch() {
+  local iso_timestamp="$1"
+
+  case "$(detect_platform)" in
+    macos)
+      date -j -f "%Y-%m-%dT%H:%M:%SZ" "$iso_timestamp" "+%s" 2>/dev/null || echo "0"
+      ;;
+    linux|windows)
+      date -d "$iso_timestamp" "+%s" 2>/dev/null || echo "0"
+      ;;
+    *)
+      echo "0"
+      ;;
+  esac
+}
+
+get_current_epoch() {
+  date "+%s"
+}
+
+format_timestamp() {
+  local epoch="$1"
+
+  case "$(detect_platform)" in
+    macos)
+      date -u -r "$epoch" "+%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || echo ""
+      ;;
+    linux|windows)
+      date -u -d "@$epoch" "+%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || echo ""
+      ;;
+    *)
+      echo ""
+      ;;
+  esac
+}
+
+check_dependencies() {
+  local missing=()
+
+  command -v jq >/dev/null || missing+=("jq")
+  command -v flock >/dev/null || missing+=("flock")
+
+  if [[ ${#missing[@]} -gt 0 ]]; then
+    echo "Missing dependencies: ${missing[*]}" >&2
+    return 1
+  fi
+
+  return 0
+}
+
+get_temp_dir() {
+  case "$(detect_platform)" in
+    macos|linux)
+      echo "/tmp"
+      ;;
+    windows)
+      echo "${TEMP:-/tmp}"
+      ;;
+    *)
+      echo "/tmp"
+      ;;
+  esac
+}
+
+get_file_age() {
+  local file="$1"
+
+  if [[ ! -f "$file" ]]; then
+    echo "0"
+    return
+  fi
+
+  case "$(detect_platform)" in
+    macos)
+      local modified=$(stat -f %m "$file" 2>/dev/null || echo "0")
+      ;;
+    linux|windows)
+      local modified=$(stat -c %Y "$file" 2>/dev/null || echo "0")
+      ;;
+    *)
+      echo "0"
+      return
+      ;;
+  esac
+
+  local now=$(date +%s)
+  echo $((now - modified))
+}
+
+sanitize_shell_arg() {
+  local arg="$1"
+  printf '%q' "$arg"
+}
