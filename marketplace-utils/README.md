@@ -29,6 +29,60 @@ marketplace-utils/
     └── validate-patterns.sh     # PreToolUse validation template
 ```
 
+## Session Management v2
+
+The marketplace-utils directory provides a centralized hook infrastructure for all Claude Code plugins.
+
+### Core Components
+
+- **platform-compat.sh** - Cross-platform compatibility (macOS/Linux/Windows)
+- **logging.sh** - Centralized logging system with configurable levels
+- **error-reporting.sh** - Structured error journal in JSON Lines format
+- **session-management.sh** - Enhanced session state with file locking
+- **hook-lifecycle.sh** - Universal hook wrapper (source this in all hooks)
+
+### Quick Start
+
+Every hook should source the lifecycle wrapper:
+
+```bash
+#!/usr/bin/env bash
+source "${CLAUDE_MARKETPLACE_ROOT}/marketplace-utils/hook-lifecycle.sh"
+
+init_hook "plugin-name" "hook-name"
+
+INPUT=$(read_hook_input)
+FILE=$(get_input_field "tool_input.file_path")
+
+log_info "Processing file: $FILE"
+
+pretooluse_respond "allow"
+exit 0
+```
+
+### Documentation
+
+- [Migration Guide](docs/MIGRATION-GUIDE.md) - Migrate existing plugins to v2
+- [Hook Development](docs/HOOK-DEVELOPMENT.md) - Write new hooks
+- [Debugging](docs/DEBUGGING.md) - Troubleshoot hook issues
+- [Architecture](docs/ARCHITECTURE.md) - System design and internals
+- [Design Document](docs/SESSION-MANAGEMENT-V2-DESIGN.md) - Complete specification
+
+### Testing
+
+Run all tests:
+
+```bash
+cd marketplace-utils
+./tests/test-runner.sh
+```
+
+### Environment Variables
+
+- `CLAUDE_DEBUG_LEVEL` - Log level (DEBUG, INFO, WARN, ERROR) - default: WARN
+- `CLAUDE_SAVE_LOGS` - Preserve logs after session (0 or 1) - default: 0
+- `CLAUDE_LOG_DIR` - Custom log directory - default: /tmp
+
 ## Usage Patterns
 
 ### For Marketplace Plugins
