@@ -1,17 +1,23 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-STATE_FILE="/tmp/claude-prisma-session.json"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CLAUDE_MARKETPLACE_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 
-[[ ! -f "$STATE_FILE" ]] && exit 0
+source "${CLAUDE_MARKETPLACE_ROOT}/marketplace-utils/hook-lifecycle.sh"
 
-read -r INPUT
-FILE_PATH=$(echo "$INPUT" | grep -o '"file_path": "[^"]*"' | cut -d'"' -f4)
+init_hook "prisma-6" "PostToolUse"
+
+INPUT=$(read_hook_input)
+FILE_PATH=$(get_input_field "tool_input.file_path")
 
 if [[ -z "$FILE_PATH" ]]; then
-  FILE_PATH=$(echo "$INPUT" | grep -o '"path": "[^"]*"' | cut -d'"' -f4)
+  FILE_PATH=$(get_input_field "tool_input.path")
 fi
 
-[[ -z "$FILE_PATH" ]] && exit 0
+if [[ -z "$FILE_PATH" ]]; then
+  exit 0
+fi
 
 FILE_NAME="${FILE_PATH##*/}"
 FILE_DIR="${FILE_PATH%/*}"
@@ -29,8 +35,8 @@ elif [[ "$FILE_DIR" == *"migrations"* ]]; then
   SKILLS="MIGRATIONS-dev-workflow, MIGRATIONS-production, MIGRATIONS-v6-upgrade"
   MESSAGE="Prisma Migrations: $SKILLS"
 elif [[ "$FILE_PATH" =~ \.(ts|js|tsx|jsx)$ ]]; then
-  PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(dirname "$(dirname "$0")")}"
-  IMPORTS=$(bash "$PLUGIN_ROOT/hooks/scripts/analyze-imports.sh" "$FILE_PATH" 2>/dev/null)
+  PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(dirname "$(dirname "$SCRIPT_DIR")")}"
+  IMPORTS=$(bash "$PLUGIN_ROOT/hooks/scripts/analyze-imports.sh" "$FILE_PATH" 2>/dev/null || true)
 
   if [[ "$IMPORTS" == *"@prisma/client"* ]]; then
     RECOMMENDATION_TYPE="prisma_files"
@@ -45,23 +51,23 @@ elif [[ "$FILE_PATH" =~ \.(ts|js|tsx|jsx)$ ]]; then
   fi
 
   if [[ "$FILE_PATH" == *"vercel"* || "$FILE_PATH" == *"lambda"* || "$FILE_PATH" == *"app/"* ]]; then
-    SERVERLESS_SHOWN=$(grep -o '"serverless_context": true' "$STATE_FILE" 2>/dev/null)
-    if [[ -z "$SERVERLESS_SHOWN" ]]; then
-      echo "Serverless Context: CLIENT-serverless-config, PERFORMANCE-connection-pooling"
-      sed -i.bak 's/"serverless_context": false/"serverless_context": true/' "$STATE_FILE"
+    if ! has_shown_recommendation "prisma-6" "serverless_context"; then
+      log_info "Serverless context detected"
+      mark_recommendation_shown "prisma-6" "serverless_context"
+      inject_context "Serverless Context: CLIENT-serverless-config, PERFORMANCE-connection-pooling"
     fi
   fi
 fi
 
-[[ -z "$RECOMMENDATION_TYPE" ]] && exit 0
+if [[ -z "$RECOMMENDATION_TYPE" ]]; then
+  exit 0
+fi
 
-SHOWN=$(grep -o "\"$RECOMMENDATION_TYPE\": true" "$STATE_FILE" 2>/dev/null)
-
-if [[ -z "$SHOWN" ]]; then
-  echo "$MESSAGE"
-  echo "Use Skill tool to activate specific skills when needed."
-
-  sed -i.bak "s/\"$RECOMMENDATION_TYPE\": false/\"$RECOMMENDATION_TYPE\": true/" "$STATE_FILE"
+if ! has_shown_recommendation "prisma-6" "$RECOMMENDATION_TYPE"; then
+  log_info "Showing recommendation: $RECOMMENDATION_TYPE"
+  mark_recommendation_shown "prisma-6" "$RECOMMENDATION_TYPE"
+  inject_context "$MESSAGE
+Use Skill tool to activate specific skills when needed."
 fi
 
 exit 0

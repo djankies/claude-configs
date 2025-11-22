@@ -1,25 +1,14 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-STATE_FILE="/tmp/claude-prisma-session.json"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CLAUDE_MARKETPLACE_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 
-if [[ -f "$STATE_FILE" ]]; then
-  EXISTING_SESSION=$(cat "$STATE_FILE" 2>/dev/null | grep -o '"session_id": "[^"]*"' | head -1)
-  if [[ -n "$EXISTING_SESSION" ]]; then
-    exit 0
-  fi
-fi
+source "${CLAUDE_MARKETPLACE_ROOT}/marketplace-utils/hook-lifecycle.sh"
 
-cat > "$STATE_FILE" <<EOF
-{
-  "session_id": "$$-$(date +%s)",
-  "recommendations_shown": {
-    "prisma_files": false,
-    "schema_files": false,
-    "migration_files": false,
-    "raw_sql_context": false,
-    "serverless_context": false
-  }
-}
-EOF
+init_hook "prisma-6" "SessionStart"
 
-echo "Prisma session initialized"
+log_info "Prisma 6 session initialized"
+
+inject_context "Prisma 6 plugin session started"
+exit 0

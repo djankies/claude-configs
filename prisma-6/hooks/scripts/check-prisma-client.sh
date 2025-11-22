@@ -1,21 +1,29 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-set -e
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CLAUDE_MARKETPLACE_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 
-EXIT_CODE=0
+source "${CLAUDE_MARKETPLACE_ROOT}/marketplace-utils/hook-lifecycle.sh"
+
+init_hook "prisma-6" "PreToolUse"
+
+INPUT=$(read_hook_input)
 
 if ! command -v grep &> /dev/null; then
-  echo "Error: grep command not found"
-  exit 2
+  log_error "grep command not found"
+  pretooluse_respond "allow"
+  exit 0
 fi
 
 TS_FILES=$(find . -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \) \
   ! -path "*/node_modules/*" \
   ! -path "*/dist/*" \
   ! -path "*/build/*" \
-  ! -path "*/.next/*" 2>/dev/null)
+  ! -path "*/.next/*" 2>/dev/null || true)
 
 if [ -z "$TS_FILES" ]; then
+  pretooluse_respond "allow"
   exit 0
 fi
 
@@ -25,15 +33,15 @@ if [ -n "$INSTANCES" ]; then
   INSTANCE_COUNT=$(echo "$INSTANCES" | wc -l | tr -d ' ')
 
   if [ "$INSTANCE_COUNT" -gt 1 ]; then
-    echo "Warning: Multiple PrismaClient instances detected ($INSTANCE_COUNT)"
-    echo "$INSTANCES"
-    echo ""
-    echo "Use global singleton pattern to prevent connection pool exhaustion:"
-    echo "  import { PrismaClient } from '@prisma/client'"
-    echo "  const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined }"
-    echo "  export const prisma = globalForPrisma.prisma ?? new PrismaClient()"
-    echo "  if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma"
-    EXIT_CODE=1
+    log_warn "Multiple PrismaClient instances detected: $INSTANCE_COUNT"
+    pretooluse_respond "allow" "Warning: Multiple PrismaClient instances detected ($INSTANCE_COUNT)
+
+Use global singleton pattern to prevent connection pool exhaustion:
+  import { PrismaClient } from '@prisma/client'
+  const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined }
+  export const prisma = globalForPrisma.prisma ?? new PrismaClient()
+  if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma"
+    exit 0
   fi
 fi
 
@@ -57,11 +65,13 @@ if [ -n "$FUNCTION_SCOPED" ]; then
   done
 
   if [ "$IS_SINGLETON_WRAPPER" = false ]; then
-    echo "Warning: PrismaClient instantiated inside function scope"
-    echo "This creates new instances on each function call, exhausting connections."
-    echo ""
-    echo "Move PrismaClient to module scope with singleton pattern."
-    EXIT_CODE=1
+    log_warn "PrismaClient instantiated inside function scope"
+    pretooluse_respond "allow" "Warning: PrismaClient instantiated inside function scope
+
+This creates new instances on each function call, exhausting connections.
+
+Move PrismaClient to module scope with singleton pattern."
+    exit 0
   fi
 fi
 
@@ -69,13 +79,14 @@ MISSING_GLOBAL=$(echo "$TS_FILES" | xargs grep -L "globalForPrisma\|globalThis.*
   xargs grep -l "new PrismaClient()" 2>/dev/null || true)
 
 if [ -n "$MISSING_GLOBAL" ]; then
-  echo "Warning: PrismaClient instantiation without global singleton pattern:"
-  echo "$MISSING_GLOBAL"
-  echo ""
-  echo "Recommended pattern for Next.js and serverless environments:"
-  echo "  const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined }"
-  echo "  export const prisma = globalForPrisma.prisma ?? new PrismaClient()"
-  EXIT_CODE=1
+  log_warn "PrismaClient instantiation without global singleton pattern"
+  pretooluse_respond "allow" "Warning: PrismaClient instantiation without global singleton pattern
+
+Recommended pattern for Next.js and serverless environments:
+  const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined }
+  export const prisma = globalForPrisma.prisma ?? new PrismaClient()"
+  exit 0
 fi
 
-exit $EXIT_CODE
+pretooluse_respond "allow"
+exit 0
