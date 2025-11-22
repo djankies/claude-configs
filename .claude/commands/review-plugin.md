@@ -229,7 +229,7 @@ Validate fixes:
 ## Validation
 
 **After review:** ✓ All JSON valid, all components reviewed, issues aggregated, philosophy checked
-**After remediation:** ✓ Fixes applied, files valid, issues resolved, no new issues, `pnpm run validate` passes
+**After remediation:** ✓ Fixes applied, files valid, issues resolved, no new issues, `pnpm run validate` passes (no errors or warnings)
 **Before completing:** ✓ Report generated, summary presented
 
 ## Error Recovery
