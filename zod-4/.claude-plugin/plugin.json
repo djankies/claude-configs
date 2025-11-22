@@ -1,0 +1,21 @@
+{
+  "name": "zod-4",
+  "version": "1.0.0",
+  "description": "Comprehensive guidance for Zod v4 schema validation, covering breaking changes, new features, and best practices for TypeScript-first runtime validation",
+  "author": {
+    "name": "Claude Code Plugin Marketplace",
+    "email": "plugins@claude.ai"
+  },
+  "repository": "djankies/claude-configs",
+  "keywords": [
+    "zod",
+    "validation",
+    "schema",
+    "typescript",
+    "runtime-validation",
+    "type-inference",
+    "v4",
+    "migration"
+  ],
+  "license": "MIT"
+}

@@ -68,6 +68,21 @@
       "license": "MIT",
       "keywords": ["nextjs", "nextjs-16", "react", "cache-components", "security", "cve-2025-29927", "migration"],
       "category": "framework"
+    },
+    {
+      "name": "zod-4",
+      "source": "./zod-4",
+      "description": "Comprehensive guidance for Zod v4 schema validation, covering breaking changes, new features, and best practices for TypeScript-first runtime validation",
+      "version": "1.0.0",
+      "author": {
+        "name": "Daniel Jankowski",
+        "email": "djank0113@gmail.com"
+      },
+      "homepage": "https://github.com/djankies/claude-configs",
+      "repository": "djankies/claude-configs",
+      "license": "MIT",
+      "keywords": ["zod", "validation", "schema", "typescript", "runtime-validation", "type-inference", "v4", "migration"],
+      "category": "library"
     }
   ]
 }
