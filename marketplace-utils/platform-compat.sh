@@ -69,7 +69,10 @@ check_dependencies() {
   local missing=()
 
   command -v jq >/dev/null || missing+=("jq")
-  command -v flock >/dev/null || missing+=("flock")
+
+  if ! command -v flock >/dev/null; then
+    echo "WARNING: flock not available, file locking disabled" >&2
+  fi
 
   if [[ ${#missing[@]} -gt 0 ]]; then
     echo "Missing dependencies: ${missing[*]}" >&2
@@ -80,17 +83,15 @@ check_dependencies() {
 }
 
 get_temp_dir() {
-  case "$(detect_platform)" in
-    macos|linux)
-      echo "/tmp"
-      ;;
-    windows)
-      echo "${TEMP:-/tmp}"
-      ;;
-    *)
-      echo "/tmp"
-      ;;
-  esac
+  if [[ -n "${TMPDIR:-}" ]]; then
+    echo "${TMPDIR%/}"
+  elif [[ -n "${TMP:-}" ]]; then
+    echo "${TMP%/}"
+  elif [[ -n "${TEMP:-}" ]]; then
+    echo "${TEMP%/}"
+  else
+    echo "/tmp"
+  fi
 }
 
 get_file_age() {
@@ -101,12 +102,13 @@ get_file_age() {
     return
   fi
 
+  local modified
   case "$(detect_platform)" in
     macos)
-      local modified=$(stat -f %m "$file" 2>/dev/null || echo "0")
+      modified=$(stat -f %m "$file" 2>/dev/null || echo "0")
       ;;
     linux|windows)
-      local modified=$(stat -c %Y "$file" 2>/dev/null || echo "0")
+      modified=$(stat -c %Y "$file" 2>/dev/null || echo "0")
       ;;
     *)
       echo "0"
@@ -114,7 +116,8 @@ get_file_age() {
       ;;
   esac
 
-  local now=$(date +%s)
+  local now
+  now=$(date +%s)
   echo $((now - modified))
 }
 

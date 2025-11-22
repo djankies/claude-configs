@@ -6,18 +6,17 @@ PLUGIN_NAME="${PLUGIN_NAME:-unknown}"
 HOOK_NAME="${HOOK_NAME:-unknown}"
 
 get_call_stack() {
-  local stack=""
   local frame=0
+  local frames=()
   local line
 
   while caller $frame >/dev/null 2>&1; do
     line=$(caller $frame)
-    stack="$stack\"$line\","
+    frames+=("$line")
     frame=$((frame + 1))
   done
 
-  stack="[${stack%,}]"
-  echo "$stack"
+  jq -n -c --arg a "${frames[*]}" '$a | split(" ") | map(select(length > 0))'
 }
 
 report_error_internal() {
@@ -56,7 +55,14 @@ report_error_internal() {
       stack: $stack
     }')
 
-  echo "$error_json" >> "$ERROR_JOURNAL"
+  if command -v flock >/dev/null 2>&1; then
+    {
+      flock -x 200
+      echo "$error_json" >> "$ERROR_JOURNAL"
+    } 200>>"${ERROR_JOURNAL}.lock"
+  else
+    echo "$error_json" >> "$ERROR_JOURNAL"
+  fi
 
   if [[ -n "${log_error:-}" ]]; then
     log_error "[$code] $message"

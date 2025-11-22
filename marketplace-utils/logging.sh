@@ -15,7 +15,14 @@ declare -A LOG_LEVELS=(
 
 get_log_level_value() {
   local level="$1"
-  echo "${LOG_LEVELS[$level]:-0}"
+  local value="${LOG_LEVELS[$level]:-}"
+
+  if [[ -z "$value" ]]; then
+    echo "WARNING: Unknown log level '$level', defaulting to DEBUG (0)" >&2
+    echo "0"
+  else
+    echo "$value"
+  fi
 }
 
 should_log() {
@@ -45,7 +52,14 @@ log_message() {
   timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || echo "unknown")
   local log_line="[$timestamp] [$PLUGIN_NAME] [$level] [$component] $message"
 
-  echo "$log_line" >> "$LOG_FILE"
+  if command -v flock >/dev/null 2>&1; then
+    {
+      flock -x 200
+      echo "$log_line" >> "$LOG_FILE"
+    } 200>>"${LOG_FILE}.lock"
+  else
+    echo "$log_line" >> "$LOG_FILE"
+  fi
 }
 
 log_debug() {

@@ -39,8 +39,9 @@ test_timestamp_conversion() {
 
 test_current_epoch() {
   local now=$(get_current_epoch)
+  local reference_epoch=$(get_timestamp_epoch "2024-01-01T00:00:00Z")
 
-  if [[ "$now" =~ ^[0-9]+$ && "$now" -gt 1700000000 ]]; then
+  if [[ "$now" =~ ^[0-9]+$ && "$now" -gt "$reference_epoch" ]]; then
     echo "PASS: get_current_epoch returned valid timestamp: $now"
     return 0
   else
@@ -50,16 +51,32 @@ test_current_epoch() {
 }
 
 test_is_remote_execution() {
+  local saved_remote="${CLAUDE_CODE_REMOTE:-}"
+
   unset CLAUDE_CODE_REMOTE
   if is_remote_execution; then
     echo "FAIL: is_remote_execution returned true when CLAUDE_CODE_REMOTE not set"
+    if [[ -n "$saved_remote" ]]; then
+      export CLAUDE_CODE_REMOTE="$saved_remote"
+    fi
     return 1
   fi
 
   export CLAUDE_CODE_REMOTE="true"
   if ! is_remote_execution; then
     echo "FAIL: is_remote_execution returned false when CLAUDE_CODE_REMOTE=true"
+    if [[ -n "$saved_remote" ]]; then
+      export CLAUDE_CODE_REMOTE="$saved_remote"
+    else
+      unset CLAUDE_CODE_REMOTE
+    fi
     return 1
+  fi
+
+  if [[ -n "$saved_remote" ]]; then
+    export CLAUDE_CODE_REMOTE="$saved_remote"
+  else
+    unset CLAUDE_CODE_REMOTE
   fi
 
   echo "PASS: is_remote_execution works correctly"
