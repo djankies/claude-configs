@@ -241,10 +241,11 @@ Skills are **modular and focused**. Each addresses one concern (security, cachin
 
 ## Integration
 
-### Works With @react-19 Plugin
+### Works With Other Plugins
 
-This plugin is designed to work alongside the `@react-19` plugin:
+This plugin is designed to work alongside other plugins in the ecosystem:
 
+**@react-19 Plugin:**
 - **nextjs-16**: Next.js-specific patterns (routing, caching, server actions)
 - **react-19**: React fundamentals (hooks, server components, transitions)
 
@@ -254,11 +255,17 @@ Skills can reference each other across plugins:
 - `caching-use-cache-directive` builds on React Server Components knowledge
 - `forms-server-actions-security` references React 19's `useActionState` hook
 
-Install both for comprehensive Next.js 16 + React 19 development:
+**@prisma-6 Plugin:**
+- Server action security integrates with Prisma input validation
+- Transaction error handling for database operations in server actions
+- Type-safe queries for data access layer implementations
+
+Install all three for comprehensive Next.js 16 + React 19 + Prisma 6 development:
 
 ```bash
 claude plugins add nextjs-16
 claude plugins add react-19
+claude plugins add prisma-6
 ```
 
 ## Contributing
