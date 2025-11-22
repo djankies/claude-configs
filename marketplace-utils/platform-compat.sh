@@ -51,6 +51,20 @@ get_current_epoch() {
   date "+%s"
 }
 
+get_timestamp_ms() {
+  case "$(detect_platform)" in
+    macos)
+      echo $(($(date +%s) * 1000))
+      ;;
+    linux|windows)
+      date +%s%3N 2>/dev/null || echo $(($(date +%s) * 1000))
+      ;;
+    *)
+      echo $(($(date +%s) * 1000))
+      ;;
+  esac
+}
+
 format_timestamp() {
   local epoch="$1"
 
@@ -71,10 +85,6 @@ check_dependencies() {
   local missing=()
 
   command -v jq >/dev/null || missing+=("jq")
-
-  if ! command -v flock >/dev/null; then
-    echo "WARNING: flock not available, file locking disabled" >&2
-  fi
 
   if [[ ${#missing[@]} -gt 0 ]]; then
     echo "Missing dependencies: ${missing[*]}" >&2

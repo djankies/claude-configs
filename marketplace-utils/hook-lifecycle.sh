@@ -12,13 +12,19 @@ trap 'log_debug "SIGPIPE received in hook-lifecycle.sh at line $LINENO, exiting 
 init_hook() {
   local plugin_name="$1"
   local hook_name="$2"
-  local start_time=$(date +%s%3N 2>/dev/null || date +%s000)
+  local start_time=$(get_timestamp_ms)
 
   if [[ ! "$plugin_name" =~ ^[a-zA-Z0-9_-]+$ ]]; then
     fatal_error "INVALID_PLUGIN_NAME" "Invalid plugin name: $plugin_name"
   fi
 
-  check_dependencies || log_warn "Some dependencies missing - functionality may be limited"
+  if ! check_dependencies; then
+    log_warn "Some dependencies missing - functionality may be limited"
+  fi
+
+  if ! command -v flock >/dev/null 2>&1; then
+    log_debug "flock not available, using mkdir-based locking"
+  fi
 
   if [[ "${CLAUDE_CODE_REMOTE:-}" == "true" ]]; then
     log_info "Running in remote/web environment"
@@ -32,7 +38,7 @@ init_hook() {
   export SESSION_FILE="${CLAUDE_SESSION_FILE:-}"
   export HOOK_START_TIME="$start_time"
 
-  local elapsed=$(($(date +%s%3N 2>/dev/null || date +%s000) - start_time))
+  local elapsed=$(($(get_timestamp_ms) - start_time))
   log_debug "Hook initialized: $PLUGIN_NAME/$HOOK_NAME in ${elapsed}ms"
 }
 
@@ -40,7 +46,7 @@ finish_hook() {
   local exit_code="${1:-0}"
 
   if [[ -n "${HOOK_START_TIME:-}" ]]; then
-    local end_time=$(date +%s%3N 2>/dev/null || date +%s000)
+    local end_time=$(get_timestamp_ms)
     local total_elapsed=$((end_time - HOOK_START_TIME))
 
     if [[ $exit_code -eq 0 ]]; then
