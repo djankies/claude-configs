@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "Cross-cutting code review plugin that orchestrates review skills from tool plugins",
   "author": {
-    "name": "Claude Code Plugin Marketplace",
-    "email": "plugins@claudecode.dev"
+    "name": "Daniel Jankowski",
+    "email": "djank0113@gmail.com"
   },
   "repository": "djankies/claude-configs",
   "license": "MIT",
