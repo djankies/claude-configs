@@ -210,10 +210,10 @@ fi
 MESSAGE+="📚 Reference: https://react.dev/reference/rules/rules-of-hooks
 "
 
-if [[ "$TOTAL_ERRORS" -gt 0 ]]; then
-  posttooluse_respond "block" "$MESSAGE"
-  finish_hook 0
-else
+if [[ "$TOTAL_ERRORS" -gt 0 ]] || [[ "$TOTAL_WARNINGS" -gt 0 ]]; then
   posttooluse_respond "" "" "$MESSAGE"
   finish_hook 0
 fi
+
+posttooluse_respond
+finish_hook 0
