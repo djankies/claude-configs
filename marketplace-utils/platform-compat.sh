@@ -94,6 +94,25 @@ check_dependencies() {
   return 0
 }
 
+check_flock() {
+  if command -v flock >/dev/null 2>&1; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+suggest_flock_install() {
+  case "$(detect_platform)" in
+    macos)
+      echo "flock not found. For better performance, install via: brew install util-linux" >&2
+      ;;
+    linux)
+      echo "flock not found. Install via package manager (e.g., apt install util-linux)" >&2
+      ;;
+  esac
+}
+
 get_temp_dir() {
   if [[ -n "${TMPDIR:-}" ]]; then
     echo "${TMPDIR%/}"
