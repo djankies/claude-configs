@@ -16,10 +16,14 @@ if [[ ! -d "$PLUGIN_ROOT/node_modules" ]]; then
   if ! command -v npm >/dev/null 2>&1; then
     log_warn "npm not found - skipping dependency installation"
   else
-    if (cd "$PLUGIN_ROOT" && npm install --silent --no-audit --no-fund 2>&1 | grep -v "^$" | head -20); then
-      log_info "Dependencies installed successfully"
+    if (cd "$PLUGIN_ROOT" && npm install --silent --no-audit --no-fund >/dev/null 2>&1); then
+      if [[ -d "$PLUGIN_ROOT/node_modules" ]]; then
+        log_info "Dependencies installed successfully"
+      else
+        log_error "npm install succeeded but node_modules not created"
+      fi
     else
-      log_error "Failed to install dependencies - Rules of Hooks validation will be disabled"
+      log_error "npm install failed - Rules of Hooks validation will be disabled"
     fi
   fi
 fi
