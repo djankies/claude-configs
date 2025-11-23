@@ -43,8 +43,7 @@ if echo "$CODE_CONTENT" | grep -qE '\bforwardRef\s*[<(]'; then
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\.(propTypes|defaultProps)\s*='; then
-  CRITICAL_VIOLATIONS+=("propTypes/defaultProps deprecated")
-  RECOMMENDED_SKILLS+=("review-hook-patterns")
+  CRITICAL_VIOLATIONS+=("propTypes/defaultProps deprecated - remove and use TypeScript/ES6 defaults")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\bclass\s+\w+\s+extends\s+(React\.Component|Component|PureComponent|React\.PureComponent)\b'; then
