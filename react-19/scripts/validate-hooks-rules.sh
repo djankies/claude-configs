@@ -21,12 +21,6 @@ if [[ -z "$FILE_PATH" ]]; then
   finish_hook 0
 fi
 
-if [[ ! -f "$FILE_PATH" ]]; then
-  log_info "File does not exist: $FILE_PATH, skipping validation"
-  pretooluse_respond "allow"
-  finish_hook 0
-fi
-
 EXT="${FILE_PATH##*.}"
 if [[ ! "$EXT" =~ ^(js|jsx|ts|tsx)$ ]]; then
   log_info "File extension $EXT is not JS/JSX/TS/TSX, skipping validation"
@@ -34,7 +28,19 @@ if [[ ! "$EXT" =~ ^(js|jsx|ts|tsx)$ ]]; then
   finish_hook 0
 fi
 
+CONTENT=$(get_input_field "tool_input.content")
+if [[ -z "$CONTENT" ]]; then
+  log_info "No content in tool input, skipping validation"
+  pretooluse_respond "allow"
+  finish_hook 0
+fi
+
 log_info "Starting hooks validation for: $FILE_PATH"
+
+TEMP_FILE=$(mktemp --suffix=".${EXT}")
+trap "rm -f '$TEMP_FILE'" EXIT
+
+echo "$CONTENT" > "$TEMP_FILE"
 
 if ! command -v node >/dev/null 2>&1; then
   log_error "Node.js not found - cannot validate Rules of Hooks"
@@ -58,7 +64,7 @@ fi
 
 log_info "Validating Rules of Hooks: $FILE_PATH"
 
-VALIDATION_OUTPUT=$(node "$VALIDATOR_SCRIPT" "$FILE_PATH" 2>&1)
+VALIDATION_OUTPUT=$(node "$VALIDATOR_SCRIPT" "$TEMP_FILE" 2>&1)
 VALIDATION_EXIT_CODE=$?
 
 if [[ $VALIDATION_EXIT_CODE -eq 0 ]]; then
