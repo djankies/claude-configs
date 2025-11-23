@@ -13,12 +13,12 @@ React enforces two invariants on Hook usage. Violating these causes state corrup
 1. **Top-level only** - Never call Hooks inside loops, conditions, nested functions, or try/catch/finally
 2. **React functions only** - Call Hooks exclusively from function components or custom Hooks
 
-**Why:** Hooks depend on consistent call order across renders. Conditional/dynamic invocation breaks state tracking.
+**Why:** Consistent call order across renders; conditional/dynamic invocation breaks state tracking.
 
 ## Valid Hook Locations
 
 ✅ Top level of function components
-✅ Top level of custom Hooks (functions starting with `use`)
+✅ Top level of custom Hooks (`use*` functions)
 
 ```javascript
 function Counter() {
@@ -36,15 +36,16 @@ function useWindowWidth() {
 
 | Violation | Why Invalid | Fix |
 |-----------|-------------|-----|
-| Inside if/else | Skipped on some renders | Move Hook to top, use conditional rendering |
-| Inside loops | Variable call count | Move Hook to top, manage array state |
+| Inside if/else | Skipped on some renders | Move to top; use conditional rendering |
+| Inside loops | Variable call count | Move to top; manage array state |
 | After early return | Unreachable on some paths | Move Hook before return |
-| In event handlers | Called outside render | Move Hook to top, use state from closure |
+| In event handlers | Called outside render | Move to top; use state from closure |
 | In class components | Classes don't support Hooks | Convert to function component |
-| Inside callbacks (useMemo/useEffect) | Nested function context | Move Hook to top level |
+| Inside callbacks | Nested function context | Move Hook to top level |
 
-## Fixing Conditional Hooks
+## Common Fixes
 
+### Conditional Hooks
 ❌ **Wrong:**
 ```javascript
 function Profile({ userId }) {
@@ -53,21 +54,16 @@ function Profile({ userId }) {
   }
 }
 ```
-
 ✅ **Right:**
 ```javascript
 function Profile({ userId }) {
   const user = useUser(userId);
-
   if (!userId) return null;
   return <div>{user.name}</div>;
 }
 ```
-
 **Pattern:** Always call Hook, use conditional rendering for output.
-
-## Fixing Hooks in Loops
-
+### Hooks in Loops
 ❌ **Wrong:**
 ```javascript
 function List({ items }) {
@@ -77,12 +73,10 @@ function List({ items }) {
   });
 }
 ```
-
 ✅ **Right:**
 ```javascript
 function List({ items }) {
   const [selected, setSelected] = useState({});
-
   return items.map(item => (
     <Item
       key={item.id}
@@ -92,11 +86,8 @@ function List({ items }) {
   ));
 }
 ```
-
 **Pattern:** Single Hook managing collection, not per-item Hooks.
-
-## Fixing Hooks in Event Handlers
-
+### Hooks in Event Handlers
 ❌ **Wrong:**
 ```javascript
 function Form() {
@@ -107,33 +98,25 @@ function Form() {
   return <button onClick={handleSubmit}>Submit</button>;
 }
 ```
-
 ✅ **Right:**
 ```javascript
 function Form() {
   const [loading, setLoading] = useState(false);
-
   function handleSubmit() {
     setLoading(true);
   }
   return <button onClick={handleSubmit} disabled={loading}>Submit</button>;
 }
 ```
-
 **Pattern:** Hook at component level, setter in handler.
-
-## Fixing Hooks in Classes
-
+### Hooks in Classes
 ❌ **Wrong:**
 ```javascript
-class Counter extends React.Component {
-  render() {
-    const [count, setCount] = useState(0);
-    return <div>{count}</div>;
-  }
+function BadCounter() {
+  const [count, setCount] = useState(0);
+  return <div>{count}</div>;
 }
 ```
-
 ✅ **Right:**
 ```javascript
 function Counter() {
@@ -141,11 +124,8 @@ function Counter() {
   return <div>{count}</div>;
 }
 ```
-
-**Pattern:** Convert class to function component.
-
-## Fixing Hooks in Callbacks
-
+**Pattern:** Use function components for Hooks.
+### Hooks in Callbacks
 ❌ **Wrong:**
 ```javascript
 function Theme() {
@@ -155,7 +135,6 @@ function Theme() {
   }, []);
 }
 ```
-
 ✅ **Right:**
 ```javascript
 function Theme() {
@@ -163,59 +142,45 @@ function Theme() {
   const style = useMemo(() => createStyle(theme), [theme]);
 }
 ```
-
 **Pattern:** Call Hook at top level, reference in callback.
-
-## Fixing Hooks After Early Returns
-
+### Hooks After Early Returns
 ❌ **Wrong:**
 ```javascript
 function User({ userId }) {
   if (!userId) return null;
-
   const user = useUser(userId);
   return <div>{user.name}</div>;
 }
 ```
-
 ✅ **Right:**
 ```javascript
 function User({ userId }) {
   const user = useUser(userId || null);
-
   if (!userId) return null;
   return <div>{user.name}</div>;
 }
 ```
-
 **Pattern:** Call all Hooks before any returns.
 
 ## Custom Hooks
 
 Custom Hooks may call other Hooks because they execute during render phase:
-
 ```javascript
 function useDebounce(value, delay) {
   const [debounced, setDebounced] = useState(value);
-
   useEffect(() => {
     const timer = setTimeout(() => setDebounced(value), delay);
     return () => clearTimeout(timer);
   }, [value, delay]);
-
   return debounced;
 }
 ```
 
-**Requirements:**
-- Name starts with `use`
-- Called from function component or another custom Hook
-- Follows same Rules of Hooks
+**Requirements:** Name starts with `use`; called from function component or another custom Hook; follows same Rules of Hooks.
 
 ## Quick Diagnostic
 
 **ESLint error:** "React Hook cannot be called..."
-
 1. Check location: Is Hook inside if/loop/try/handler/class?
 2. Move Hook to top level of component/custom Hook
 3. Keep conditional logic, move Hook call outside it

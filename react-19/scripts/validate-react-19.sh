@@ -48,21 +48,21 @@ fi
 
 if echo "$CODE_CONTENT" | grep -qE '\bclass\s+\w+\s+extends\s+(React\.Component|Component|PureComponent|React\.PureComponent)\b'; then
   CRITICAL_VIOLATIONS+=("Class component found - migrate to function component")
-  RECOMMENDED_SKILLS+=("using-use-hook")
+  RECOMMENDED_SKILLS+=("using-the-use-hook")
 
   if echo "$CODE_CONTENT" | grep -qE '\bcomponent(Did|Will)Mount\b'; then
-    RECOMMENDED_SKILLS+=("action-state-patterns")
+    RECOMMENDED_SKILLS+=("using-action-state")
   fi
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\bReactDOM\.render\s*\('; then
   CRITICAL_VIOLATIONS+=("ReactDOM.render deprecated - use createRoot")
-  RECOMMENDED_SKILLS+=("server-vs-client-boundaries")
+  RECOMMENDED_SKILLS+=("managing-server-vs-client-boundaries")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\buseFormState\s*\('; then
   CRITICAL_VIOLATIONS+=("useFormState renamed to useActionState")
-  RECOMMENDED_SKILLS+=("action-state-patterns")
+  RECOMMENDED_SKILLS+=("using-action-state")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\bfindDOMNode\s*\('; then
@@ -72,12 +72,12 @@ fi
 
 if echo "$CODE_CONTENT" | grep -qE '\bunmountComponentAtNode\s*\('; then
   CRITICAL_VIOLATIONS+=("unmountComponentAtNode deprecated - use root.unmount()")
-  RECOMMENDED_SKILLS+=("server-vs-client-boundaries")
+  RECOMMENDED_SKILLS+=("managing-server-vs-client-boundaries")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\bReactDOM\.hydrate\s*\('; then
   CRITICAL_VIOLATIONS+=("ReactDOM.hydrate deprecated - use hydrateRoot")
-  RECOMMENDED_SKILLS+=("server-vs-client-boundaries")
+  RECOMMENDED_SKILLS+=("managing-server-vs-client-boundaries")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\bref\s*=\s*["\x27]\w+["\x27]'; then
@@ -87,7 +87,7 @@ fi
 
 if echo "$CODE_CONTENT" | grep -qE '\b(componentWillMount|componentWillReceiveProps|componentWillUpdate|UNSAFE_componentWillMount|UNSAFE_componentWillReceiveProps|UNSAFE_componentWillUpdate)\s*\('; then
   CRITICAL_VIOLATIONS+=("Unsafe lifecycle methods removed in React 19")
-  RECOMMENDED_SKILLS+=("using-use-hook")
+  RECOMMENDED_SKILLS+=("using-the-use-hook")
 fi
 
 HAS_USE_SERVER=$(grep -qE "^[[:space:]]*['\"]use server['\"]" "$FILE_PATH" && echo "true" || echo "false")
@@ -109,19 +109,19 @@ if grep -qE "^[[:space:]]*['\"]use server['\"]" "$FILE_PATH" || grep -qE "^[[:sp
     HAS_FORM_DATA=true
     if [ "$HAS_VALIDATION" = false ]; then
       WARNINGS+=("Server Action without input validation")
-      RECOMMENDED_SKILLS+=("form-validation" "server-actions")
+      RECOMMENDED_SKILLS+=("validating-forms" "implementing-server-actions")
     fi
   fi
 
   if echo "$CODE_CONTENT" | grep -qE '\b(delete|update|create|modify|remove)\w*\s*\('; then
     if [ "$HAS_AUTH_CHECK" = false ]; then
       WARNINGS+=("Server Action mutations without auth check")
-      RECOMMENDED_SKILLS+=("server-actions")
+      RECOMMENDED_SKILLS+=("implementing-server-actions")
     fi
   fi
 
   if [ "$HAS_FORM_DATA" = true ]; then
-    RECOMMENDED_SKILLS+=("action-state-patterns")
+    RECOMMENDED_SKILLS+=("using-action-state")
   fi
 fi
 
@@ -129,7 +129,7 @@ if echo "$CODE_CONTENT" | grep -qE '\bformData\.get\s*\(|\bformData\s*\.'; then
   if echo "$CODE_CONTENT" | grep -qE '(export\s+)?(async\s+)?function\s+\w+.*FormData'; then
     if [ "$HAS_USE_SERVER" = "false" ]; then
       WARNINGS+=("FormData handler missing 'use server' directive")
-      RECOMMENDED_SKILLS+=("server-actions")
+      RECOMMENDED_SKILLS+=("implementing-server-actions")
     fi
   fi
 fi
@@ -141,7 +141,7 @@ if echo "$CODE_CONTENT" | grep -qE '\b(useState|useEffect|useContext|useReducer|
     if [ -f "package.json" ] && grep -qE '"(next|@next)"\s*:\s*"' "package.json"; then
       if ! echo "$CODE_CONTENT" | grep -qE '\.server\.(js|jsx|ts|tsx)'; then
         WARNINGS+=("Client hooks without 'use client' directive")
-        RECOMMENDED_SKILLS+=("server-vs-client-boundaries")
+        RECOMMENDED_SKILLS+=("managing-server-vs-client-boundaries")
       fi
     fi
   fi
@@ -150,7 +150,7 @@ fi
 if echo "$CODE_CONTENT" | grep -qE 'onSubmit.*preventDefault'; then
   if ! echo "$CODE_CONTENT" | grep -qE '\buseActionState\s*\('; then
     WARNINGS+=("Consider useActionState for form state")
-    RECOMMENDED_SKILLS+=("action-state-patterns")
+    RECOMMENDED_SKILLS+=("using-action-state")
   fi
 fi
 
@@ -158,7 +158,7 @@ if echo "$CODE_CONTENT" | grep -qE '\buseActionState\s*\('; then
   TWO_ELEMENT='(const|let|var)\s*\[\s*\w+\s*,\s*\w+\s*\]'
   THREE_ELEMENT='(const|let|var)\s*\[\s*\w+\s*,\s*\w+\s*,\s*(\w+)\s*\]'
 
-  RECOMMENDED_SKILLS+=("action-state-patterns")
+  RECOMMENDED_SKILLS+=("using-action-state")
 
   if echo "$CODE_CONTENT" | grep -qE "$TWO_ELEMENT\s*=\s*useActionState"; then
     WARNINGS+=("useActionState isPending not destructured")
@@ -198,86 +198,86 @@ if echo "$CODE_CONTENT" | grep -qE 'disabled=\{(pending|isSubmitting|isPending)'
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\buseOptimistic\s*\('; then
-  RECOMMENDED_SKILLS+=("optimistic-updates")
+  RECOMMENDED_SKILLS+=("implementing-optimistic-updates")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE 'useState.*(pending|optimistic)|setPending|setOptimistic'; then
   if ! echo "$CODE_CONTENT" | grep -qE '\buseOptimistic\s*\('; then
     WARNINGS+=("Consider useOptimistic for optimistic updates")
-    RECOMMENDED_SKILLS+=("optimistic-updates")
+    RECOMMENDED_SKILLS+=("implementing-optimistic-updates")
   fi
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\buse\s*\('; then
-  RECOMMENDED_SKILLS+=("using-use-hook")
+  RECOMMENDED_SKILLS+=("using-the-use-hook")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\buseDeferredValue\s*\(\s*\w+\s*\)([^,]|$)'; then
   WARNINGS+=("useDeferredValue missing initialValue parameter")
-  RECOMMENDED_SKILLS+=("using-use-hook")
+  RECOMMENDED_SKILLS+=("using-the-use-hook")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\bReact\.FC\s*<|:\s*React\.FC\b'; then
   WARNINGS+=("React.FC discouraged - use plain function components")
-  RECOMMENDED_SKILLS+=("component-composition")
+  RECOMMENDED_SKILLS+=("composing-components")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE "React\.createElement\s*\(\s*['\"]"; then
   WARNINGS+=("React.createElement with string literals - consider JSX")
-  RECOMMENDED_SKILLS+=("component-composition")
+  RECOMMENDED_SKILLS+=("composing-components")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\buseContext\s*\('; then
   if ! echo "$CODE_CONTENT" | grep -qE '\buse\s*\('; then
-    RECOMMENDED_SKILLS+=("context-api-patterns")
+    RECOMMENDED_SKILLS+=("using-context-api")
   fi
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\buse(Memo|Callback)\s*\('; then
-  RECOMMENDED_SKILLS+=("react-compiler-aware")
+  RECOMMENDED_SKILLS+=("optimizing-with-react-compiler")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\bReact\.Children\.(map|forEach|count|only|toArray)\s*\('; then
   WARNINGS+=("React.Children utilities deprecated - use array methods")
-  RECOMMENDED_SKILLS+=("component-composition")
+  RECOMMENDED_SKILLS+=("composing-components")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\bContext\.Consumer\b|<\w+\.Consumer>'; then
   WARNINGS+=("Context.Consumer deprecated - use useContext or use()")
-  RECOMMENDED_SKILLS+=("context-api-patterns" "using-use-hook")
+  RECOMMENDED_SKILLS+=("using-context-api" "using-the-use-hook")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\bcontextType\s*='; then
   WARNINGS+=("contextType deprecated - use useContext")
-  RECOMMENDED_SKILLS+=("context-api-patterns")
+  RECOMMENDED_SKILLS+=("using-context-api")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\bcreateFactory\s*\('; then
   WARNINGS+=("React.createFactory deprecated - use JSX or createElement")
-  RECOMMENDED_SKILLS+=("component-composition")
+  RECOMMENDED_SKILLS+=("composing-components")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\bReact\.createClass\s*\('; then
   WARNINGS+=("React.createClass removed - use class or function components")
-  RECOMMENDED_SKILLS+=("component-composition")
+  RECOMMENDED_SKILLS+=("composing-components")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\bgetDerivedStateFromProps\s*\('; then
   WARNINGS+=("getDerivedStateFromProps can often be replaced with hooks")
-  RECOMMENDED_SKILLS+=("using-use-hook")
+  RECOMMENDED_SKILLS+=("using-the-use-hook")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE 'Math\.random\(\).*toString\('; then
   WARNINGS+=("Math.random() for IDs - use useId() hook")
-  RECOMMENDED_SKILLS+=("using-use-hook")
+  RECOMMENDED_SKILLS+=("using-the-use-hook")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\buseReducer\s*\('; then
-  RECOMMENDED_SKILLS+=("reducer-patterns")
+  RECOMMENDED_SKILLS+=("using-reducers")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\bReact\.createContext\s*\(|\bcreateContext\s*\('; then
-  RECOMMENDED_SKILLS+=("context-api-patterns" "local-vs-global-state")
+  RECOMMENDED_SKILLS+=("using-context-api" "managing-local-vs-global-state")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\bReact\.lazy\s*\(|\blazy\s*\('; then
@@ -289,7 +289,7 @@ if echo "$CODE_CONTENT" | grep -qE '\b(preload|preinit|prefetchDNS|preconnect)\s
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\bcustomElements\.(define|get|whenDefined)|\bHTMLElement\b|extends\s+HTMLElement'; then
-  RECOMMENDED_SKILLS+=("custom-elements-support")
+  RECOMMENDED_SKILLS+=("supporting-custom-elements")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\b(renderHook|waitFor)\s*\(|@testing-library/react'; then
