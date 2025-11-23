@@ -16,20 +16,25 @@ if [[ -z "$FILE_PATH" ]]; then
 fi
 
 if [[ -z "$FILE_PATH" ]]; then
+  log_info "No file path found in hook input, skipping validation"
   pretooluse_respond "allow"
   finish_hook 0
 fi
 
 if [[ ! -f "$FILE_PATH" ]]; then
+  log_info "File does not exist: $FILE_PATH, skipping validation"
   pretooluse_respond "allow"
   finish_hook 0
 fi
 
 EXT="${FILE_PATH##*.}"
 if [[ ! "$EXT" =~ ^(js|jsx|ts|tsx)$ ]]; then
+  log_info "File extension $EXT is not JS/JSX/TS/TSX, skipping validation"
   pretooluse_respond "allow"
   finish_hook 0
 fi
+
+log_info "Starting hooks validation for: $FILE_PATH"
 
 if ! command -v node >/dev/null 2>&1; then
   log_error "Node.js not found - cannot validate Rules of Hooks"
