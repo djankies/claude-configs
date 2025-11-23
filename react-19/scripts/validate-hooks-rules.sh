@@ -63,8 +63,10 @@ fi
 
 log_info "Validating Rules of Hooks: $FILE_PATH"
 
-VALIDATION_OUTPUT=$(node "$VALIDATOR_SCRIPT" "$FILE_PATH" 2>&1) || true
+set +e
+VALIDATION_OUTPUT=$(node "$VALIDATOR_SCRIPT" "$FILE_PATH" 2>&1)
 VALIDATION_EXIT_CODE=$?
+set -e
 
 log_info "Validation completed with exit code: $VALIDATION_EXIT_CODE"
 
