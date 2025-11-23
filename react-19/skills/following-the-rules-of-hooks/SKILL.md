@@ -1,5 +1,5 @@
 ---
-name: rules-of-hooks
+name: following-the-rules-of-hooks
 description: Fix React Rules of Hooks violations - conditional calls, hooks in loops/callbacks/classes
 version: 1.0.0
 ---
