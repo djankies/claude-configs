@@ -51,8 +51,13 @@ if [[ ! -f "$VALIDATOR_SCRIPT" ]]; then
 fi
 
 if [[ ! -d "$PLUGIN_ROOT/node_modules" ]]; then
-  log_warn "Dependencies not installed. Run: cd $PLUGIN_ROOT && npm install"
-  posttooluse_respond "" "" "⚠️  ESLint dependencies not installed. Run 'npm install' in react-19 plugin directory."
+  log_error "ESLint dependencies missing - auto-install may have failed"
+  posttooluse_respond "" "" "⚠️  Rules of Hooks validation unavailable - dependencies missing.
+
+This should have been installed automatically. To fix manually:
+  cd $PLUGIN_ROOT && npm install
+
+Validation will be skipped for this file."
   finish_hook 0
 fi
 
