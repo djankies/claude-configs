@@ -6,17 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/validate-react-patterns.sh",
-            "timeout": 5000
-          },
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/validate-hooks-rules.sh",
-            "timeout": 5000
-          },
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/validate-compliance.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/validate-react-19.sh",
             "timeout": 5000
           }
         ]
