@@ -126,30 +126,38 @@ React requires:
   2. Hooks MUST only be called from React function components or custom hooks (names starting with 'use')
   3. Hooks MUST be called in the same order on every render
 
+HOW TO FIX:
 "
 
   if echo "$VIOLATION_MESSAGES" | grep -qi "conditionally\|conditional"; then
-    RECOMMENDED_SKILLS+=("component-composition" "using-use-hook")
+    MESSAGE+="  • Conditional hooks: Move hooks to top level, use conditional rendering instead
+    Example: Instead of 'if (x) { useState() }', use 'const [state] = useState(); if (x) { use state }'
+"
   fi
 
-  if echo "$VIOLATION_MESSAGES" | grep -qi "loop"; then
-    RECOMMENDED_SKILLS+=("component-composition")
+  if echo "$VIOLATION_MESSAGES" | grep -qi "loop\|executed more than once"; then
+    MESSAGE+="  • Hooks in loops: Extract loop body into separate component, call hooks in that component
+    Example: items.map(item => <ItemComponent key={item.id} item={item} />)
+"
   fi
 
   if echo "$VIOLATION_MESSAGES" | grep -qi "is neither a React function component nor a custom React Hook"; then
-    RECOMMENDED_SKILLS+=("component-composition")
-  fi
-
-  if echo "$VIOLATION_MESSAGES" | grep -qi "callback"; then
-    RECOMMENDED_SKILLS+=("component-composition")
+    MESSAGE+="  • Hooks in regular functions: Rename to start with 'use' (custom hook) or convert to component (PascalCase)
+    Example: 'function handleClick()' → 'function useClickHandler()' or 'function ClickHandler()'
+"
   fi
 
   if echo "$VIOLATION_MESSAGES" | grep -qi "class component"; then
-    RECOMMENDED_SKILLS+=("component-composition" "server-vs-client-boundaries")
+    MESSAGE+="  • Hooks in class components: Convert class to function component
+    Reference: /skill migrating-from-forwardref for migration patterns
+"
+    RECOMMENDED_SKILLS+=("migrating-from-forwardref")
   fi
 
-  if [[ ${#RECOMMENDED_SKILLS[@]} -eq 0 ]]; then
-    RECOMMENDED_SKILLS+=("component-composition" "using-use-hook")
+  if echo "$VIOLATION_MESSAGES" | grep -qi "early return"; then
+    MESSAGE+="  • Hooks after early return: Move all hooks above ALL return statements
+    All hooks must run on every render in the same order
+"
   fi
 fi
 
@@ -167,35 +175,35 @@ if [[ "$TOTAL_WARNINGS" -gt 0 ]]; then
 
   MESSAGE+="
 These warnings indicate missing dependencies that can cause stale closures and bugs.
-Review and fix these dependency arrays to ensure hooks have correct dependencies.
+
+HOW TO FIX:
+  • Add all referenced variables to dependency array
+  • Or use useCallback/useMemo to stabilize references
+  • Or move constants outside component if they never change
+  • Reference: https://react.dev/reference/react/useEffect#specifying-reactive-dependencies
+
+"
+fi
+
+MESSAGE+="
+⚠️  REQUIRED ACTIONS:
+  1. Read the file you just wrote to see violations in context
+  2. Apply the fixes described above for each violation type
+  3. Ensure ALL hooks are called at top level, in same order, every render
+  4. Test the fixed code to verify it works correctly
+  5. Never repeat these mistakes - hooks MUST follow these rules
 
 "
 
-  if echo "$WARNING_MESSAGES" | grep -qi "exhaustive-deps"; then
-    RECOMMENDED_SKILLS+=("context-api-patterns" "local-vs-global-state")
-  fi
-fi
-
 if [[ ${#RECOMMENDED_SKILLS[@]} -gt 0 ]]; then
   UNIQUE_SKILLS=($(printf '%s\n' "${RECOMMENDED_SKILLS[@]}" | sort -u))
-  MESSAGE+="⚠️  REQUIRED ACTIONS:
-
-You MUST use the following skills to learn how to fix these violations:
+  MESSAGE+="Additional resources:
 "
   for skill in "${UNIQUE_SKILLS[@]}"; do
     MESSAGE+="   /skill $skill
 "
   done
   MESSAGE+="
-After using these skills, you MUST:
-  1. Read the file you just wrote to see the violations in context
-  2. Rewrite the code to fix ALL violations listed above
-  3. Follow React's Rules of Hooks strictly
-  4. Verify hooks are only called at the top level of components
-  5. Never repeat these mistakes in future code
-
-DO NOT attempt to write more code until you have used the required skills and understand how to fix each violation.
-
 "
 fi
 
