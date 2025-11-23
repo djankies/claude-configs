@@ -325,6 +325,7 @@ for v in data.get('violations', []):
     msg = v['message'].replace('React Hook', 'Hook')
     print(f\"{v['line']} {v['column']} {msg}\")
 " 2>/dev/null || true)
+    RECOMMENDED_SKILLS+=("rules-of-hooks")
   fi
 
   if [[ "$TOTAL_WARNINGS" -gt 0 ]]; then
@@ -339,6 +340,7 @@ for w in data.get('warnings', []):
     msg = w['message'].replace('React Hook', 'Hook')
     print(f\"{w['line']} {w['column']} {msg}\")
 " 2>/dev/null || true)
+    RECOMMENDED_SKILLS+=("rules-of-hooks")
   fi
 fi
 
