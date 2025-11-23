@@ -377,17 +377,16 @@ if [ $TOTAL_ISSUES -gt 0 ] || [ ${#RECOMMENDED_SKILLS[@]} -gt 0 ]; then
 
   if [ ${#RECOMMENDED_SKILLS[@]} -gt 0 ]; then
     UNIQUE_SKILLS=($(printf '%s\n' "${RECOMMENDED_SKILLS[@]}" | sort -u))
-    MESSAGE+="💡 Skills: "
-    FIRST=true
+    MESSAGE+="
+🚨 REQUIRED: Use these skills BEFORE modifying this file:
+"
     for skill in "${UNIQUE_SKILLS[@]}"; do
-      if [ "$FIRST" = true ]; then
-        MESSAGE+="$skill"
-        FIRST=false
-      else
-        MESSAGE+=", $skill"
-      fi
+      MESSAGE+="   /skill $skill
+"
     done
     MESSAGE+="
+⚠️  DO NOT fix violations without using the required skills first.
+⚠️  DO NOT write more React code without learning these patterns.
 "
   fi
 
