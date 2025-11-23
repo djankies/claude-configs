@@ -23,42 +23,46 @@ const validateHooksRules = async (filePath) => {
     process.exit(0);
   }
 
-  const absolutePath = path.resolve(filePath);
-
   const reactHooksPlugin = require('eslint-plugin-react-hooks');
+  const tsParser = require('@typescript-eslint/parser');
+  const babelParser = require('@babel/eslint-parser');
 
-  const eslint = new ESLint({
-    ignore: false,
-    overrideConfigFile: true,
-    overrideConfig: [
-      {
-        files: ['**/*'],
-        languageOptions: {
-          parser: ext.match(/\.tsx?$/)
-            ? require('@typescript-eslint/parser')
-            : require('@babel/eslint-parser'),
-          parserOptions: {
-            ecmaVersion: 2024,
-            sourceType: 'module',
-            ecmaFeatures: {
-              jsx: true,
-            },
-            requireConfigFile: false,
-            babelOptions: {
-              presets: ['@babel/preset-react'],
-            },
+  const config = [
+    {
+      files: ['**/*.{js,jsx,ts,tsx}'],
+      languageOptions: {
+        parser: ext.match(/\.tsx?$/) ? tsParser : babelParser,
+        parserOptions: {
+          ecmaVersion: 2024,
+          sourceType: 'module',
+          ecmaFeatures: {
+            jsx: true,
+          },
+          requireConfigFile: false,
+          babelOptions: {
+            presets: ['@babel/preset-react'],
           },
         },
-        plugins: {
-          'react-hooks': reactHooksPlugin,
-        },
-        rules: reactHooksPlugin.configs.recommended.rules,
       },
-    ],
+      plugins: {
+        'react-hooks': reactHooksPlugin,
+      },
+      rules: {
+        'react-hooks/rules-of-hooks': 'error',
+        'react-hooks/exhaustive-deps': 'warn',
+      },
+    },
+  ];
+
+  const eslint = new ESLint({
+    overrideConfigFile: true,
+    overrideConfig: config,
   });
 
   try {
-    const results = await eslint.lintFiles([absolutePath]);
+    const results = await eslint.lintText(fileContent, {
+      filePath: path.basename(filePath),
+    });
     const result = results[0];
 
     if (!result) {
