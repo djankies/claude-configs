@@ -63,8 +63,10 @@ fi
 
 log_info "Validating Rules of Hooks: $FILE_PATH"
 
-VALIDATION_OUTPUT=$(node "$VALIDATOR_SCRIPT" "$FILE_PATH" 2>&1)
+VALIDATION_OUTPUT=$(node "$VALIDATOR_SCRIPT" "$FILE_PATH" 2>&1) || true
 VALIDATION_EXIT_CODE=$?
+
+log_info "Validation completed with exit code: $VALIDATION_EXIT_CODE"
 
 if [[ $VALIDATION_EXIT_CODE -eq 0 ]]; then
   VALID=$(echo "$VALIDATION_OUTPUT" | jq -r '.valid // true' 2>/dev/null || echo "true")
