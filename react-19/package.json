@@ -1,0 +1,21 @@
+{
+  "name": "@claude-marketplace/react-19-plugin",
+  "version": "1.0.0",
+  "description": "React 19 validation plugin for Claude Code with AST-based Rules of Hooks validation",
+  "private": true,
+  "scripts": {
+    "install-deps": "npm install",
+    "validate": "node scripts/validate-hooks-rules.js"
+  },
+  "dependencies": {
+    "eslint": "^9.17.0",
+    "@babel/core": "^7.26.0",
+    "@babel/eslint-parser": "^7.25.9",
+    "@babel/preset-react": "^7.26.3",
+    "@typescript-eslint/parser": "^8.18.1",
+    "eslint-plugin-react-hooks": "^5.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

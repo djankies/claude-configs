@@ -95,6 +95,20 @@ pretooluse_respond() {
   local reason="${2:-}"
   local updated_input="${3:-}"
 
+  if [[ "$decision" == "block" ]]; then
+    log_error "PreToolUse decision: BLOCK"
+  else
+    log_info "PreToolUse decision: $decision"
+  fi
+
+  if [[ -n "$reason" ]]; then
+    local preview="${reason:0:200}"
+    if [[ ${#reason} -gt 200 ]]; then
+      preview="${preview}... (${#reason} chars total)"
+    fi
+    log_info "Message to Claude: $preview"
+  fi
+
   jq -n \
     --arg decision "$decision" \
     --arg reason "$reason" \
@@ -113,6 +127,21 @@ posttooluse_respond() {
   local decision="${1:-}"
   local reason="${2:-}"
   local context="${3:-}"
+
+  if [[ -n "$decision" ]]; then
+    log_info "PostToolUse decision: $decision"
+    if [[ -n "$reason" ]]; then
+      log_info "Decision reason: ${reason:0:200}"
+    fi
+  fi
+
+  if [[ -n "$context" ]]; then
+    local preview="${context:0:200}"
+    if [[ ${#context} -gt 200 ]]; then
+      preview="${preview}... (${#context} chars total)"
+    fi
+    log_info "Context to Claude: $preview"
+  fi
 
   jq -n \
     --arg decision "$decision" \
@@ -145,7 +174,11 @@ inject_context() {
   local context="$1"
   local hook_event="${2:-${HOOK_EVENT:-SessionStart}}"
 
-  log_info "Injecting context: ${context:0:100}..." "$hook_event"
+  local preview="${context:0:200}"
+  if [[ ${#context} -gt 200 ]]; then
+    preview="${preview}... (${#context} chars total)"
+  fi
+  log_info "Context to Claude: $preview" "$hook_event"
 
   jq -n \
     --arg context "$context" \
