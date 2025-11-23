@@ -131,13 +131,13 @@ posttooluse_respond() {
   if [[ -n "$decision" ]]; then
     log_info "PostToolUse decision: $decision"
     if [[ -n "$reason" ]]; then
-      log_info "Decision reason: ${reason:0:200}"
+      log_info "Decision reason: ${reason:0:500}"
     fi
   fi
 
   if [[ -n "$context" ]]; then
-    local preview="${context:0:200}"
-    if [[ ${#context} -gt 200 ]]; then
+    local preview="${context:0:500}"
+    if [[ ${#context} -gt 500 ]]; then
       preview="${preview}... (${#context} chars total)"
     fi
     log_info "Context to Claude: $preview"
