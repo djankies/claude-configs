@@ -6,7 +6,7 @@ CLAUDE_MARKETPLACE_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 source "${CLAUDE_MARKETPLACE_ROOT}/marketplace-utils/hook-lifecycle.sh"
 
-init_hook "react-19" "PreToolUse"
+init_hook "react-19" "PostToolUse"
 
 read_hook_input > /dev/null
 FILE_PATH=$(get_input_field "tool_input.file_path")
@@ -16,12 +16,12 @@ if [[ -z "$FILE_PATH" ]]; then
 fi
 
 if [[ -z "$FILE_PATH" ]]; then
-  pretooluse_respond "allow"
+  posttooluse_respond
   finish_hook 0
 fi
 
 if [[ ! -f "$FILE_PATH" ]]; then
-  pretooluse_respond "allow"
+  posttooluse_respond
   finish_hook 0
 fi
 
@@ -201,15 +201,10 @@ if [ ${#CRITICAL_VIOLATIONS[@]} -gt 0 ] || [ ${#WARNINGS[@]} -gt 0 ] || [ ${#REC
     MESSAGE+="\n"
   fi
 
-  if [ ${#CRITICAL_VIOLATIONS[@]} -gt 0 ]; then
-    pretooluse_respond "block" "$(echo -e "$MESSAGE")"
-    finish_hook 0
-  else
-    pretooluse_respond "allow" "$(echo -e "$MESSAGE")"
-    finish_hook 0
-  fi
+  posttooluse_respond "" "" "$(echo -e "$MESSAGE")"
+  finish_hook 0
 fi
 
 log_info "No React 19 pattern violations in $FILE_PATH"
-pretooluse_respond "allow"
+posttooluse_respond
 finish_hook 0
