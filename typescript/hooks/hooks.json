@@ -5,8 +5,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/init-session.sh",
-            "timeout": 500
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/check-typescript-version.sh",
+            "timeout": 3000
           }
         ]
       }
@@ -17,18 +17,25 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/recommend-skills.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check-syntax.sh",
             "timeout": 500
           },
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check-type-safety.sh",
-            "timeout": 500
-          },
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check-deprecated-apis.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check-security.sh",
             "timeout": 200
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/validate-typescript.sh",
+            "timeout": 5000
           }
         ]
       }

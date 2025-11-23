@@ -3,20 +3,9 @@ name: TypeScript Error Resolution
 description: Resolve all TypeScript errors using root cause analysis, targeted fixes, and mandatory validation
 ---
 
-<role>
-You are a TypeScript Expert specializing in type error resolution. You excel at tracing errors to root causes, applying minimal targeted fixes, and ensuring zero errors remain.
-</role>
-
-<context>
-The user has specified a target file to fix.
-
 Project configuration:
-@tsconfig.json
-@package.json
-</context>
-
-<task>
-Resolve all TypeScript errors in the target file:
+read tsconfig.json if haven't already
+read package.json if haven't already
 
 ## 1. Comprehensive Error Discovery
 
@@ -29,12 +18,14 @@ pnpm type-check 2>&1 | grep "target-file"
 Replace `target-file` with the actual file path from the user's request.
 
 List all errors with:
+
 - File path and line numbers
 - Error codes (TS####)
 - Full error descriptions
 - Related information
 
 Prioritize errors by dependency order:
+
 - Base type definition errors first
 - Cascading errors after root causes
 - Independent errors in parallel
@@ -46,12 +37,14 @@ Read the target file specified by the user.
 For each error, trace to underlying cause:
 
 **Verify type structures from source**:
+
 - Check imported type definitions
 - Verify function signatures
 - Confirm interface/type shapes
 - Validate generic constraints
 
 **Identify root cause categories**:
+
 - Type annotation errors (wrong type specified)
 - Type narrowing failures (missing guards)
 - Generic constraint violations (needs extends)
@@ -60,6 +53,7 @@ For each error, trace to underlying cause:
 - Import/export type issues (wrong imports)
 
 **Consider impact on dependent code**:
+
 - Will fix break other code?
 - Are there cascading implications?
 - Does this affect public API?
@@ -71,89 +65,102 @@ Apply targeted fixes using Edit tool.
 ### Type Safety Patterns
 
 **For type narrowing**:
+
 ```typescript
-if (typeof value === "string") { }
-if (value !== null && value !== undefined) { }
-if ("property" in object) { }
-if (Array.isArray(value)) { }
+if (typeof value === 'string') {
+}
+if (value !== null && value !== undefined) {
+}
+if ('property' in object) {
+}
+if (Array.isArray(value)) {
+}
 ```
 
 **For generic constraints**:
+
 ```typescript
-function process<T extends SomeType>(value: T): void { }
+function process<T extends SomeType>(value: T): void {}
 ```
 
 **For union discrimination**:
+
 ```typescript
-type Result =
-  | { success: true; data: Data }
-  | { success: false; error: Error }
+type Result = { success: true; data: Data } | { success: false; error: Error };
 
 if (result.success) {
-  result.data
+  result.data;
 } else {
-  result.error
+  result.error;
 }
 ```
 
 **For null safety**:
+
 ```typescript
-value?.property
-value ?? defaultValue
-const nonNull = value!
+value?.property;
+value ?? defaultValue;
+const nonNull = value!;
 ```
 
 **For unknown types**:
+
 ```typescript
 function parse(input: unknown): Result {
-  if (typeof input !== "object" || input === null) {
-    throw new Error("Invalid input")
+  if (typeof input !== 'object' || input === null) {
+    throw new Error('Invalid input');
   }
 
-  const obj = input as Record<string, unknown>
+  const obj = input as Record<string, unknown>;
 
-  if (typeof obj.property !== "string") {
-    throw new Error("Invalid property")
+  if (typeof obj.property !== 'string') {
+    throw new Error('Invalid property');
   }
 
-  return { property: obj.property }
+  return { property: obj.property };
 }
 ```
 
 ### Principles
 
 **Minimal changes**:
+
 - Fix only what's broken
 - Preserve existing logic
 - Maintain code structure
 
 **Address root causes**:
+
 - Don't suppress symptoms
 - Fix source of error, not just error site
 - Consider why type system caught this
 
 **Maintain consistency**:
+
 - Follow project patterns
 - Use existing type definitions
 - Match naming conventions
 
 **Prefer interfaces over types** (for objects):
+
 ```typescript
 interface User {
-  id: string
-  name: string
+  id: string;
+  name: string;
 }
 ```
 
 **Use type aliases for unions/primitives**:
+
 ```typescript
-type Status = "pending" | "complete" | "error"
-type ID = string
+type Status = 'pending' | 'complete' | 'error';
+type ID = string;
 ```
 
 **Use unknown over any**:
+
 ```typescript
-const data: unknown = JSON.parse(input)
+const data: unknown = JSON.parse(input);
 ```
 
 ## 4. Validation
@@ -169,6 +176,7 @@ Replace `target-file` with the actual file path.
 **Success criteria**: MUST show zero TypeScript errors
 
 **If errors remain**:
+
 1. Analyze remaining errors
 2. Identify if new errors introduced
 3. Apply additional fixes
@@ -189,6 +197,7 @@ Replace `target-file` with the actual file path.
 - MUST use generic constraints appropriately
 
 **Code Quality Requirements:**
+
 - MUST maintain existing code structure
 - MUST follow project naming conventions
 - MUST apply minimal changes to resolve errors
@@ -196,11 +205,12 @@ Replace `target-file` with the actual file path.
 - NEVER change runtime behavior
 
 **Resolution Requirements:**
+
 - Address root causes, not symptoms
 - Fix cascading errors in dependency order
 - Iterate until zero errors remain
 - Validate after every batch of fixes
-</constraints>
+  </constraints>
 
 <validation>
 **MANDATORY Validation**:
@@ -212,16 +222,18 @@ pnpm type-check 2>&1 | grep "target-file"
 Replace `target-file` with the actual file path. Must show zero errors or report "No errors found".
 
 **File Integrity**:
+
 - Verify syntactically valid TypeScript
 - Ensure imports/exports correct
 - Confirm no runtime behavior changes
 
 **Failure Handling**:
+
 - If validation fails, analyze remaining errors
 - Apply additional fixes
 - Re-run validation until all checks pass
 - NEVER mark complete with errors remaining
-</validation>
+  </validation>
 
 <output>
 Provide clear summary of resolution:
@@ -241,11 +253,13 @@ For each fix:
 **Location**: `{file}:{line}`
 
 **Original error**:
+
 ```
 {TypeScript error message}
 ```
 
 **Change made**:
+
 ```typescript
 {Code change applied}
 ```
@@ -268,4 +282,4 @@ For each fix:
 - {Any follow-up improvements to consider}
 - {Type refactoring opportunities}
 - {Long-term type safety enhancements}
-</output>
+  </output>
