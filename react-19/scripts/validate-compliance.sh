@@ -232,6 +232,20 @@ if echo "$CODE_CONTENT" | grep -qE 'Math\.random\(\).*toString\('; then
   RECOMMENDED_SKILLS+=("using-use-hook")
 fi
 
+if echo "$CODE_CONTENT" | grep -qE '\bcustomElements\.(define|get|whenDefined)|\bHTMLElement\b|extends\s+HTMLElement'; then
+  RECOMMENDED_SKILLS+=("custom-elements-support")
+fi
+
+if echo "$CODE_CONTENT" | grep -qE '\b(renderHook|waitFor)\s*\(|@testing-library/react'; then
+  if echo "$CODE_CONTENT" | grep -qE '\buse[A-Z]\w+\s*\('; then
+    RECOMMENDED_SKILLS+=("testing-hooks")
+  fi
+fi
+
+if echo "$CODE_CONTENT" | grep -qE '(describe|test|it)\s*\([^)]*["\'].*[Ss]erver.*[Aa]ction'; then
+  RECOMMENDED_SKILLS+=("testing-server-actions")
+fi
+
 if [ ${#CRITICAL_VIOLATIONS[@]} -gt 0 ] || [ ${#ERRORS[@]} -gt 0 ] || [ ${#RECOMMENDED_SKILLS[@]} -gt 0 ]; then
   MESSAGE=""
 
