@@ -109,10 +109,10 @@ if [[ "$TOTAL_ERRORS" -gt 0 ]]; then
 
   VIOLATION_MESSAGES=$(echo "$VIOLATIONS" | jq -r '.[].message' 2>/dev/null)
 
-  echo "$VIOLATIONS" | jq -r '.[] | "   Line \(.line):\(.column) - \(.message)"' 2>/dev/null | while IFS= read -r line; do
+  while IFS= read -r line; do
     MESSAGE+="$line
 "
-  done
+  done < <(echo "$VIOLATIONS" | jq -r '.[] | "   Line \(.line):\(.column) - \(.message)"' 2>/dev/null)
 
   MESSAGE+="
 🚫 RULES OF HOOKS VIOLATIONS:
@@ -156,10 +156,10 @@ if [[ "$TOTAL_WARNINGS" -gt 0 ]]; then
 
   WARNING_MESSAGES=$(echo "$WARNINGS" | jq -r '.[].message' 2>/dev/null)
 
-  echo "$WARNINGS" | jq -r '.[] | "   Line \(.line):\(.column) - \(.message)"' 2>/dev/null | while IFS= read -r line; do
+  while IFS= read -r line; do
     MESSAGE+="$line
 "
-  done
+  done < <(echo "$WARNINGS" | jq -r '.[] | "   Line \(.line):\(.column) - \(.message)"' 2>/dev/null)
 
   MESSAGE+="
 These warnings indicate missing dependencies that can cause stale closures and bugs.
