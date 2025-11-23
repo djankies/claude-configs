@@ -23,11 +23,16 @@ const validateHooksRules = async (filePath) => {
     process.exit(0);
   }
 
+  const absolutePath = path.resolve(filePath);
+
+  const reactHooksPlugin = require('eslint-plugin-react-hooks');
+
   const eslint = new ESLint({
+    ignore: false,
     overrideConfigFile: true,
     overrideConfig: [
       {
-        files: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx'],
+        files: ['**/*'],
         languageOptions: {
           parser: ext.match(/\.tsx?$/)
             ? require('@typescript-eslint/parser')
@@ -45,18 +50,15 @@ const validateHooksRules = async (filePath) => {
           },
         },
         plugins: {
-          'react-hooks': require('eslint-plugin-react-hooks'),
+          'react-hooks': reactHooksPlugin,
         },
-        rules: {
-          'react-hooks/rules-of-hooks': 'error',
-          'react-hooks/exhaustive-deps': 'warn',
-        },
+        rules: reactHooksPlugin.configs.recommended.rules,
       },
     ],
   });
 
   try {
-    const results = await eslint.lintFiles([filePath]);
+    const results = await eslint.lintFiles([absolutePath]);
     const result = results[0];
 
     if (!result) {
