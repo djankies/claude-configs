@@ -145,6 +145,8 @@ inject_context() {
   local context="$1"
   local hook_event="${2:-${HOOK_EVENT:-SessionStart}}"
 
+  log_info "Injecting context: ${context:0:100}..." "$hook_event"
+
   jq -n \
     --arg context "$context" \
     --arg event "$hook_event" \

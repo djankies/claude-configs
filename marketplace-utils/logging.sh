@@ -4,8 +4,8 @@ trap 'echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) [DEBUG] SIGPIPE received in logging.s
 
 CLAUDE_SESSION_PID="${CLAUDE_SESSION_PID:-$PPID}"
 LOG_FILE="${LOG_FILE:-/tmp/claude-session-${CLAUDE_SESSION_PID}.log}"
-PLUGIN_NAME="${PLUGIN_NAME:-unknown}"
-HOOK_NAME="${HOOK_NAME:-unknown}"
+PLUGIN_NAME="${PLUGIN_NAME:-}"
+HOOK_NAME="${HOOK_NAME:-}"
 
 declare -A LOG_LEVELS=(
   ["DEBUG"]=0
@@ -42,7 +42,7 @@ should_log() {
 log_message() {
   local level="$1"
   local message="$2"
-  local component="${3:-${HOOK_NAME:-unknown}}"
+  local component="${3:-${HOOK_NAME:-}}"
 
   local min_level="${CLAUDE_DEBUG_LEVEL:-WARN}"
 
@@ -52,7 +52,9 @@ log_message() {
 
   local timestamp
   timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || echo "unknown")
-  local log_line="[$timestamp] [$PLUGIN_NAME] [$level] [$component] $message"
+  local plugin="${PLUGIN_NAME:-marketplace}"
+  local comp="${component:-init}"
+  local log_line="[$timestamp] [$plugin] [$level] [$comp] $message"
 
   if command -v flock >/dev/null 2>&1; then
     {

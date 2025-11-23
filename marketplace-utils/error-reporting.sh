@@ -4,8 +4,8 @@ trap 'echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) [DEBUG] SIGPIPE received in error-rep
 
 CLAUDE_SESSION_PID="${CLAUDE_SESSION_PID:-$PPID}"
 ERROR_JOURNAL="${ERROR_JOURNAL:-/tmp/claude-errors-${CLAUDE_SESSION_PID}.jsonl}"
-PLUGIN_NAME="${PLUGIN_NAME:-unknown}"
-HOOK_NAME="${HOOK_NAME:-unknown}"
+PLUGIN_NAME="${PLUGIN_NAME:-}"
+HOOK_NAME="${HOOK_NAME:-}"
 
 get_call_stack() {
   local frame=0
