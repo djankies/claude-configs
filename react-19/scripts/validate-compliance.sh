@@ -242,7 +242,7 @@ if echo "$CODE_CONTENT" | grep -qE '\b(renderHook|waitFor)\s*\(|@testing-library
   fi
 fi
 
-if echo "$CODE_CONTENT" | grep -qE '(describe|test|it)\s*\([^)]*["\'].*[Ss]erver.*[Aa]ction'; then
+if echo "$CODE_CONTENT" | grep -qE "(describe|test|it)\s*\([^)]*[\"'].*[Ss]erver.*[Aa]ction"; then
   RECOMMENDED_SKILLS+=("testing-server-actions")
 fi
 
