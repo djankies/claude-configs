@@ -303,17 +303,43 @@ if echo "$CODE_CONTENT" | grep -qE "(describe|test|it)\s*\([^)]*[\"'].*[Ss]erver
   RECOMMENDED_SKILLS+=("testing-server-actions")
 fi
 
-ESLINT_OUTPUT=$(node "${SCRIPT_DIR}/validate-hooks-rules.js" "$FILE_PATH" 2>&1 || true)
-if echo "$ESLINT_OUTPUT" | grep -q "CRITICAL:"; then
-  while IFS= read -r line; do
-    if [[ "$line" =~ CRITICAL: ]]; then
-      VIOLATION=$(echo "$line" | sed 's/.*CRITICAL: //')
-      CRITICAL_VIOLATIONS+=("$VIOLATION")
-    elif [[ "$line" =~ WARNING: ]]; then
-      WARNING=$(echo "$line" | sed 's/.*WARNING: //')
-      WARNINGS+=("$WARNING")
-    fi
-  done <<< "$ESLINT_OUTPUT"
+HOOKS_VALIDATOR="${SCRIPT_DIR}/validate-hooks-rules.js"
+if [[ ! -f "$HOOKS_VALIDATOR" ]]; then
+  HOOKS_VALIDATOR="${CLAUDE_MARKETPLACE_ROOT}/react-19/scripts/validate-hooks-rules.js"
+fi
+
+ESLINT_JSON=$(node "$HOOKS_VALIDATOR" "$FILE_PATH" 2>&1 || true)
+if echo "$ESLINT_JSON" | grep -q '"valid":false'; then
+  TOTAL_ERRORS=$(echo "$ESLINT_JSON" | grep -o '"totalErrors":[0-9]*' | cut -d: -f2)
+  TOTAL_WARNINGS=$(echo "$ESLINT_JSON" | grep -o '"totalWarnings":[0-9]*' | cut -d: -f2)
+
+  if [[ "$TOTAL_ERRORS" -gt 0 ]]; then
+    while read -r line col message; do
+      if [[ -n "$message" ]]; then
+        CRITICAL_VIOLATIONS+=("Rules of Hooks (line $line): $message")
+      fi
+    done < <(echo "$ESLINT_JSON" | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+for v in data.get('violations', []):
+    msg = v['message'].replace('React Hook', 'Hook')
+    print(f\"{v['line']} {v['column']} {msg}\")
+" 2>/dev/null || true)
+  fi
+
+  if [[ "$TOTAL_WARNINGS" -gt 0 ]]; then
+    while read -r line col message; do
+      if [[ -n "$message" ]]; then
+        WARNINGS+=("Hook dependency (line $line): $message")
+      fi
+    done < <(echo "$ESLINT_JSON" | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+for w in data.get('warnings', []):
+    msg = w['message'].replace('React Hook', 'Hook')
+    print(f\"{w['line']} {w['column']} {msg}\")
+" 2>/dev/null || true)
+  fi
 fi
 
 TOTAL_ISSUES=$((${#CRITICAL_VIOLATIONS[@]} + ${#WARNINGS[@]}))
