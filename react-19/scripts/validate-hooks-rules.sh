@@ -37,16 +37,16 @@ if ! command -v node >/dev/null 2>&1; then
   finish_hook 0
 fi
 
-VALIDATOR_SCRIPT="${SCRIPT_DIR}/validate-hooks-rules.js"
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-${SCRIPT_DIR}/..}"
+VALIDATOR_SCRIPT="${PLUGIN_ROOT}/scripts/validate-hooks-rules.js"
 if [[ ! -f "$VALIDATOR_SCRIPT" ]]; then
   log_error "Validator script not found: $VALIDATOR_SCRIPT"
   pretooluse_respond "allow" "⚠️  Hooks validator not found. Validation skipped."
   finish_hook 0
 fi
 
-NPM_ROOT="${SCRIPT_DIR}/.."
-if [[ ! -d "$NPM_ROOT/node_modules" ]]; then
-  log_warn "Dependencies not installed. Run: cd $NPM_ROOT && npm install"
+if [[ ! -d "$PLUGIN_ROOT/node_modules" ]]; then
+  log_warn "Dependencies not installed. Run: cd $PLUGIN_ROOT && npm install"
   pretooluse_respond "allow" "⚠️  ESLint dependencies not installed. Run 'npm install' in react-19 plugin directory."
   finish_hook 0
 fi
