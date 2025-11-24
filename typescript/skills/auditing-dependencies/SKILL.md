@@ -1,5 +1,5 @@
 ---
-name: security-dependencies
+name: auditing-dependencies
 description: Auditing and updating npm dependencies to prevent security vulnerabilities in TypeScript projects
 ---
 

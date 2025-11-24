@@ -1,5 +1,5 @@
 ---
-name: security-input-validation
+name: sanitizing-user-inputs
 description: Sanitizing and validating user input to prevent XSS, injection attacks, and security vulnerabilities in TypeScript applications
 ---
 
@@ -593,12 +593,12 @@ Before deploying any endpoint that processes user input:
 ## Related Skills
 
 **Zod v4 Validation:**
-- `@zod-4/skills/using-zod-v4-features` - Top-level string format functions (z.email(), z.uuid(), z.url(), z.ipv4(), z.base64()) for validating common input formats
-- `@zod-4/skills/writing-zod-transformations` - Built-in string transformations (trim, toLowerCase, toUpperCase) for sanitizing and normalizing user input
+- using-zod-v4-features skill from the zod-4 plugin - Top-level string format functions (z.email(), z.uuid(), z.url(), z.ipv4(), z.base64()) for validating common input formats
+- writing-zod-transformations skill from the zod-4 plugin - Built-in string transformations (trim, toLowerCase, toUpperCase) for sanitizing and normalizing user input
 
 **Prisma 6 Security:**
-- `@prisma-6/skills/validating-query-inputs` - Zod validation patterns specifically for Prisma database operations and SQL injection prevention
-- `@prisma-6/skills/preventing-sql-injection` - Parameterized queries, raw query safety, and SQL injection prevention techniques in Prisma 6
+- validating-query-inputs skill from the prisma-6 plugin - Zod validation patterns specifically for Prisma database operations and SQL injection prevention
+- preventing-sql-injection skill from the prisma-6 plugin - Parameterized queries, raw query safety, and SQL injection prevention techniques in Prisma 6
 
 ## Resources
 

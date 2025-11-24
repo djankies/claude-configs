@@ -1,5 +1,5 @@
 ---
-name: SECURITY-credentials
+name: hashing-passwords
 description: CRITICAL security skill teaching proper credential and password handling. NEVER store passwords, use bcrypt/argon2, NEVER accept third-party credentials. Use when handling authentication, passwords, API keys, or any sensitive credentials.
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Task, TodoWrite
 version: 1.0.0
@@ -219,9 +219,9 @@ npm install -D @types/argon2
 - `references/emergency-response.md` - Breach response and migration
 
 **Related Skills**:
-- **Input Validation**: @typescript/SECURITY-input-validation
-- **Dependencies**: @typescript/SECURITY-dependencies
-- **External Data**: @typescript/VALIDATION-external-data
+- **Input Validation**: Use the sanitizing-user-inputs skill
+- **Dependencies**: Use the auditing-dependencies skill
+- **External Data**: Use the validating-external-data skill
 </progressive-disclosure>
 
 <validation>

@@ -1,5 +1,5 @@
 ---
-name: TypeScript Error Resolution
+name: resolving-type-errors
 description: Resolve all TypeScript errors using root cause analysis, targeted fixes, and mandatory validation
 ---
 

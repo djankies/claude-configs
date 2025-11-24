@@ -1,5 +1,5 @@
 ---
-name: TypeScript Type Extraction
+name: refactoring-inline-types
 description: Refactor inline types into reusable, well-organized type definitions using interfaces, type aliases, and generics
 ---
 

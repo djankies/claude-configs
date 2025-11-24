@@ -1,5 +1,5 @@
 ---
-name: TypeScript Type Checking
+name: diagnosing-type-errors
 description: Analyze TypeScript errors and provide detailed diagnostics with root cause analysis and specific fix recommendations
 ---
 
