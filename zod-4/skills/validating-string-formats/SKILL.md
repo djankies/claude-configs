@@ -1,5 +1,5 @@
 ---
-name: VALIDATION-string-formats
+name: validating-string-formats
 description: Guide to Zod v4 new features including top-level string formats, string transformations, codecs, and stringbool
 ---
 
@@ -183,10 +183,10 @@ For comprehensive format reference table, advanced features, template literals, 
 
 ## References
 
-- Validation: `@zod-4/skills/VALIDATION-schema-basics/SKILL.md`
-- Migration: `@zod-4/skills/MIGRATION-v3-to-v4/SKILL.md`
-- Transformations: `@zod-4/skills/TRANSFORMATION-string-methods/SKILL.md`
-- Performance: `@zod-4/skills/PERFORMANCE-optimization/SKILL.md`
+- Validation: VALIDATION-schema-basics skill from the zod-4 plugin
+- Migration: MIGRATION-v3-to-v4 skill from the zod-4 plugin
+- Transformations: TRANSFORMATION-string-methods skill from the zod-4 plugin
+- Performance: PERFORMANCE-optimization skill from the zod-4 plugin
 - Comprehensive docs: `@zod-4/knowledge/zod-4-comprehensive.md`
 
 ## Success Criteria

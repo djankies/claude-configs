@@ -1,5 +1,5 @@
 ---
-name: REVIEW-patterns
+name: reviewing-patterns
 description: Review Zod schemas for correctness, performance, type safety, and adherence to v4 best practices
 review: true
 ---
@@ -471,11 +471,11 @@ Or explicitly:
 
 ## References
 
-- Compatibility validation: `@zod-4/skills/VALIDATION-schema-basics/SKILL.md`
-- v4 Features: `@zod-4/skills/VALIDATION-string-formats/SKILL.md`
-- Error handling: `@zod-4/skills/ERRORS-customization/SKILL.md`
-- Performance: `@zod-4/skills/PERFORMANCE-optimization/SKILL.md`
-- Testing: `@zod-4/skills/testing-zod-schemas/SKILL.md`
+- Compatibility validation: VALIDATION-schema-basics skill from the zod-4 plugin
+- v4 Features: VALIDATION-string-formats skill from the zod-4 plugin
+- Error handling: ERRORS-customization skill from the zod-4 plugin
+- Performance: PERFORMANCE-optimization skill from the zod-4 plugin
+- Testing: testing-zod-schemas skill from the zod-4 plugin
 
 ## Success Criteria
 

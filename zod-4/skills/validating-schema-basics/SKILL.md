@@ -1,5 +1,5 @@
 ---
-name: VALIDATION-schema-basics
+name: validating-schema-basics
 description: Validate code for Zod v4 compatibility by detecting deprecated APIs and ensuring adherence to v4 patterns
 review: true
 ---
@@ -236,9 +236,9 @@ The skill will check for all deprecated patterns and provide remediation guidanc
 
 ## References
 
-- Full migration guide: `@zod-4/skills/MIGRATION-v3-to-v4/SKILL.md`
-- String formats: `@zod-4/skills/VALIDATION-string-formats/SKILL.md`
-- Error handling: `@zod-4/skills/ERRORS-customization/SKILL.md`
+- Full migration guide: MIGRATION-v3-to-v4 skill from the zod-4 plugin
+- String formats: VALIDATION-string-formats skill from the zod-4 plugin
+- Error handling: ERRORS-customization skill from the zod-4 plugin
 - Comprehensive docs: `@zod-4/knowledge/zod-4-comprehensive.md`
 
 ## Success Criteria

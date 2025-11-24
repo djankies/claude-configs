@@ -293,10 +293,10 @@ const schema = z.string().transform(s => {
 
 ## References
 
-- v4 Features: `@zod-4/skills/VALIDATION-string-formats/SKILL.md`
-- Error handling: `@zod-4/skills/ERRORS-customization/SKILL.md`
-- Performance: `@zod-4/skills/PERFORMANCE-optimization/SKILL.md`
-- Testing: `@zod-4/skills/testing-zod-schemas/SKILL.md`
+- v4 Features: VALIDATION-string-formats skill from the zod-4 plugin
+- Error handling: ERRORS-customization skill from the zod-4 plugin
+- Performance: PERFORMANCE-optimization skill from the zod-4 plugin
+- Testing: testing-zod-schemas skill from the zod-4 plugin
 - Comprehensive docs: `@zod-4/knowledge/zod-4-comprehensive.md`
 
 ## Success Criteria

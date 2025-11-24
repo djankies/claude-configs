@@ -1,5 +1,5 @@
 ---
-name: PERFORMANCE-optimization
+name: optimizing-performance
 description: Optimize Zod validation performance with safeParse, bulk array validation, schema reuse, and passthrough patterns
 ---
 
@@ -191,9 +191,9 @@ For complete implementation examples, benchmarking code, and profiling technique
 
 ## References
 
-- v4 Features: `@zod-4/skills/VALIDATION-string-formats/SKILL.md`
-- Error handling: `@zod-4/skills/ERRORS-customization/SKILL.md`
-- Testing: `@zod-4/skills/testing-zod-schemas/SKILL.md`
+- v4 Features: VALIDATION-string-formats skill from the zod-4 plugin
+- Error handling: ERRORS-customization skill from the zod-4 plugin
+- Testing: testing-zod-schemas skill from the zod-4 plugin
 - Comprehensive docs: `@zod-4/knowledge/zod-4-comprehensive.md`
 
 ## Success Criteria

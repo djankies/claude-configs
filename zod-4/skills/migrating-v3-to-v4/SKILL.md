@@ -1,5 +1,5 @@
 ---
-name: MIGRATION-v3-to-v4
+name: migrating-v3-to-v4
 description: Complete migration guide from Zod v3 to v4 covering all breaking changes and upgrade patterns
 ---
 
@@ -422,9 +422,9 @@ Compare bundle size before/after migration.
 
 ## References
 
-- Validation skill: `@zod-4/skills/VALIDATION-schema-basics/SKILL.md`
-- v4 Features: `@zod-4/skills/VALIDATION-string-formats/SKILL.md`
-- Error handling: `@zod-4/skills/ERRORS-customization/SKILL.md`
+- Validation skill: VALIDATION-schema-basics skill from the zod-4 plugin
+- v4 Features: VALIDATION-string-formats skill from the zod-4 plugin
+- Error handling: ERRORS-customization skill from the zod-4 plugin
 - Comprehensive docs: `@zod-4/knowledge/zod-4-comprehensive.md`
 
 ## Success Criteria

@@ -1,5 +1,5 @@
 ---
-name: TRANSFORMATION-string-methods
+name: transforming-string-methods
 description: Write type-safe transformations with Zod including string methods, custom transforms, codecs, and pipelines
 ---
 
@@ -273,10 +273,10 @@ For common transformation patterns, async transformations, and advanced pipeline
 
 ## References
 
-- v4 Features: `@zod-4/skills/VALIDATION-string-formats/SKILL.md`
-- Error handling: `@zod-4/skills/ERRORS-customization/SKILL.md`
-- Performance: `@zod-4/skills/PERFORMANCE-optimization/SKILL.md`
-- Testing: `@zod-4/skills/testing-zod-schemas/SKILL.md`
+- v4 Features: VALIDATION-string-formats skill from the zod-4 plugin
+- Error handling: ERRORS-customization skill from the zod-4 plugin
+- Performance: PERFORMANCE-optimization skill from the zod-4 plugin
+- Testing: testing-zod-schemas skill from the zod-4 plugin
 - Comprehensive docs: `@zod-4/knowledge/zod-4-comprehensive.md`
 
 ## Success Criteria

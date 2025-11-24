@@ -1,5 +1,5 @@
 ---
-name: ERRORS-customization
+name: customizing-errors
 description: Handle Zod validation errors with unified error API, custom messages, error formatting, and user-friendly display
 ---
 
@@ -466,10 +466,10 @@ const schema = z.union([
 
 ## References
 
-- Validation: `@zod-4/skills/VALIDATION-schema-basics/SKILL.md`
-- v4 Features: `@zod-4/skills/VALIDATION-string-formats/SKILL.md`
-- Framework integration: `@zod-4/skills/integrating-zod-frameworks/SKILL.md`
-- Testing: `@zod-4/skills/testing-zod-schemas/SKILL.md`
+- Validation: VALIDATION-schema-basics skill from the zod-4 plugin
+- v4 Features: VALIDATION-string-formats skill from the zod-4 plugin
+- Framework integration: integrating-zod-frameworks skill from the zod-4 plugin
+- Testing: testing-zod-schemas skill from the zod-4 plugin
 - Comprehensive docs: `@zod-4/knowledge/zod-4-comprehensive.md`
 
 ## Success Criteria
