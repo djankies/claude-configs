@@ -31,7 +31,7 @@ if echo "$CONTENT" | grep -q "DEPRECATED_PATTERN"; then
 The pattern 'DEPRECATED_PATTERN' is deprecated.
 Please use 'NEW_PATTERN' instead.
 
-See: your-plugin/skills/your-migration-skill"
+See: your-plugin/skills/migrating-async-request-apis"
   finish_hook 0
 fi
 
@@ -41,7 +41,7 @@ if echo "$CONTENT" | grep -q "UNSAFE_PATTERN"; then
 
 Consider using a safer alternative.
 
-See: your-plugin/skills/your-security-skill"
+See: your-plugin/skills/securing-server-actions"
   finish_hook 0
 fi
 

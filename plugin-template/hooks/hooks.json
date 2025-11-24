@@ -2,12 +2,12 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Write|Edit",
+        "matcher": "*",
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/validate-write.sh",
-            "timeout": 30
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/recommend-skills.sh",
+            "timeout": 10
           }
         ]
       }
@@ -18,19 +18,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/log-tool-use.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/validate.sh",
             "timeout": 10
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Before proceeding, verify that the user's request in $ARGUMENTS is clear and actionable.",
-            "timeout": 60
           }
         ]
       }
@@ -40,7 +29,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/session-init.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/init-session.sh",
             "timeout": 30
           }
         ]
