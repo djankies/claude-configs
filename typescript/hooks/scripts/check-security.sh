@@ -33,7 +33,7 @@ if echo "$NEW_STRING" | grep -iqE 'password.*=.*(Buffer.*toString|btoa|atob)'; t
 
 Base64 is NOT encryption. Use bcrypt, argon2, or scrypt for password hashing.
 
-See: @typescript/securing-credentials skill"
+See: @typescript/hashing-passwords skill"
   finish_hook 0
 fi
 
@@ -43,7 +43,7 @@ if echo "$NEW_STRING" | grep -iqE '(paypal|google|facebook|twitter|github|micros
 
 NEVER ask for passwords to other services. Use OAuth instead.
 
-See: @typescript/securing-credentials skill"
+See: @typescript/hashing-passwords skill"
   finish_hook 0
 fi
 

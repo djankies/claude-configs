@@ -102,7 +102,7 @@ fi
 
 if echo "$CODE_CONTENT" | grep -qE '\.innerHTML\s*=(?!\s*["\x27]{2})'; then
   WARNINGS+=("Security: .innerHTML usage - validate/sanitize input to prevent XSS")
-  RECOMMENDED_SKILLS+=("validating-inputs")
+  RECOMMENDED_SKILLS+=("sanitizing-user-inputs")
 fi
 
 if echo "$CODE_CONTENT" | grep -qE 'new Function\s*\('; then
@@ -112,13 +112,13 @@ fi
 if grep -qE "(export\s+)?(async\s+)?function\s+\w+.*Request|route\s*:|app\.(get|post|put|delete)" "$FILE_PATH"; then
   if ! echo "$CODE_CONTENT" | grep -qE '\.(safeParse|parse)\s*\(|validate\w*\s*\(|schema\.(parse|safeParse)|z\.(string|number|object)'; then
     WARNINGS+=("API Route: Missing input validation on API endpoint")
-    RECOMMENDED_SKILLS+=("validating-inputs")
+    RECOMMENDED_SKILLS+=("sanitizing-user-inputs")
   fi
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\binterface\s+\w+.*\{'; then
   if echo "$CODE_CONTENT" | grep -qE '\btype\s+\w+.*=.*\{'; then
-    RECOMMENDED_SKILLS+=("checking-types")
+    RECOMMENDED_SKILLS+=("diagnosing-type-errors")
   fi
 fi
 
@@ -151,7 +151,7 @@ try:
 except:
     pass
 " 2>/dev/null || true)
-      RECOMMENDED_SKILLS+=("fixing-type-errors")
+      RECOMMENDED_SKILLS+=("resolving-type-errors")
     fi
 
     if [[ "$TOTAL_WARNINGS" -gt 0 ]]; then

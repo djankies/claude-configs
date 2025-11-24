@@ -22,7 +22,7 @@ if echo "$CONTENT" | grep -q "DEPRECATED_PATTERN"; then
   echo "The pattern 'DEPRECATED_PATTERN' is deprecated."
   echo "Please use 'NEW_PATTERN' instead."
   echo ""
-  echo "See: your-plugin/skills/your-migration-skill"
+  echo "See: your-plugin/skills/migrating-async-request-apis"
   exit 2
 fi
 
@@ -31,7 +31,7 @@ if echo "$CONTENT" | grep -q "UNSAFE_PATTERN"; then
   echo ""
   echo "Consider using a safer alternative."
   echo ""
-  echo "See: your-plugin/skills/your-security-skill"
+  echo "See: your-plugin/skills/securing-server-actions"
   exit 0
 fi
 
