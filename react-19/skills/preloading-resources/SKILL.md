@@ -1,5 +1,5 @@
 ---
-name: resource-preloading
+name: preloading-resources
 description: Teaches resource preloading APIs in React 19 including prefetchDNS, preconnect, preload, and preinit. Use when optimizing initial load or navigation performance.
 allowed-tools: Read, Write, Edit
 version: 1.0.0

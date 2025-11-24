@@ -1,5 +1,5 @@
 ---
-name: code-splitting
+name: implementing-code-splitting
 description: Teaches code splitting with lazy() and Suspense in React 19 for reducing initial bundle size. Use when implementing lazy loading, route-based splitting, or optimizing performance.
 allowed-tools: Read, Write, Edit
 version: 1.0.0

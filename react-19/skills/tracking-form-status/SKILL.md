@@ -1,5 +1,5 @@
 ---
-name: form-status-tracking
+name: tracking-form-status
 description: Teaches useFormStatus hook for tracking form submission state in React 19. Use when implementing submit buttons, form loading states, or pending indicators.
 allowed-tools: Read, Write, Edit
 version: 1.0.0
