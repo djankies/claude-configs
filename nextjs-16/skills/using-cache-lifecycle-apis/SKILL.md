@@ -1,5 +1,5 @@
 ---
-name: caching-lifecycle-apis
+name: using-cache-lifecycle-apis
 description: Teach cache lifecycle APIs in Next.js 16 - cacheLife(), cacheTag(), updateTag(), refresh(), revalidateTag(). Use when managing cache invalidation, setting cache policies, or implementing cache tags.
 allowed-tools: Read, Write, Edit, Glob, Grep, TodoWrite
 version: 1.0.0
@@ -361,8 +361,8 @@ export async function DELETE(
 
 When caching database queries, optimize query selection and pagination to prevent performance issues:
 
-- For optimizing field selection in cached queries, see @prisma-6/skills/optimizing-query-selection
-- For implementing pagination in cached endpoints, see @prisma-6/skills/implementing-query-pagination
+- For optimizing field selection in cached queries, use the optimizing-query-selection skill from the prisma-6 plugin
+- For implementing pagination in cached endpoints, use the implementing-query-pagination skill from the prisma-6 plugin
 
 ## Common Patterns
 

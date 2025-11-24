@@ -12,7 +12,7 @@ Comprehensive review for Next.js 16 compliance covering security vulnerabilities
 
 ## Review Process
 
-For comprehensive security review patterns, see @review/reviewing-security. For dependency auditing, see @review/reviewing-dependencies.
+For comprehensive security review patterns, use the reviewing-security skill from the review plugin. For dependency auditing, use the reviewing-dependencies skill from the review plugin.
 
 ### 1. Security Audit
 

@@ -1,5 +1,5 @@
 ---
-name: security-data-access-layer
+name: securing-data-access-layer
 description: Teach Data Access Layer pattern to prevent CVE-2025-29927 middleware authentication bypass. Use when implementing authentication, authorization, protecting routes, or working with server actions that need auth.
 allowed-tools: Read, Write, Edit, Glob, Grep, TodoWrite
 version: 1.0.0
@@ -37,7 +37,7 @@ Implement a **multi-layer security strategy** with authentication verification a
 
 ### Core Pattern: verifySession()
 
-For comprehensive input validation patterns to use alongside authentication, see @typescript/SECURITY-input-validation.
+For comprehensive input validation patterns to use alongside authentication, use the sanitizing-user-inputs skill from the typescript plugin.
 
 Create a centralized Data Access Layer that verifies authentication before ANY data access:
 
@@ -174,7 +174,7 @@ export async function getPost(postId: string) {
 
 ### Multi-Step Atomic Operations
 
-For authenticated operations requiring atomicity (e.g., creating a post with tags, transferring ownership), see @prisma-6/skills/using-interactive-transactions.
+For authenticated operations requiring atomicity (e.g., creating a post with tags, transferring ownership), use the using-interactive-transactions skill from the prisma-6 plugin.
 
 ### Public + Private Data
 

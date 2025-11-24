@@ -1,5 +1,5 @@
 ---
-name: migration-middleware-to-proxy
+name: migrating-middleware-to-proxy
 description: Teach middleware.ts to proxy.ts migration in Next.js 16. Use when migrating middleware, encountering middleware errors, or implementing request proxying.
 allowed-tools: Read, Write, Edit, Glob, TodoWrite
 version: 1.0.0

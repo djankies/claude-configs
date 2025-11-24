@@ -178,7 +178,7 @@ export async function transferFunds(formData: FormData) {
 
 ## Validation Patterns
 
-For comprehensive Zod validation patterns and runtime type checking, see @typescript/VALIDATION-runtime-checks.
+For comprehensive Zod validation patterns and runtime type checking, use the using-runtime-checks skill from the typescript plugin.
 
 Structure validation schemas for reusability:
 
@@ -246,7 +246,7 @@ Every server action must implement:
 
 ## Integration with Forms
 
-For comprehensive form state management patterns and action state handling, see @react-19/HOOKS-use-action-state.
+For comprehensive form state management patterns and action state handling, use the using-action-state skill from the react-19 plugin.
 
 Use with React 19's useActionState hook for form state management:
 
@@ -280,12 +280,12 @@ export function ProfileForm() {
 ## Related Skills
 
 **Zod v4 Validation:**
-- `@zod-4/skills/handling-zod-errors` - Error customization with unified error API, safeParse pattern, and error formatting for secure error responses
-- `@zod-4/skills/using-zod-v4-features` - Top-level string format functions (z.email(), z.uuid(), z.url()) for validating common input types
+- handling-zod-errors skill from the zod-4 plugin - Error customization with unified error API, safeParse pattern, and error formatting for secure error responses
+- using-zod-v4-features skill from the zod-4 plugin - Top-level string format functions (z.email(), z.uuid(), z.url()) for validating common input types
 
 **Prisma 6 Integration:**
-- `@prisma-6/skills/validating-query-inputs` - Validate external input with Zod before Prisma operations in server actions
-- `@prisma-6/skills/handling-transaction-errors` - Handle Prisma transaction errors with P-code checking and retry strategies for server action database operations
+- validating-query-inputs skill from the prisma-6 plugin - Validate external input with Zod before Prisma operations in server actions
+- handling-transaction-errors skill from the prisma-6 plugin - Handle Prisma transaction errors with P-code checking and retry strategies for server action database operations
 
 ## Common Vulnerabilities
 

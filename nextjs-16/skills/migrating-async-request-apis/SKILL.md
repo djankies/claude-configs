@@ -1,5 +1,5 @@
 ---
-name: migration-async-request-apis
+name: migrating-async-request-apis
 description: Teach async request APIs in Next.js 16 - params, searchParams, cookies(), headers(), draftMode() are now async. Use when migrating from Next.js 15, fixing type errors, or working with request data.
 allowed-tools: Read, Write, Edit, Glob, Grep, TodoWrite
 version: 1.0.0

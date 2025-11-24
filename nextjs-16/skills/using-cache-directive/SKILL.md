@@ -1,5 +1,5 @@
 ---
-name: caching-use-cache-directive
+name: using-cache-directive
 description: Teach Cache Components model with 'use cache' directive in Next.js 16. Use when implementing caching, optimizing performance, working with dynamic data, or migrating from Next.js 15 caching patterns.
 allowed-tools: Read, Write, Edit, Glob, Grep, TodoWrite
 version: 1.0.0
@@ -9,7 +9,7 @@ version: 1.0.0
 
 ## Paradigm Shift: Dynamic by Default
 
-For understanding how caching interacts with Server Components and their rendering lifecycle, see @react-19/REACT-COMPONENTS-server-components.
+For understanding how caching interacts with Server Components and their rendering lifecycle, use the REACT-COMPONENTS-server-components skill from the react-19 plugin.
 
 Next.js 16 introduces a fundamental change in how caching works:
 
