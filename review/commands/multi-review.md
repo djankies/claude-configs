@@ -11,321 +11,216 @@ You are a code review orchestrator. You coordinate specialized review agents in 
 </role>
 
 <context>
-Files/directories to review: $ARGUMENTS
-Available review concerns: {from Phase 0 discovery}
-
-Check which tools are available:
-`bash ~/.claude/plugins/marketplaces/claude-configs/review/scripts/review-check-tools.sh`
+Paths to review: $ARGUMENTS
+If no arguments: review current git changes (staged + unstaged)
 </context>
 
-## Phase 0: Discover Review Skills
+## Phase 1: Review Scope Selection
 
-### 0.1 Run Discovery Script
+### 1.1 Select Review Types
 
-Execute skill discovery to find all available review concerns:
-
-```bash
-bash ~/.claude/plugins/marketplaces/claude-configs/review/scripts/discover-review-skills.sh
-```
-
-### 0.2 Parse Discovery Output
-
-Extract from JSON output:
-- `available_concerns`: Unique list of concern names (e.g., "react", "typescript", "nextjs", "security")
-- `skill_mapping`: Map of concern → {plugin, skill_path} for loading skills
-
-Example output structure:
-```json
-{
-  "available_concerns": ["react", "typescript", "nextjs", "security", "code-quality"],
-  "skill_mapping": {
-    "react": {"plugin": "review", "skill_path": "reviewing-react"},
-    "typescript": {"plugin": "review", "skill_path": "reviewing-typescript"}
-  }
-}
-```
-
-### 0.3 Process User Arguments
-
-**If user provides concern arguments** (e.g., `/review react typescript nextjs`):
-1. Parse concern names from $ARGUMENTS
-2. Map each concern to discovered skills using skill_mapping
-3. Load skills using Skill tool: `@{plugin}/{skill_name}`
-4. If concern not found in available_concerns:
-   - Warn user: "Concern '{concern}' not found"
-   - Suggest: "Available concerns: {available_concerns}"
-   - Continue with valid concerns
-
-**If user provides no arguments** (e.g., `/review`):
-1. Display available concerns from discovery
-2. Use AskUserQuestion to let user select concerns:
+Ask user which review types to run BEFORE exploration:
 
 ```AskUserQuestion
-Question: "Which concerns should I review?"
-Header: "Available Review Concerns"
-MultiSelect: true
-Options: {generate from available_concerns}
-```
-
-3. Load selected skills
-
-### 0.4 Backward Compatibility
-
-If discovery script fails or returns empty results:
-- Fall back to hardcoded concern list from Phase 1.1
-- Log warning in problems_encountered
-- Continue with standard multi-select flow
-
-## Phase 1: Scope & Tool Setup
-
-### 1.1 Select Review Scope
-
-Use AskUserQuestion:
-
-```
-
-Question: "Which aspects should I review?"
+Question: "What aspects of the codebase should I review?"
 Header: "Review Scope"
 MultiSelect: true
-DefaultSelections: ["Code Quality"]
 Options:
-
-- Code Quality: "Linting, formatting, type safety (~2min, needs eslint/typescript)"
-- Security: "Vulnerabilities, unsafe patterns (~3min, needs semgrep)"
-- Complexity: "Cyclomatic complexity, maintainability (~2min, needs lizard)"
-- Duplication: "Copy-paste detection (~4min, needs jsinspect)"
-- Dependencies: "Unused dependencies, dead code (~3min, needs knip/depcheck)"
-
+  - Code Quality: "Linting, formatting, patterns"
+  - Security: "Vulnerabilities, unsafe patterns"
+  - Complexity: "Cyclomatic complexity, maintainability"
+  - Duplication: "Copy-paste detection"
+  - Dependencies: "Unused dependencies, dead code"
 ```
 
-### 1.2 Validate File Count
+### 1.2 Deploy Explore Agent
 
-Count files to review:
-
-```bash
-# For directories
-find <directory> -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \) | wc -l
-
-# For git changes
-if git rev-parse --git-dir > /dev/null 2>&1; then
-  echo "Staged: $(git diff --cached --name-only | wc -l), Unstaged: $(git diff --name-only | wc -l)"
-fi
-```
-
-**If >15 files:** Ask user to confirm or select subset (suggest 3-5 logical subsets by directory/change type)
-
-### 1.3 Check & Install Tools
-
-`bash ~/.claude/plugins/marketplaces/claude-configs/review/scripts/review-check-tools.sh` -> Returns list of installed and missing tools
-
-Map review types to required tools:
-
-- Code Quality → eslint, typescript, knip
-- Security → semgrep
-- Complexity → lizard
-- Duplication → jsinspect
-- Dependencies → depcheck, knip
-
-If tools missing, STOP and use the AskUserQuestion tool to ask the user if they want to install the tools.
-
-```AskUserQuestion
-Question: "Do you want to install the tools?"
-Header: "Install Tools"
-multi-select: true
-options:
-  - "semgrep"
-  - "lizard"
-  - "jsinspect": "Duplicate code detection tool"
-  - "depcheck": "Find unused dependencies"
-  - "knip": "Find unused code/exports/deps (comprehensive)"
-  - "eslint": "JavaScript/TypeScript linter for code quality"
-  - "typescript": "Type checking with tsc command"
-```
-
-If the user confirms, use the Task tool to install the tools the user selected.
-
-```
-Task:
-- subagent_type: "general-purpose"
-- description: "Install review tools: {tool_list}"
-- prompt: "Install these tools: {list}. Run install commands, verify with --version, report success/failure. Handle errors gracefully."
-```
-
-## Phase 2: Context Mapping
-
-### 2.1 Enumerate Files
-
-```bash
-# For directories
-find <directory> -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \)
-
-# For changes
-git diff --cached --name-only && git diff --name-only
-```
-
-### 2.2 Map Dependencies
-
-Deploy context mapper via Task:
+Use the Task tool with subagent_type "Explore" to analyze the codebase for the selected review types:
 
 ```task
 Task:
-- subagent_type: "general-purpose"
-- description: "Map code dependencies"
+- subagent_type: "Explore"
+- description: "Analyze codebase for {selected_review_types}"
 - prompt: |
-  Analyze these files (DO NOT review, ONLY map relationships):
-  {file_list}
+  Analyze these paths to detect technologies and find relevant skills:
+  Paths: $ARGUMENTS (or current git changes if empty)
+  Selected Review Types: {selected_review_types from 1.1}
 
-  For each file identify:
-  - Direct imports (max 10, prioritize local)
-  - All exports
-  - Files that import this (max 5)
-  - Complexity flags (>300 lines, >4 nesting depth)
+  1. Enumerate files:
+     - For directories: find all source files (.ts, .tsx, .js, .jsx, .py, etc.)
+     - For "." or no args: git diff --cached --name-only && git diff --name-only
+     - Count total files
 
-  Also collect:
-  - Project name (package.json)
-  - Git branch
-  - Data models (interfaces/types/classes)
-  - Config files (.env, tsconfig.json, etc)
+  2. Detect technologies by examining:
+     - File extensions (.ts, .tsx, .jsx, .py, etc.)
+     - package.json dependencies (react, next, prisma, zod, etc.)
+     - Import statements in source files
+     - Config files (tsconfig.json, next.config.js, prisma/schema.prisma, etc.)
 
-  Output ONLY this JSON:
+  3. Discover available review skills:
+     Run: bash ~/.claude/plugins/marketplaces/claude-configs/review/scripts/discover-review-skills.sh
+     Parse JSON output for complete skill_mapping
+
+  4. Filter skills by BOTH detected technologies AND selected review types:
+     - Only include skills relevant to: {selected_review_types}
+     - Map detected technologies to plugins:
+       - React/JSX → react-19 plugin
+       - TypeScript → typescript plugin
+       - Next.js → nextjs-16 plugin
+       - Prisma → prisma-6 plugin
+       - Zod → zod-4 plugin
+       - General → review plugin (always include)
+
+  5. Return JSON with skills organized by review type:
   {
-    "project_name": "...",
-    "branch": "...",
-    "files": {
-      "path/to/file.ts": {
-        "imports": [...],
-        "exports": [...],
-        "imported_by": [...],
-        "line_count": 150,
-        "complexity_flags": [...]
-      }
+    "files": ["path/to/file1.ts", ...],
+    "file_count": N,
+    "detected_technologies": ["react", "typescript", "nextjs"],
+    "selected_review_types": ["Security", "Code Quality"],
+    "skills_by_review_type": {
+      "Security": ["reviewing-security", "reviewing-type-safety", "securing-server-actions", "securing-data-access-layer"],
+      "Code Quality": ["reviewing-code-quality", "reviewing-type-safety", "reviewing-hook-patterns", "reviewing-nextjs-16-patterns"]
     },
-    "data_models": {...},
-    "config_files": [...]
+    "project_context": {
+      "project_name": "from package.json",
+      "branch": "from git",
+      "config_files": [...]
+    }
   }
 ```
 
-Validate output is valid JSON with required fields.
+### 1.3 Validate File Count
 
-## Phase 3: Parallel Agent Deployment
+Parse Explore agent output. If file_count > 15, ask user to confirm or select subset. Warn about degraded review quality.
 
-### 3.1 Construct Agent Prompts
+### 1.4 Check Required Tools
 
-For each selected review type, construct detailed prompt using context from Phase 2:
+Run: `bash ~/.claude/plugins/marketplaces/claude-configs/review/scripts/review-check-tools.sh`
+
+Map selected review types to tools:
+
+- Code Quality → eslint, typescript
+- Security → semgrep
+- Complexity → lizard
+- Duplication → jsinspect
+- Dependencies → knip, depcheck
+
+If tools missing for selected types, ask user:
+
+```AskUserQuestion
+Question: "Some review tools are missing. Install them?"
+Header: "Missing Tools"
+MultiSelect: true
+Options: {only list missing tools needed for selected review types}
+```
+
+## Phase 2: Parallel Review Deployment
+
+### 2.1 Build Skill Lists Per Review Type
+
+For each selected review type, compile the relevant skills from ALL detected technologies:
+
+```text
+Example: User selected "Security" + "Code Quality"
+Detected technologies: ["react", "typescript", "nextjs"]
+
+Security Review skills:
+- review:reviewing-security (general)
+- typescript:reviewing-type-safety (for type-related security)
+- react-19:reviewing-server-actions (if nextjs detected)
+- nextjs-16:securing-server-actions (if nextjs detected)
+- nextjs-16:securing-data-access-layer (if nextjs detected)
+
+Code Quality Review skills:
+- review:reviewing-code-quality (general)
+- typescript:reviewing-type-safety
+- react-19:reviewing-hook-patterns
+- react-19:reviewing-component-architecture
+- nextjs-16:reviewing-nextjs-16-patterns
+```
+
+### 2.2 Construct Agent Prompts
+
+For each selected review type, construct prompt with ALL relevant skills:
 
 ```prompt
 Review Type: {review_type}
 
 Files to Review:
-{file_list with line counts}
+{file_list from exploration}
 
 Project Context:
 - Project: {project_name}
-- Branch: {branch_name}
+- Branch: {branch}
+- Technologies: {detected_technologies}
 
-Tool Availability:
-{from Phase 1.3 tool check}
-Available: {list of available tools for this review type}
-Missing: {list of missing tools for this review type}
+Skills to Load (load ALL before reviewing):
+{list of plugin:skill_path for this review type}
 
-File Dependencies:
-{for each file: imports, exports, imported_by, complexity_flags}
-
-Data Models:
-{models from Phase 2}
-
-Configuration Files:
-{config_files from Phase 2}
+Use the following tools during your review: {from Phase 1.4}
 
 Instructions:
-1. Load skill: reviewing-{review_type}
-2. If tools available, run skill's automated scripts FIRST
-3. Parse script outputs for findings
-4. Use Read/Grep/Glob for manual inspection of flagged files
-5. Apply skill's detection patterns and severity mapping
-6. Return standardized JSON output
-
-CRITICAL:
-- Prioritize automated tool outputs (authoritative source)
-- Use manual inspection to supplement, not replace, automated findings
-- All findings must have exact file:line citations from scripts or Read tool
-- Focus ONLY on {review_type} issues
+1. Load EACH skill using the Skill tool
+2. Apply detection patterns from ALL loaded skills
+3. Run automated scripts if available in skills
+4. Focus ONLY on {review_type} concerns
+5. Return standardized JSON
 ```
 
-### 3.2 Deploy All Agents in Parallel
+### 2.3 Deploy All Review Agents in Parallel
 
-**CRITICAL:** Deploy ALL agents in SINGLE message with multiple Task calls.
-
-Example for "Code Quality" + "Security":
+**CRITICAL:** Deploy ALL agents in SINGLE message.
 
 ```tasks
-Task 1:
+{for each selected_review_type}
+Task {n}:
 - subagent_type: "code-reviewer"
-- description: "Code Quality Review"
-- prompt: {constructed_prompt_code_quality}
-
-Task 2:
-- subagent_type: "code-reviewer"
-- description: "Security Review"
-- prompt: {constructed_prompt_security}
+- description: "{review_type} Review"
+- prompt: {constructed_prompt with all relevant skills}
+{end}
 ```
 
-### 3.3 Validate Agent Outputs
+### 2.4 Validate Agent Outputs
 
-For each agent response:
+For each response:
 
-1. Parse JSON: `echo "$output" | jq empty`
-2. If parsing fails: extract text between first `{` and last `}`, retry
-3. Validate required fields: review_type, summary, negative_findings, positive_findings
-4. Check data integrity:
-   - File paths exist
-   - Severity values: critical|high|medium|nitpick
-   - negative_findings have: affected_code, code_snippet, description, rationale, recommendation
-5. Log errors in problems_encountered, continue with other agents
+1. Parse JSON
+2. Validate fields: review_type, skills_used, summary, negative_findings, positive_findings
+3. Check severity values: critical|high|medium|nitpick
+4. Log failures, continue with valid outputs
 
-## Phase 4: Synthesis
+## Phase 3: Synthesis
 
-### 4.1 Deduplicate Findings
+### 3.1 Deduplicate Findings
 
-Duplicated findings between agents indicate high confidence in the finding.
+For findings affecting same file:line across agents:
 
-For duplicates:
+- Keep longest rationale
+- Merge review_types array
+- Note higher confidence
+- Preserve skill_source from each
 
-- Keep finding with longest rationale
-- Note higher confidence in the finding.
-- Merge review_types: ["security", "code-quality"]
-- Combine recommendations if different
-- Update description: "{original} (Found by: {review_types})"
+### 3.2 Calculate Metrics
 
-### 4.2 Calculate Metrics
-
-```metrics
+```text
 total_issues = count(negative_findings after deduplication)
 critical_count = count(severity == "critical")
 high_count = count(severity == "high")
 medium_count = count(severity == "medium")
 nitpick_count = count(severity == "nitpick")
-
-overall_grade = min(agent.summary.grade for all agents)
-overall_risk = max(agent.summary.risk_level for all agents)
+overall_grade = min(all grades)
+overall_risk = max(all risk_levels)
 ```
 
-### 4.3 Identify Priority Actions
+### 3.3 Priority Actions
 
 1. All critical issues → priority 1
 2. High issues affecting >2 files → priority 2
-3. Top 3 medium issues by rationale length → priority 3
+3. Top 3 medium issues → priority 3
 
-Return top 10 actions sorted by priority.
+## Phase 4: Report
 
-### 4.4 Synthesize Feedback
-
-Extract skill_feedback and prompt_feedback from all agents.
-Identify common themes, gaps, ignored instructions.
-
-## Phase 5: Report Generation
-
-### 5.1 Ask Format Preference
+### 4.1 Format Selection
 
 ```AskUserQuestion
 Question: "How would you like the results?"
@@ -336,161 +231,70 @@ Options:
   - JSON: "Save as ./YYYY-MM-DD-review-report.json"
 ```
 
-### 5.2 Generate Report
+### 4.2 Report Template
 
-**Template:**
-
-````markdown
+```markdown
 # Code Review Report
 
-**Generated:** {datetime} | **Project:** {project_name} | **Branch:** {branch_name}
-**Files Reviewed:** {total_files} | **Review Types:** {types}
+**Generated:** {datetime} | **Project:** {project_name} | **Branch:** {branch}
+**Files Reviewed:** {file_count} | **Technologies:** {detected_technologies}
+**Review Types:** {selected_review_types}
 
-## Executive Summary
+## Summary
 
-| Metric        | Value            |
-| ------------- | ---------------- |
-| Total Issues  | {total_issues}   |
-| Critical      | {critical_count} |
-| High          | {high_count}     |
-| Medium        | {medium_count}   |
-| Nitpick       | {nitpick_count}  |
-| Overall Grade | {overall_grade}  |
-| Risk Level    | {overall_risk}   |
+| Metric       | Value            |
+| ------------ | ---------------- |
+| Total Issues | {total_issues}   |
+| Critical     | {critical_count} |
+| High         | {high_count}     |
+| Medium       | {medium_count}   |
+| Nitpick      | {nitpick_count}  |
+| Grade        | {overall_grade}  |
+| Risk         | {overall_risk}   |
 
-### Top Priority Actions
+## Priority Actions
 
-{for top 5 priority_actions}
-{priority}. **{action}** - {description}
-Recommendation: {recommendation}
-{end}
+{top 5 priority actions with recommendations}
 
----
+## Findings by Review Type
 
-## Detailed Findings by Review Type
+{for each review_type: critical → high → medium → nitpick findings}
+{include skill_source for each finding}
 
-{for each review_type}
+## Positive Patterns
 
-### {review_type} Review
-
-Grade: {grade} | Risk: {risk_level} | Issues: {total_issues}
-
-#### Critical Issues ({critical_count})
-
-{for each critical finding}
-**{file_path}** (lines {line_start}-{line_end})
-
-```{language}
-{code_snippet}
-```
-````
-
-**Issue:** {description}
-**Why it matters:** {rationale}
-**Fix:** {recommendation}
-
----
-
-{end}
-
-#### High Priority ({high_count})
-
-{same format}
-
-#### Medium Priority ({medium_count})
-
-{same format, collapsed by default}
-
-#### Nitpicks ({nitpick_count})
-
-{brief format: file + description + fix}
-
-#### Positive Findings ({positive_count})
-
-{for each}
-**{pattern}** in {files}: {description}
-{end}
-
-{end for each review_type}
-
----
-
-## Problems Encountered
-
-{if any: list type, message, context}
-{else: "No problems encountered"}
-
----
-
-## Process Feedback
-
-**What Worked Well:** {synthesized positive skill_feedback}
-**Areas for Improvement:** {synthesized improvement suggestions}
-**Prompt Issues:** {ignored or unclear instructions from agents}
-Record feedback in ~/.claude/plugins/marketplaces/claude-configs/review/feedback.md for future improvements. If the feedback already exists, note in the document that the same feedback was reported again. (higher confidence)
-
----
-
-### 5.3 Save or Present
-
-**Chat:** Display directly
-**Markdown/JSON:**
-
-```bash
-REPORT_DATE=$(date +"%Y-%m-%d")
-echo "$REPORT_CONTENT" > "./${REPORT_DATE}-review-report.{md|json}"
+{aggregated positive findings}
 ```
 
-### 5.4 Next Steps
-
-use the AskUserQuestion tool with these exact options:
+### 4.3 Next Steps
 
 ```AskUserQuestion
-Question: "What are the next steps?"
+Question: "What next?"
 Header: "Next Steps"
 MultiSelect: true
 Options:
   - "Fix critical issues"
-  - "Fix high priority issues"
-  - "Fix medium priority issues"
-  - "Fix nitpick issues"
-  - "Review complete
-  - "Something else..." (let the user describe the next steps)
+  - "Fix high issues"
+  - "Fix medium issues"
+  - "Fix nitpicks"
+  - "Done"
 ```
-
-DO NOT include a "Fix all issues" option - It's multi-select, so the user can select multiple options.
 
 ## Constraints
 
-- Phase order: 1→2→3→4→5 (no skipping)
-- Ask scope BEFORE checking tools
-- Deploy ALL agents in SINGLE message (parallel, not sequential)
-- Never perform reviews yourself
+- Phase order: 1→2→3→4 (no skipping)
+- Explore agent detects technologies
+- User selects review types via AskUserQuestion
+- Each review agent receives ALL skills for detected technologies + review type
+- Deploy ALL review agents in SINGLE message
+- Never perform reviews yourself—delegate only
 - Never fail entire review due to single agent failure
-- Only check/install tools for selected review types
-- Wait for all agents before synthesis
-- Deduplicate findings before presenting
-- Validate all agent outputs for JSON correctness
-- Warn about >15 files, suggest subsets
-- Include git context in agent prompts
-- Synthesize feedback, don't concatenate
-- Use alphabetical ordering for determinism
-- Include timestamps in reports
-
-## Validation Checklist
-
-When all of these requirements are met you are done.
-
-**Phase 1:** ✓ Scope selected, tools available
-**Phase 2:** ✓ Files enumerated, context mapped (valid JSON)
-**Phase 3:** ✓ All agents deployed in single message, outputs validated
-**Phase 4:** ✓ Findings deduplicated, metrics calculated, priority actions identified
-**Phase 5:** ✓ Report format selected, generated correctly, saved/presented
+- Deduplicate before presenting
+- Warn if >15 files
 
 ## Error Recovery
 
-**Tool installation fails:** Continue with available tools, document missing tools
-**Context mapping fails:** Use file list without dependencies, document issue
-**Agent fails:** Continue with other agents, generate partial report
-**Agent timeout (>10min):** Log timeout, suggest reducing scope
-**All agents fail:** Present diagnostic info, suggest troubleshooting steps
+- Exploration fails: Fall back to generic review plugin skills only
+- Tool missing: Continue without that tool, note in report
+- Agent fails: Continue with others, generate partial report
+- All fail: Present diagnostic, suggest manual review
