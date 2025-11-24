@@ -1,5 +1,5 @@
 ---
-name: review-react-hook-patterns
+name: reviewing-hook-patterns
 description: Review React hook usage for React 19 compliance and best practices
 review: true
 allowed-tools: Read, Grep, Glob

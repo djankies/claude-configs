@@ -121,8 +121,8 @@ For comprehensive Server Actions documentation, see: `research/react-19-comprehe
 ## Related Skills
 
 **Zod v4 Error Handling:**
-- `@zod-4/skills/handling-zod-errors` - SafeParse pattern, error flattening, and user-friendly error messages for server action validation
+- handling-zod-errors skill from the zod-4 plugin - SafeParse pattern, error flattening, and user-friendly error messages for server action validation
 
 **Prisma 6 Integration:**
-- `@prisma-6/skills/ensuring-query-type-safety` - Type-safe Prisma queries with GetPayload patterns for server action database operations
-- `@prisma-6/skills/validating-query-inputs` - Input validation patterns for database queries in server actions to prevent injection and invalid data
+- ensuring-query-type-safety skill from the prisma-6 plugin - Type-safe Prisma queries with GetPayload patterns for server action database operations
+- validating-query-inputs skill from the prisma-6 plugin - Input validation patterns for database queries in server actions to prevent injection and invalid data

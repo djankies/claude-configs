@@ -1,5 +1,5 @@
 ---
-name: TYPES-any-vs-unknown
+name: avoiding-any-types
 description: Teaches when and how to use unknown instead of any type in TypeScript. Use when working with TypeScript code that has any types, needs type safety, handling external data, or when designing APIs. Critical for preventing type safety violations.
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Task, TodoWrite
 version: 1.0.0
@@ -69,9 +69,9 @@ When using `unknown`, implement type guards:
 
 For detailed patterns and examples:
 
-- **Type Guard Patterns**: See @typescript/TYPES-type-guards for comprehensive type guard implementation
-- **Runtime Validation**: See @typescript/VALIDATION-runtime-checks for validating unknown data
-- **Generic Constraints**: See @typescript/TYPES-generics for constraining generic types
+- **Type Guard Patterns**: Use the using-type-guards skill for comprehensive type guard implementation
+- **Runtime Validation**: Use the using-runtime-checks skill for validating unknown data
+- **Generic Constraints**: Use the using-generics skill for constraining generic types
 </progressive-disclosure>
 
 <examples>
@@ -116,7 +116,7 @@ if (isUser(userData)) {
 }
 ```
 
-**Better**: Use Zod for complex validation (see @typescript/VALIDATION-runtime-checks)
+**Better**: Use Zod for complex validation (use the using-runtime-checks skill)
 
 ---
 

@@ -103,5 +103,5 @@ For comprehensive useOptimistic documentation, see: `research/react-19-comprehen
 <related-skills>
 ## Related Skills
 
-For handling transaction errors in optimistic updates, see @prisma-6/skills/handling-transaction-errors.
+For handling transaction errors in optimistic updates, use the handling-transaction-errors skill from the prisma-6 plugin.
 </related-skills>

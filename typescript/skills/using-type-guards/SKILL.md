@@ -1,5 +1,5 @@
 ---
-name: TYPES-type-guards
+name: using-type-guards
 description: Teaches how to write custom type guards with type predicates and use built-in type narrowing in TypeScript. Use when working with unknown types, union types, validating external data, or implementing type-safe runtime checks.
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Task, TodoWrite
 version: 1.0.0
@@ -301,9 +301,9 @@ function processData(data: unknown): void {
 - `testing-guide.md` - Complete unit testing guide with examples
 
 **Related Skills**:
-- **Runtime Validation Libraries**: See @typescript/VALIDATION-runtime-checks for Zod/io-ts patterns
-- **Unknown Type Handling**: See @typescript/TYPES-any-vs-unknown for when to use type guards
-- **Error Type Guards**: See @typescript/ERROR-HANDLING-type-guards for error-specific patterns
+- **Runtime Validation Libraries**: Use the using-runtime-checks skill for Zod/io-ts patterns
+- **Unknown Type Handling**: Use the avoiding-any-types skill for when to use type guards
+- **Error Type Guards**: Error-specific type guard patterns can be found in error handling documentation
 </progressive-disclosure>
 
 <constraints>

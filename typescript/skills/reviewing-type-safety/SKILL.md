@@ -1,5 +1,5 @@
 ---
-name: review-type-safety
+name: reviewing-type-safety
 description: Code review skill that checks TypeScript type safety, exported for use by cross-cutting review plugin
 review: true
 ---
@@ -28,7 +28,7 @@ When reviewing TypeScript code, systematically check for these type safety viola
 **Correct alternatives:**
 - Use `unknown` with type guards instead of `any`
 - Use specific types or generic constraints
-- See @typescript/TYPES-any-vs-unknown for guidance
+- Use the avoiding-any-types skill for guidance
 
 **Severity:** HIGH - Defeats TypeScript's purpose entirely
 
@@ -75,7 +75,7 @@ When reviewing TypeScript code, systematically check for these type safety viola
 - Use Zod, io-ts, or similar for runtime validation
 - Validate at system boundaries
 - Never trust external data
-- See @typescript/VALIDATION-runtime-checks
+- Use the using-runtime-checks skill
 
 **Severity:** HIGH - Security and reliability issue
 
@@ -102,7 +102,7 @@ When reviewing TypeScript code, systematically check for these type safety viola
 - OAuth for third-party authentication
 - Sanitize all user input
 - Use parameterized queries
-- See @typescript/SECURITY-credentials
+- Use the hashing-passwords skill
 
 **Severity:** CRITICAL - Production security breach risk
 
@@ -116,7 +116,7 @@ When reviewing TypeScript code, systematically check for these type safety viola
 **Correct patterns:**
 - Constrain to expected shape: `<T extends { id: string }>`
 - Use multiple type parameters with relationships: `<T extends U>`
-- See @typescript/TYPES-generics
+- Use the using-generics skill
 
 **Severity:** MEDIUM - Reduces type safety guarantees
 

@@ -1,5 +1,5 @@
 ---
-name: TYPES-generics
+name: using-generics
 description: Teaches generic constraints, avoiding any in generic defaults, and mapped types in TypeScript. Use when creating reusable functions, components, or types that work with multiple types while maintaining type safety.
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Task, TodoWrite
 version: 1.0.0
@@ -323,9 +323,9 @@ See `references/detailed-examples.md` for more conditional type patterns includi
 
 **Related skills:**
 
-- @typescript/TYPES-type-guards for narrowing generic types
-- @typescript/TYPES-any-vs-unknown for generic defaults
-- @typescript/VALIDATION-runtime-checks for validating generic data
+- Use the using-type-guards skill for narrowing generic types
+- Use the avoiding-any-types skill for generic defaults
+- Use the using-runtime-checks skill for validating generic data
 </progressive-disclosure>
 
 <constraints>

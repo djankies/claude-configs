@@ -225,16 +225,16 @@ For complete implementation examples with all features, see:
 
 ## References
 
-- v4 Features: `@zod-4/skills/VALIDATION-string-formats/SKILL.md`
-- Error handling: `@zod-4/skills/ERRORS-customization/SKILL.md`
-- Testing: `@zod-4/skills/testing-zod-schemas/SKILL.md`
-- Transformations: `@zod-4/skills/TRANSFORMATION-string-methods/SKILL.md`
+- v4 Features: VALIDATION-string-formats skill from the zod-4 plugin
+- Error handling: ERRORS-customization skill from the zod-4 plugin
+- Testing: testing-zod-schemas skill from the zod-4 plugin
+- Transformations: TRANSFORMATION-string-methods skill from the zod-4 plugin
 - Comprehensive docs: `@zod-4/knowledge/zod-4-comprehensive.md`
 
 **Prisma 6 Integration:**
-- `@prisma-6/skills/validating-query-inputs` - Complete Zod + Prisma 6 validation patterns for API routes, form data, and database operations
-- `@prisma-6/skills/ensuring-query-type-safety` - Type-safe Prisma queries with Zod runtime validation for database inputs and outputs
-- `@prisma-6/skills/preventing-sql-injection` - SQL injection prevention with parameterized queries and raw SQL safety in Prisma 6
+- validating-query-inputs skill from the prisma-6 plugin - Complete Zod + Prisma 6 validation patterns for API routes, form data, and database operations
+- ensuring-query-type-safety skill from the prisma-6 plugin - Type-safe Prisma queries with Zod runtime validation for database inputs and outputs
+- preventing-sql-injection skill from the prisma-6 plugin - SQL injection prevention with parameterized queries and raw SQL safety in Prisma 6
 
 ## Success Criteria
 

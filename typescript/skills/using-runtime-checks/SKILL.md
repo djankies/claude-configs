@@ -1,5 +1,5 @@
 ---
-name: VALIDATION-runtime-checks
+name: using-runtime-checks
 description: Teaches how to validate external data at runtime using Zod and other validation libraries in TypeScript. Use when working with APIs, JSON parsing, user input, or any external data source where runtime validation is needed.
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Task, TodoWrite
 version: 1.0.0
@@ -238,9 +238,9 @@ For complete patterns see `references/`:
 
 For related skills:
 
-- **Type Guards**: See @typescript/TYPES-type-guards for manual type narrowing
-- **Unknown vs Any**: See @typescript/TYPES-any-vs-unknown for why validation is needed
-- **External Data**: See @typescript/VALIDATION-external-data for specific data source patterns
+- **Type Guards**: Use the using-type-guards skill for manual type narrowing
+- **Unknown vs Any**: Use the avoiding-any-types skill for why validation is needed
+- **External Data**: Use the validating-external-data skill for specific data source patterns
 </progressive-disclosure>
 
 <constraints>

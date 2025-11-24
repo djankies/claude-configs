@@ -337,10 +337,10 @@ For complete implementation examples including integration testing, performance 
 
 ## References
 
-- v4 Features: `@zod-4/skills/VALIDATION-string-formats/SKILL.md`
-- Error handling: `@zod-4/skills/ERRORS-customization/SKILL.md`
-- Transformations: `@zod-4/skills/TRANSFORMATION-string-methods/SKILL.md`
-- Performance: `@zod-4/skills/PERFORMANCE-optimization/SKILL.md`
+- v4 Features: VALIDATION-string-formats skill from the zod-4 plugin
+- Error handling: ERRORS-customization skill from the zod-4 plugin
+- Transformations: TRANSFORMATION-string-methods skill from the zod-4 plugin
+- Performance: PERFORMANCE-optimization skill from the zod-4 plugin
 - Comprehensive docs: `@zod-4/knowledge/zod-4-comprehensive.md`
 
 ## Success Criteria

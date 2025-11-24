@@ -1,5 +1,5 @@
 ---
-name: validation-external-data
+name: validating-external-data
 description: Validating external data from APIs, JSON parsing, user input, and any untrusted sources in TypeScript applications
 ---
 
@@ -696,12 +696,12 @@ Silently failing validation defeats its purpose.
 ## Related Skills
 
 **Zod v4 Features:**
-- `@zod-4/skills/using-zod-v4-features` - Top-level string format functions and v4 features for validating API responses and external data
-- `@zod-4/skills/handling-zod-errors` - SafeParse pattern, error handling strategies, and error formatting for robust external data validation
+- Use the using-zod-v4-features skill from the zod-4 plugin - Top-level string format functions and v4 features for validating API responses and external data
+- Use the handling-zod-errors skill from the zod-4 plugin - SafeParse pattern, error handling strategies, and error formatting for robust external data validation
 
 **Prisma 6 Database Validation:**
-- `@prisma-6/skills/ensuring-query-type-safety` - Type-safe Prisma queries with runtime validation for database query results as external data sources
-- `@prisma-6/skills/validating-query-inputs` - Validate data before Prisma operations to ensure database integrity and prevent invalid data persistence
+- Use the ensuring-query-type-safety skill from the prisma-6 plugin - Type-safe Prisma queries with runtime validation for database query results as external data sources
+- Use the validating-query-inputs skill from the prisma-6 plugin - Validate data before Prisma operations to ensure database integrity and prevent invalid data persistence
 
 ## Resources
 

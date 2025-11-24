@@ -1,5 +1,5 @@
 ---
-name: VALIDATION-type-assertions
+name: validating-type-assertions
 description: Teaches when type assertions are safe versus dangerous in TypeScript. Use when considering using 'as' keyword, type casting, or when working with external data that might use assertions instead of proper validation.
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Task, TodoWrite
 version: 1.0.0
@@ -332,9 +332,9 @@ function getUser(data: unknown): User {
 
 For related patterns:
 
-- **Runtime Validation**: See @typescript/VALIDATION-runtime-checks for proper validation with Zod
-- **Type Guards**: See @typescript/TYPES-type-guards for safe type narrowing
-- **Unknown Type**: See @typescript/TYPES-any-vs-unknown for handling unknown data safely
+- **Runtime Validation**: Use the using-runtime-checks skill for proper validation with Zod
+- **Type Guards**: Use the using-type-guards skill for safe type narrowing
+- **Unknown Type**: Use the avoiding-any-types skill for handling unknown data safely
 </progressive-disclosure>
 
 <constraints>

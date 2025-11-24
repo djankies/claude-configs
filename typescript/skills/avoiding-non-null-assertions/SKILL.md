@@ -19,11 +19,13 @@ The non-null assertion operator (`!`) is deprecated in modern TypeScript because
 ### 1. Optional Chaining (`?.`)
 
 **Bad:**
+
 ```typescript
 const userName = user!.profile!.name;
 ```
 
 **Good:**
+
 ```typescript
 const userName = user?.profile?.name;
 ```
@@ -31,11 +33,13 @@ const userName = user?.profile?.name;
 ### 2. Nullish Coalescing (`??`)
 
 **Bad:**
+
 ```typescript
 const value = config!.timeout;
 ```
 
 **Good:**
+
 ```typescript
 const value = config?.timeout ?? 5000;
 ```
@@ -43,6 +47,7 @@ const value = config?.timeout ?? 5000;
 ### 3. Type Guards
 
 **Bad:**
+
 ```typescript
 function processUser(user: User | null) {
   console.log(user!.name);
@@ -50,6 +55,7 @@ function processUser(user: User | null) {
 ```
 
 **Good:**
+
 ```typescript
 function processUser(user: User | null) {
   if (user !== null) {
@@ -61,6 +67,7 @@ function processUser(user: User | null) {
 ### 4. Early Return Pattern
 
 **Bad:**
+
 ```typescript
 function getUserEmail(userId: number): string {
   const user = findUser(userId);
@@ -69,6 +76,7 @@ function getUserEmail(userId: number): string {
 ```
 
 **Good:**
+
 ```typescript
 function getUserEmail(userId: number): string | null {
   const user = findUser(userId);
@@ -82,6 +90,7 @@ function getUserEmail(userId: number): string | null {
 ### 5. Custom Type Guards
 
 **Bad:**
+
 ```typescript
 function handleValue(value: unknown) {
   return (value as User)!.name;
@@ -89,13 +98,10 @@ function handleValue(value: unknown) {
 ```
 
 **Good:**
+
 ```typescript
 function isUser(value: unknown): value is User {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    'name' in value
-  );
+  return typeof value === 'object' && value !== null && 'name' in value;
 }
 
 function handleValue(value: unknown) {
@@ -109,6 +115,7 @@ function handleValue(value: unknown) {
 ### 6. Narrowing with `in` Operator
 
 **Bad:**
+
 ```typescript
 function process(obj: { data?: string }) {
   console.log(obj.data!.toUpperCase());
@@ -116,6 +123,7 @@ function process(obj: { data?: string }) {
 ```
 
 **Good:**
+
 ```typescript
 function process(obj: { data?: string }) {
   if ('data' in obj && obj.data !== undefined) {
@@ -127,12 +135,14 @@ function process(obj: { data?: string }) {
 ### 7. Array Methods with Type Safety
 
 **Bad:**
+
 ```typescript
 const users: User[] = getUsers();
 const firstUser = users[0]!;
 ```
 
 **Good:**
+
 ```typescript
 const users: User[] = getUsers();
 const firstUser = users.at(0);
@@ -144,6 +154,7 @@ if (firstUser) {
 ### 8. Assertion Functions (TypeScript 3.7+)
 
 **Good:**
+
 ```typescript
 function assertIsDefined<T>(value: T): asserts value is NonNullable<T> {
   if (value === undefined || value === null) {
@@ -160,12 +171,14 @@ function process(value: string | null) {
 ## DOM Element Access
 
 **Bad:**
+
 ```typescript
 const button = document.getElementById('submit')!;
 button.addEventListener('click', handler);
 ```
 
 **Good:**
+
 ```typescript
 const button = document.getElementById('submit');
 if (button) {
@@ -174,6 +187,7 @@ if (button) {
 ```
 
 **Or with assertion function:**
+
 ```typescript
 function assertElement<T extends Element>(
   element: T | null,
@@ -192,6 +206,7 @@ button.addEventListener('click', handler);
 ## When Is `!` Acceptable?
 
 Only in very rare cases where:
+
 1. You have exhaustively verified the value exists
 2. There's no other way to express it to TypeScript
 3. You document WHY it's safe
@@ -223,6 +238,7 @@ Enable strict checks:
 ## Summary
 
 **Never use `!` operator:**
+
 - Use `?.` for optional chaining
 - Use `??` for default values
 - Use type guards for narrowing
