@@ -64,9 +64,16 @@ if echo "$CODE_CONTENT" | grep -qE '<T\s*>|<T\s*=\s*any>|<T\s*,|<T\s+extends'; t
   fi
 fi
 
-if echo "$CODE_CONTENT" | grep -qE '\w+\s*!\s*\.|\w+\s*!\s*\['; then
-  WARNINGS+=("Type Safety: Non-null assertion - ensure value is validated")
-  RECOMMENDED_SKILLS+=("using-type-guards")
+if echo "$CODE_CONTENT" | grep -qF '!.' || echo "$CODE_CONTENT" | grep -qF '![' || echo "$CODE_CONTENT" | grep -qF '!)' || echo "$CODE_CONTENT" | grep -qF '!;'; then
+  WARNINGS+=("Deprecated: Non-null assertion operator (!) - use type guards instead")
+  RECOMMENDED_SKILLS+=("avoiding-non-null-assertions")
+fi
+
+if echo "$CODE_CONTENT" | grep -qE '<[a-zA-Z][a-zA-Z0-9]*>\s*[a-zA-Z_$"{]'; then
+  if ! echo "$CODE_CONTENT" | grep -qE '<[a-zA-Z][a-zA-Z0-9]*\s+extends|<T\s*>|<T\s*,|<.*>\s*\(|interface.*<|class.*<|type.*<|function.*<'; then
+    WARNINGS+=("Deprecated: Angle-bracket type assertion (<Type>value) - use 'as Type' syntax")
+    RECOMMENDED_SKILLS+=("avoiding-angle-bracket-assertions")
+  fi
 fi
 
 if echo "$CODE_CONTENT" | grep -qE '\.substr\s*\('; then
