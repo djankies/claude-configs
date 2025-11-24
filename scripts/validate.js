@@ -499,13 +499,33 @@ async function validateMCP() {
 }
 
 /**
+ * Validate skill name format (lowercase, hyphen-separated, gerund form)
+ */
+function validateSkillNameFormat(name, context) {
+  const kebabCasePattern = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+  if (!kebabCasePattern.test(name)) {
+    logError(`${context}: Skill name '${name}' must be lowercase and hyphen-separated`);
+    return false;
+  }
+
+  const gerundPattern = /^[a-z]+ing(-|$)/;
+  if (!gerundPattern.test(name)) {
+    logError(`${context}: Skill name '${name}' must begin with a verb in gerund form (verb + -ing)`);
+    return false;
+  }
+
+  return true;
+}
+
+/**
  * Validate skills directory structure
  */
 async function validateSkills() {
   logInfo('Validating skills/ directories...');
 
   const skillDirs = await glob('**/skills/*/', {
-    ignore: ['node_modules/**', '.git/**'],
+    ignore: ['node_modules/**', '.git/**', 'plugin-template/skills/**'],
     cwd: path.join(__dirname, '..')
   });
 
@@ -516,15 +536,22 @@ async function validateSkills() {
 
   let allValid = true;
   let totalSkills = 0;
+  const existingSkills = new Set();
 
   for (const skillDir of skillDirs) {
     const skillMdPath = path.join(__dirname, '..', skillDir, 'SKILL.md');
+    const dirName = path.basename(skillDir.replace(/\/$/, ''));
+
+    if (!validateSkillNameFormat(dirName, skillDir)) {
+      allValid = false;
+    }
 
     if (!fs.existsSync(skillMdPath)) {
       logWarning(`${skillDir}: Missing SKILL.md file (skills should contain SKILL.md)`);
       allValid = false;
     } else {
       totalSkills++;
+      existingSkills.add(dirName);
 
       const content = fs.readFileSync(skillMdPath, 'utf8');
       const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
@@ -533,12 +560,24 @@ async function validateSkills() {
         logWarning(`${skillDir}SKILL.md: Missing frontmatter (should have name and description)`);
       } else {
         const frontmatter = frontmatterMatch[1];
-        const hasName = /^name:\s*.+$/m.test(frontmatter);
+        const nameMatch = frontmatter.match(/^name:\s*(.+)$/m);
         const hasDescription = /^description:\s*.+$/m.test(frontmatter);
 
-        if (!hasName) {
+        if (!nameMatch) {
           logWarning(`${skillDir}SKILL.md: Missing 'name' in frontmatter`);
+        } else {
+          const frontmatterName = nameMatch[1].trim();
+
+          if (!validateSkillNameFormat(frontmatterName, `${skillDir}SKILL.md`)) {
+            allValid = false;
+          }
+
+          if (frontmatterName !== dirName) {
+            logError(`${skillDir}SKILL.md: Frontmatter name '${frontmatterName}' does not match directory name '${dirName}'`);
+            allValid = false;
+          }
         }
+
         if (!hasDescription) {
           logWarning(`${skillDir}SKILL.md: Missing 'description' in frontmatter`);
         }
@@ -548,6 +587,60 @@ async function validateSkills() {
 
   if (totalSkills > 0) {
     logSuccess(`Found ${totalSkills} valid skill(s)`);
+  }
+
+  return { allValid, existingSkills };
+}
+
+/**
+ * Validate skill references in shell scripts
+ */
+async function validateSkillReferences(existingSkills) {
+  logInfo('Validating skill references in .sh scripts...');
+
+  const shellScripts = await glob('**/*.sh', {
+    ignore: ['node_modules/**', '.git/**'],
+    cwd: path.join(__dirname, '..')
+  });
+
+  if (shellScripts.length === 0) {
+    logInfo('No .sh scripts found (optional)');
+    return true;
+  }
+
+  let allValid = true;
+  let totalReferences = 0;
+
+  const skillReferencePattern = /skills\/([a-z0-9-]+)/g;
+
+  for (const scriptPath of shellScripts) {
+    const fullPath = path.join(__dirname, '..', scriptPath);
+    const content = fs.readFileSync(fullPath, 'utf8');
+    const matches = [...content.matchAll(skillReferencePattern)];
+
+    if (matches.length === 0) {
+      continue;
+    }
+
+    for (const match of matches) {
+      const referencedSkill = match[1];
+      totalReferences++;
+
+      if (!validateSkillNameFormat(referencedSkill, `${scriptPath}:${match.index}`)) {
+        allValid = false;
+      }
+
+      if (!existingSkills.has(referencedSkill)) {
+        logError(`${scriptPath}: References non-existent skill '${referencedSkill}'`);
+        allValid = false;
+      }
+    }
+  }
+
+  if (totalReferences > 0) {
+    logSuccess(`Validated ${totalReferences} skill reference(s) in shell scripts`);
+  } else {
+    logInfo('No skill references found in shell scripts');
   }
 
   return allValid;
@@ -648,6 +741,135 @@ async function validateDirectoryPlacement() {
 }
 
 /**
+ * Validate plugin directory structure
+ */
+async function validatePluginDirectoryStructure() {
+  logInfo('Validating plugin directory structures...');
+
+  const pluginFiles = await glob('**/.claude-plugin/plugin.json', {
+    ignore: ['node_modules/**', '.git/**'],
+    cwd: path.join(__dirname, '..')
+  });
+
+  if (pluginFiles.length === 0) {
+    logInfo('No plugins found');
+    return true;
+  }
+
+  const allowedDirs = new Set([
+    '.claude-plugin',
+    'commands',
+    'agents',
+    'hooks',
+    'knowledge',
+    'scripts',
+    'skills',
+    'stress-test',
+    'test-cases',
+    'research',
+    'node_modules'
+  ]);
+
+  let allValid = true;
+
+  for (const file of pluginFiles) {
+    const pluginDir = path.dirname(path.dirname(path.join(__dirname, '..', file)));
+    const pluginDirName = path.basename(pluginDir);
+    const isTemplate = pluginDirName === 'plugin-template';
+
+    if (isTemplate) {
+      continue;
+    }
+
+    const claudePluginPath = path.join(pluginDir, '.claude-plugin');
+    if (!fs.existsSync(claudePluginPath)) {
+      logError(`${pluginDirName}: Missing required .claude-plugin directory`);
+      allValid = false;
+      continue;
+    }
+
+    const entries = fs.readdirSync(pluginDir, { withFileTypes: true });
+    const dirs = entries.filter(e => e.isDirectory()).map(e => e.name);
+
+    for (const dir of dirs) {
+      if (!allowedDirs.has(dir)) {
+        logError(`${pluginDirName}: Unexpected directory '${dir}' (allowed: ${Array.from(allowedDirs).join(', ')})`);
+        allValid = false;
+      }
+    }
+
+    if (allValid) {
+      logSuccess(`${pluginDirName}: Directory structure is valid`);
+    }
+  }
+
+  return allValid;
+}
+
+/**
+ * Validate knowledge directory structure
+ */
+async function validateKnowledge() {
+  logInfo('Validating knowledge/ directories...');
+
+  const pluginFiles = await glob('**/.claude-plugin/plugin.json', {
+    ignore: ['node_modules/**', '.git/**'],
+    cwd: path.join(__dirname, '..')
+  });
+
+  if (pluginFiles.length === 0) {
+    return true;
+  }
+
+  let allValid = true;
+  let totalKnowledgeDocs = 0;
+
+  for (const file of pluginFiles) {
+    const pluginDir = path.dirname(path.dirname(path.join(__dirname, '..', file)));
+    const pluginDirName = path.basename(pluginDir);
+    const isTemplate = pluginDirName === 'plugin-template';
+
+    if (isTemplate) {
+      continue;
+    }
+
+    const plugin = JSON.parse(fs.readFileSync(path.join(pluginDir, '.claude-plugin', 'plugin.json'), 'utf8'));
+    const pluginName = plugin.name;
+
+    const knowledgeDir = path.join(pluginDir, 'knowledge');
+
+    if (!fs.existsSync(knowledgeDir)) {
+      logWarning(`${pluginDirName}: Missing knowledge/ directory`);
+      continue;
+    }
+
+    const knowledgeFiles = fs.readdirSync(knowledgeDir).filter(f => f.endsWith('.md'));
+
+    if (knowledgeFiles.length === 0) {
+      logWarning(`${pluginDirName}: knowledge/ directory exists but contains no .md files`);
+      continue;
+    }
+
+    const expectedPattern = `${pluginName}-comprehensive.md`;
+    const hasComprehensive = knowledgeFiles.some(f => f === expectedPattern);
+
+    if (!hasComprehensive) {
+      logError(`${pluginDirName}: knowledge/ directory must contain '${expectedPattern}'`);
+      allValid = false;
+    } else {
+      totalKnowledgeDocs++;
+      logSuccess(`${pluginDirName}: Found required ${expectedPattern}`);
+    }
+  }
+
+  if (totalKnowledgeDocs > 0) {
+    logSuccess(`Validated ${totalKnowledgeDocs} knowledge document(s)`);
+  }
+
+  return allValid;
+}
+
+/**
  * Detect orphaned plugins (plugins with plugin.json but not in marketplace.json)
  */
 async function detectOrphanedPlugins() {
@@ -700,12 +922,17 @@ async function main() {
 
   const marketplaceValid = validateMarketplace();
   const pluginsValid = await validatePlugins();
-  const skillsValid = await validateSkills();
+  const skillsResult = await validateSkills();
+  const skillsValid = typeof skillsResult === 'object' ? skillsResult.allValid : skillsResult;
+  const existingSkills = typeof skillsResult === 'object' ? skillsResult.existingSkills : new Set();
+  const skillReferencesValid = await validateSkillReferences(existingSkills);
   const commandsValid = await validateCommands();
   const agentsValid = await validateAgents();
   const placementValid = await validateDirectoryPlacement();
   const hooksValid = await validateHooks();
   const mcpValid = await validateMCP();
+  const directoryStructureValid = await validatePluginDirectoryStructure();
+  const knowledgeValid = await validateKnowledge();
   const orphanedValid = await detectOrphanedPlugins();
 
   console.log(`\n${colors.cyan}=== Validation Summary ===${colors.reset}\n`);
