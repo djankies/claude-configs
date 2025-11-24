@@ -91,6 +91,7 @@ Task 1:
 Task 2:
 - subagent_type: "general-purpose"
 - description: "Generate skills"
+- Required
 - prompt: |
   {shared_context}
 
@@ -182,36 +183,28 @@ Task 8:
 
 ### Philosophy Checklist
 
-**Necessity:**
+See @docs/PLUGIN-PHILOSOPHY.md for complete philosophy principles.
 
+Validate components against cognitive load principle (discovery cost + usage cost < value):
+
+**Necessity:**
 - [ ] Components justify cognitive load
-- [ ] Hooks <500ms
+- [ ] Hooks < 500ms (see @docs/claude-code/hooks.md performance guidelines)
 - [ ] Commands used daily
-- [ ] Agents provide differentiation
+- [ ] Agents provide differentiation (different permissions/model/tools)
 
 **Clarity:**
-
-- [ ] Scope clear
-- [ ] Problems documented
-- [ ] Boundaries defined
+- [ ] Scope clear, problems documented, boundaries defined
 
 **Efficiency:**
-
-- [ ] Progressive disclosure
-- [ ] No duplication
-- [ ] Commands orchestrate
+- [ ] Progressive disclosure (see @docs/claude-code/skills.md)
+- [ ] No duplication, commands orchestrate
 
 **Composability:**
-
-- [ ] Extensible
-- [ ] Skills referenceable
-- [ ] Rules composable
+- [ ] Extensible, skills referenceable, rules composable
 
 **Maintainability:**
-
-- [ ] Single source of truth
-- [ ] Independently updateable
-- [ ] No tight coupling
+- [ ] Single source of truth, independently updateable
 
 ### Design Compliance
 

@@ -29,25 +29,20 @@ Stress test report (Actual failures this plugin should help prevent):
 @$ARGUMENTS/STRESS-TEST-REPORT.md
 
 Reference example (design document structure):
-@typescript/PLUGIN-DESIGN.md
+@template/PLUGIN-DESIGN-TEMPLATE.md
 
-## Official Plugin Structure
+## Official Documentation References
 
-Per Claude Code documentation:
+See @docs/claude-code/plugins.md for complete plugin structure reference.
+See @docs/claude-code/hooks.md for hook configuration and event types.
+See @docs/claude-code/skills.md for skill authoring guidelines.
 
-- `skills/` - Auto-discovered, organize with concern prefixes (e.g., `HOOKS-use-hook/`)
-- `commands/` - Auto-discovered slash commands
-- `agents/` - Auto-discovered agent definitions
-- `hooks/` - Must specify in hooks.json
-- `knowledge/` - Shared research accessible to all components
-- `scripts/` - Shared validation scripts used by hooks/skills
+Key points:
 
-## Naming Convention
-
-- Concern prefix: ALL CAPS (HOOKS, FORMS, STATE, etc.)
-- Topic: lowercase-with-hyphens
-- Format: `[CONCERN]-[topic]/`
-- Examples: `HOOKS-use-hook/`, `FORMS-server-actions/`, `STATE-context-api/`
+- `skills/`, `commands/`, `agents/` are auto-discovered
+- `hooks/` and `.mcp.json` must be configured in plugin.json
+- Skill names use gerund form: `doing-something/` (not `do-something/`)
+- Hook scripts: see @docs/claude-code/hooks.md for `${CLAUDE_PLUGIN_ROOT}` and environment variables
 
 ## Output Location
 
@@ -68,7 +63,6 @@ Think step-by-step to generate a comprehensive plugin design document following 
 
    - If provided, read that document, otherwise STOP and ask the user to provide the research document.
    - Extract all API patterns, features, breaking changes, best practices
-   - Identify distinct conceptual areas (these become concern prefixes)
 
 3. **Create Analysis Todo List**
    - Use TodoWrite to track: research analysis, decision framework, architecture design, document generation, validation
@@ -95,58 +89,50 @@ Work through the design hierarchy for each component type:
 7. **Level 2: Skills - What patterns to teach?**
 
    - Extract teaching opportunities from research and the stress test report
-   - Identify concerns (4-8 typical: HOOKS, FORMS, STATE, TESTING, etc.)
-   - Design 6-10 teaching skills with concern prefixes
-   - Design 1-2 review skills (prefix: `REVIEW-`)
-   - For each skill: `[CONCERN]-[topic]/SKILL.md`
+   - Design 1-2 review skills
+   - For each skill: `[gerund-form]/SKILL.md`
    - Each skill can have `references/` subdirectory for skill-specific docs
    - Shared research goes in `$ARGUMENTS/knowledge/` directory
+   - Shared validation scripts goes in `$ARGUMENTS/scripts/` directory
 
 8. **Level 3: Hooks - Intelligent skill activation with lifecycle management**
 
-   - Design PreToolUse hook that intelligently reminds which skills are available
-   - Based on file extension (.tsx, .jsx → react skills)
-   - Based on file path patterns (app/page.tsx → nextjs skills)
-   - Based on file content patterns (detected via grep/analysis)
-   - Keep checks fast (< 100ms total)
-   - Early exit with no output if trigger condition is not met, ideally condition is placed within hooks.json to prevent the script from being called at all if the condition is not met.
-   - Design 1-3 additional validation hooks if needed
-   - Hooks use scripts from `scripts/` directory
+   See @docs/claude-code/hooks.md for:
 
-   - **MANDATORY: Session lifecycle management**:
+   - Complete hook event reference (SessionStart, PreToolUse, PostToolUse, etc.)
+   - Hook input/output schemas and exit codes
+   - Performance guidelines (< 100ms ideal, < 500ms acceptable)
+   - Common hook patterns (session state, file validation, contextual loading)
 
-     **SessionStart hook** (`scripts/init-session.sh`):
+   **Design Requirements for This Plugin:**
 
-     - Creates/resets session state JSON file
-     - Location: `/tmp/claude-[plugin]-session.json`
-     - Structure: `{"recommendations_shown": {"[type]": false, ...}}`
-     - Runs once at session start
-     - Fast: < 5ms (simple JSON write)
-     - should handle scenarios where file already exists from another session or plugin. all plugins should be able to share the same session state file.
+   **SessionStart hook** - Initialize session state
 
-     **PreToolUse hook** (`scripts/recommend-skills.sh`):
+   - Use session state JSON pattern from hooks.md
+   - Track recommendation types for this plugin's contexts
+   - Create `/tmp/claude-[plugin]-session.json` with boolean flags
 
-     - Reads session state JSON programmatically
-     - Checks relevant boolean for current file context
-     - If false: shows recommendation, updates boolean to true
-     - If true: exits silently (< 1ms)
-     - Uses `jq` or simple grep/sed for JSON manipulation
-     - Prevents context bloat from repeated recommendations
+   **PreToolUse hook** - Contextual skill recommendations
 
-   - **STRONGLY ENCOURAGE bash scripts over prompt-based hooks**:
+   - Use session state pattern to recommend skills once per session per context type
+   - Detect context from file extension, path patterns, or content
+   - Early exit if no relevant context detected
+   - Update session state after first recommendation shown
 
-     - Deterministic: Same input = same output
-     - Optimizable: Can be cached, parallelized
-     - Fast: No LLM inference overhead
-     - Reusable: Share scripts across hooks/skills/commands
-     - Example: File pattern detection, validation checks, code analysis
+   **Validation hooks** (if needed)
 
-     Best practices:
+   - Use file pattern validation pattern from hooks.md
+   - Detect anti-patterns specific to this plugin's domain
+   - Exit code 2 to block operations with clear error messages
 
-     - Keep output as minimal as possible.
-     - ONLY output bare minimum and nothing else
-     - Keep scripts simple and focused on a single purpose.
-     - handle errors and edge cases gracefully -> output message "SHARE WITH USER: [script-filepath] failed to run"
+   **Performance targets** (see @docs/claude-code/hooks.md performance guidelines):
+
+   - Total hook execution < 100ms ideal
+   - Individual scripts < 50ms
+   - Early exit patterns for irrelevant files
+   - Bash scripts preferred over prompt-based hooks for speed
+
+   **Implementation:** Complete bash examples will be in PLUGIN-DESIGN-TEMPLATE.md for copy-paste.
 
 9. **Level 4: Commands - Frequent directives?**
 
@@ -169,23 +155,12 @@ Work through the design hierarchy for each component type:
 
 12. **Define Component Breakdown**
 
-    - Skills: List all with concern-prefixed names
+    - Skills: List all with gerund form names
     - Hooks: List with intelligent activation logic
     - Scripts: List validation/helper scripts
     - Knowledge: Shared research documents
 
-13. **Organize Skills by Concern**
-
-    - Group related skills (4-8 concerns)
-    - Use naming: `[CONCERN]-[topic]/`
-    - Examples:
-      - `HOOKS-use-hook/`
-      - `HOOKS-action-state/`
-      - `FORMS-server-actions/`
-      - `STATE-context-api/`
-      - `REVIEW-patterns/`
-
-14. **Design Intelligent Hook System**
+13. **Design Intelligent Hook System**
 
     - PreToolUse hook checks file patterns:
       - Extension matching (.tsx → react skills)
@@ -193,13 +168,12 @@ Work through the design hierarchy for each component type:
       - Content detection (import patterns)
     - Create activation rules table
     - Design fast, targeted reminders
-    - **PREFER bash scripts for all deterministic operations**:
+    - **PREFER bash scripts for deterministic operations** (see @docs/claude-code/hooks.md):
       - Pattern matching, validation, file analysis
-      - Faster and more cacheable than LLM prompts
-      - Reusable across multiple hooks
+      - Faster and cacheable (reusable across multiple hooks)
 
-15. **Design File Structure**
-    - Official structure with concern-prefixed skills
+14. **Design File Structure**
+    - Official structure with skills
     - plugin.json with minimal required fields
     - Knowledge organization
 
@@ -213,17 +187,17 @@ Work through the design hierarchy for each component type:
 
 17. **Map Composition with Other Plugins**
     - Identify related plugins
-    - Document cross-references using `@plugin-name/[concern]-[topic]`
+    - Document cross-references using `@plugin-name/[plugin-name]`
     - Show how plugins layer (e.g., react-19 + nextjs-15)
 
 **Phase 6: Implementation Planning**
 
 18. **Create Phased Implementation Plan**
 
-    - Phase 1: Core skills (time estimate)
-    - Phase 2: Intelligent hooks (time estimate)
-    - Phase 3: Integration and testing (time estimate)
-    - Phase 4: Refinement (time estimate)
+    - Phase 1: Core skills
+    - Phase 2: Intelligent hooks
+    - Phase 3: Integration and testing
+    - Phase 4: Refinement
 
 19. **Define Success Metrics**
 
@@ -272,10 +246,6 @@ Work through the design hierarchy for each component type:
 
     [Decision and rationale]
 
-    ### 4. Concern-Prefix Organization
-
-    [How concern prefixes organize skills while following official structure]
-
     ### 5. Intelligent Skill Activation
 
     [How hooks intelligently remind parent of available skills based on context]
@@ -284,12 +254,10 @@ Work through the design hierarchy for each component type:
 
     ### Plugin Components
 
-    **Skills ([N] total across [M] concerns)**
+    **Skills ([N] total)**
 
-    - Organized with concern prefixes: `[CONCERN]-[topic]/`
-    - Each skill contains SKILL.md
-    - Optional `references/` for skill-specific docs
-    - Progressive disclosure strategy
+    - Structure and authoring: see @docs/claude-code/skills.md
+    - Progressive disclosure strategy for plugin architecture
 
     **Hooks ([N] event handlers)**
 
@@ -310,12 +278,11 @@ Work through the design hierarchy for each component type:
     - Used by skills for checks
     - Used by commands for operations
     - Fast, focused, single-purpose
-    - **STRONGLY PREFER bash scripts for deterministic operations**:
+    - **STRONGLY PREFER bash scripts for deterministic operations** (see @docs/claude-code/hooks.md):
       - Validation, pattern matching, file analysis
-      - 100x faster than LLM-based validation
+      - Faster than LLM-based validation
       - Cacheable and optimizable by Claude Code
       - Reusable across all plugin components
-      - Examples: grep patterns, AST parsing, regex checks, JSON state management
 
     **Knowledge (shared research)**
 
@@ -325,206 +292,65 @@ Work through the design hierarchy for each component type:
 
     ## Skill Structure
 
-    ### Naming Convention
+    See @docs/claude-code/skills.md for complete skill authoring guidelines including:
 
-    `[CONCERN]-[topic]/`
-
-    **Format:**
-
-    - Concern prefix: ALL CAPS (HOOKS, FORMS, STATE, TESTING, etc.)
-    - Topic: lowercase-with-hyphens
-    - Separator: single hyphen
-
-    Examples:
-
-    - `HOOKS-use-hook/` - Teaching use() API
-    - `FORMS-server-actions/` - Server Actions patterns
-    - `STATE-context-api/` - Context patterns
-    - `REVIEW-patterns/` - Code review skill
-
-    ### Concerns
-
-    [List 4-8 concerns with rationale]
-
-    ### Skill Breakdown by Concern
-
-    #### Concern: [CONCERN NAME]
-
-    **Skills:**
-
-    - `[CONCERN]-[topic-1]/` - [description]
-    - `[CONCERN]-[topic-2]/` - [description]
-
-    [Repeat for each concern]
+    - Naming conventions (gerund form, kebab-case)
+    - SKILL.md file format and frontmatter requirements
+    - Supporting files and references/ subdirectory structure
+    - Best practices for descriptions and tool restrictions
 
     ## Intelligent Hook System
 
     ### Session Lifecycle Management
 
-    The plugin uses a JSON state file to track which recommendations have been shown during the current session.
+    See @docs/claude-code/hooks.md for:
 
-    **SessionStart Hook: Initialize State**
+    - Complete hook event documentation (SessionStart, PreToolUse, etc.)
+    - Session state JSON pattern with complete bash examples
+    - File pattern validation patterns
+    - Performance optimization strategies
 
-    Implementation: `scripts/init-session.sh`
-
-    ```bash
-    #!/bin/bash
-    # scripts/init-session.sh
-    # Creates/resets session state on session start
-
-    STATE_FILE="/tmp/claude-[plugin-name]-session.json"
-
-    # Create JSON state file with all booleans set to false
-    cat > "$STATE_FILE" <<EOF
-    {
-      "session_id": "$$-$(date +%s)",
-      "recommendations_shown": {
-        "react_skills": false,
-        "nextjs_skills": false,
-        "form_skills": false,
-        "state_skills": false
-      }
-    }
-    EOF
-
-    echo "Session initialized: $STATE_FILE"
-    ```
-
-    **PreToolUse Hook: Contextual Skill Recommendations**
-
-    Implementation: `scripts/recommend-skills.sh`
-
-    ```bash
-    #!/bin/bash
-    # scripts/recommend-skills.sh
-    # Recommends skills once per session based on file context
-
-    STATE_FILE="/tmp/claude-[plugin-name]-session.json"
-
-    # Exit if state file doesn't exist (session not initialized)
-    [[ ! -f "$STATE_FILE" ]] && exit 0
-
-    # Get file info from hook input
-    FILE_PATH="$1"
-    FILE_EXT="${FILE_PATH##*.}"
-
-    # Determine recommendation type based on file pattern
-    RECOMMENDATION_TYPE=""
-    case "$FILE_EXT" in
-      tsx|jsx)
-        RECOMMENDATION_TYPE="react_skills"
-        SKILLS="HOOKS-*, FORMS-*, STATE-*"
-        MESSAGE="📚 React Skills available: $SKILLS"
-        ;;
-      ts|js)
-        if [[ "$FILE_PATH" == *"/app/"* ]]; then
-          RECOMMENDATION_TYPE="nextjs_skills"
-          SKILLS="All React skills + Next.js patterns"
-          MESSAGE="📚 Next.js detected: $SKILLS"
-        fi
-        ;;
-    esac
-
-    # Exit if no recommendation needed for this file type
-    [[ -z "$RECOMMENDATION_TYPE" ]] && exit 0
-
-    # Check if this recommendation was already shown
-    SHOWN=$(grep -o "\"$RECOMMENDATION_TYPE\": true" "$STATE_FILE" 2>/dev/null)
-
-    if [[ -z "$SHOWN" ]]; then
-      # Show recommendation
-      echo "$MESSAGE"
-      echo "Use Skill tool to activate when needed."
-
-      # Update state file: set boolean to true
-      sed -i.bak "s/\"$RECOMMENDATION_TYPE\": false/\"$RECOMMENDATION_TYPE\": true/" "$STATE_FILE"
-    fi
-
-    # Exit silently if already shown (< 1ms)
-    exit 0
-    ```
-
-    **Key Design Patterns:**
-
-    - ✅ **Centralized state**: Single JSON file tracks all recommendation types
-    - ✅ **Session lifecycle**: SessionStart hook creates/resets state
-    - ✅ **Programmatic updates**: sed/grep for fast JSON manipulation (no jq dependency)
-    - ✅ **Type-specific tracking**: Different booleans for different recommendation types
-    - ✅ **Fast**: < 1ms after recommendation shown, < 5ms for first show
-    - ✅ **Non-intrusive**: Silent after first recommendation per type
-    - ✅ **Automatic reset**: New session = new state file
-
-    **File Extension Detection:**
-
-    ```bash
-    case "$FILE_EXT" in
-      .tsx|.jsx)
-        echo "Available skills: [list relevant skills]"
-        ;;
-      .ts|.js)
-        echo "Available skills: [list relevant skills]"
-        ;;
-    esac
-    ```
-
-    **Path Pattern Detection:**
-
-    ```bash
-    if [[ "$FILE_PATH" == *"/app/"* ]]; then
-      # Next.js App Router context
-    elif [[ "$FILE_PATH" == *"/components/"* ]]; then
-      # Component development context
-    fi
-    ```
+    **For this plugin's design document, include:**
 
     **Activation Rules Table:**
     | Pattern | Triggered Skills | Rationale | Frequency |
     |---------|------------------|-----------|-----------|
-    | _.tsx, _.jsx | HOOKS-_, FORMS-_, STATE-* | React file editing | Once per session |
-    | app/page.tsx | Next.js related | Next.js routing | Once per session |
-    | *Form*.tsx | FORMS-*, STATE-\* | Form components | Once per session |
+    | [pattern1] | [skills] | [why] | Once per session |
+    | [pattern2] | [skills] | [why] | Once per session |
+    | [pattern3] | [skills] | [why] | Once per session |
 
-    **Performance:**
+    **Hook Scripts:**
 
-    - File extension check: ~1ms
-    - Path pattern check: ~5ms
-    - State file check: ~1ms
-    - Total hook execution: < 10ms
-    - Subsequent calls (after state file exists): < 1ms
+    - `scripts/init-session.sh` - SessionStart hook (see hooks.md pattern)
+    - `scripts/recommend-skills.sh` - PreToolUse hook (see hooks.md pattern)
+    - `scripts/validate-[concern].sh` - Validation hooks as needed
+
+    **Implementation:** Complete bash examples are in:
+
+    1. @docs/claude-code/hooks.md (patterns section)
+    2. PLUGIN-DESIGN-TEMPLATE.md (copy-paste templates)
 
     ### Additional Hooks
 
-    [List any PostToolUse or other hooks if needed]
+    [List any PostToolUse or other hooks if needed beyond session lifecycle]
 
     ## File Structure
 
+    See @docs/claude-code/plugins.md for official plugin directory structure.
+
+    Design-specific additions for this plugin:
+
     ```tree
     [plugin-name]/
-    ├── .claude-plugin/
-    │   └── plugin.json
-    ├── skills/
-    │   ├── [CONCERN-1]-[topic-1]/
-    │   │   ├── SKILL.md
-    │   │   └── references/          # Optional: skill-specific docs
-    │   │       └── examples.md
-    │   ├── [CONCERN-1]-[topic-2]/
-    │   ├── [CONCERN-2]-[topic-1]/
-    │   └── REVIEW-[domain]/
-    ├── commands/                     # If commands needed
-    │   └── [command].md
-    ├── agents/                       # If agents needed
-    │   └── [agent].md
-    ├── hooks/
-    │   └── hooks.json
     ├── scripts/
     │   ├── init-session.sh          # MANDATORY: SessionStart - initialize state JSON
     │   ├── recommend-skills.sh      # MANDATORY: PreToolUse - once-per-session recommendations
-    │   ├── check-file-patterns.sh
-    │   └── validate-[aspect].sh
-    ├── knowledge/
-    │   └── [domain]-comprehensive.md
-    └── README.md
+    │   └── validate-[aspect].sh     # Additional validation scripts as needed
+    └── knowledge/
+        └── [domain]-comprehensive.md # Shared research accessible to all components
     ```
+
+    Standard auto-discovered directories (skills/, commands/, agents/) and configured components (hooks/, .mcp.json) follow official structure.
 
     ## Integration with Other Plugins
 
@@ -545,7 +371,7 @@ Work through the design hierarchy for each component type:
     ### Composition Patterns
 
     **Skill References:**
-    Other plugins can reference skills: `@$1/[CONCERN]-[topic]`
+    Other plugins can reference skills: `@$1/[topic]`
 
     **Knowledge Sharing:**
     Skills can reference: `@$1/knowledge/[document]`
@@ -555,54 +381,49 @@ Work through the design hierarchy for each component type:
 
     ## Plugin Metadata
 
+    See @docs/claude-code/plugins.md for complete plugin.json schema.
+
+    Minimum required fields:
+
     ```json
     {
       "name": "$1",
       "version": "1.0.0",
-      "description": "[description]",
-      "author": {
-        "name": "Plugin Author",
-        "email": "author@example.com"
-      },
-      "keywords": ["[keyword1]", "[keyword2]"],
-      "engines": {
-        "claude-code": ">=1.0.0"
-      }
+      "description": "[description]"
     }
     ```
 
-    Note: No `exports` field needed - uses standard auto-discovery
+    Note: Component paths (skills/, commands/, agents/) are auto-discovered. Only hooks and MCP servers need explicit configuration.
 
     ## Implementation Strategy
 
-    ### Phase 1: Core Skills ([time estimate])
+    ### Phase 1: Core Skills
 
-    - Write [N] skill files with concern prefixes
-    - Organize by domain ([M] concerns)
-    - Create SKILL.md for each
+    - Write [N] skill files following @docs/claude-code/skills.md authoring guidelines
+    - Create SKILL.md for each with proper frontmatter
     - Add skill-specific references as needed
 
-    ### Phase 2: Intelligent Hooks ([time estimate])
+    ### Phase 2: Intelligent Hooks
 
     - Design activation rules based on file patterns
     - Implement PreToolUse hook with pattern matching
     - Create validation scripts in scripts/
     - Test hook performance (< 100ms)
 
-    ### Phase 3: Knowledge Base ([time estimate])
+    ### Phase 3: Knowledge Base
 
     - Consolidate research into knowledge/
     - Ensure comprehensive coverage
     - Link from skills using references
 
-    ### Phase 4: Integration & Testing ([time estimate])
+    ### Phase 4: Integration & Testing
 
     - Test skill activation with real files
     - Verify hook triggering logic
     - Test composition with related plugins
     - Performance tuning
 
-    ### Phase 5: Refinement ([time estimate])
+    ### Phase 5: Refinement
 
     - Gather feedback on activation accuracy
     - Refine skill descriptions
@@ -655,11 +476,10 @@ Work through the design hierarchy for each component type:
 
     ## Conclusion
 
-    This plugin follows official Claude Code structure while using concern prefixes for organization. The intelligent hook system ensures skills are surfaced at the right time based on file context, reducing cognitive load while maximizing relevance.
+    This plugin follows official Claude Code structure for organization. The intelligent hook system ensures skills are surfaced at the right time based on file context, reducing cognitive load while maximizing relevance.
 
     **Key innovations:**
 
-    - Concern-prefix naming for clarity
     - Intelligent PreToolUse hook for contextual activation
     - Knowledge/ for shared research
     - Scripts/ for reusable validation logic
@@ -673,7 +493,6 @@ Work through the design hierarchy for each component type:
 
 22. **Verify Completeness**
     - [ ] All sections present
-    - [ ] All skills with concern prefixes
     - [ ] Intelligent hook design included
     - [ ] File structure follows official docs
     - [ ] Knowledge/ and scripts/ directories defined
@@ -684,7 +503,6 @@ Work through the design hierarchy for each component type:
 23. **Run Quality Checks**
 
     - Document has 10+ major sections
-    - All skills use concern-prefix naming
     - PreToolUse hook has activation rules
     - Plugin boundaries clear
     - Implementation plan realistic
@@ -692,27 +510,22 @@ Work through the design hierarchy for each component type:
 24. **Generate Summary**
     Output:
 
-    ````
+    ```text
     Plugin: $1
     Design document: $ARGUMENTS/PLUGIN-DESIGN.md
 
-        Structure: Official Claude Code (skills/, hooks/, knowledge/, scripts/)
-        Organization: Concern-prefix naming
+    Structure: Official Claude Code (skills/, hooks/, knowledge/, scripts/)
 
-        Components:
-        - [N] Teaching Skills (organized by [M] concern prefixes)
-        - [N] Review Skills
-        - 1 Intelligent PreToolUse Hook
-        - [N] Additional Hooks (if needed)
-        - [N] Scripts
-        - Shared knowledge base
+    Components:
+    - [N] Teaching Skills
+    - [N] Review Skills
+    - 1 Intelligent PreToolUse Hook
+    - [N] Additional Hooks (if needed)
+    - [N] Scripts
+    - Shared knowledge base
 
-        Implementation estimate: [total time]
-        Status: Ready for review and implementation
-        ```
-
-    </task>
-    ````
+    Status: Ready for review and implementation
+    ```
 
 <constraints>
 **Document Format Requirements:**
@@ -723,20 +536,16 @@ Work through the design hierarchy for each component type:
 **Structure Requirements:**
 
 - MUST use official directories: skills/, commands/, agents/, hooks/
-- MUST organize skills with concern prefixes: `[CONCERN]-[topic]/`
 - MUST include knowledge/ for shared research
 - MUST include scripts/ for shared validation/helper scripts
-- NEVER use custom directories like concerns/
+- NEVER use custom directories like forms/, state/, etc.
 - NEVER require exports field (use auto-discovery)
 
 **Skill Organization:**
 
-- MUST use concern-prefix naming with ALL CAPS concern: `HOOKS-use-hook/`, `FORMS-server-actions/`
-- Concern prefix: ALL CAPS (HOOKS, FORMS, STATE, TESTING, etc.)
-- Topic: lowercase-with-hyphens
+- Follow naming conventions from @docs/claude-code/skills.md (gerund form, kebab-case)
 - MUST limit to 6-10 teaching skills + 1-2 review skills
-- MUST organize by 4-8 concern areas
-- EACH skill can have optional `references/` subdirectory
+- EACH skill can have optional `references/` subdirectory (see @docs/claude-code/skills.md)
 - SHARED knowledge goes in `knowledge/` directory at root
 
 **Hook Design Requirements:**
@@ -765,10 +574,9 @@ Work through the design hierarchy for each component type:
 - MUST keep total execution < 100ms
 - MUST create activation rules table with "Frequency" column showing "Once per session"
 - SCRIPTS go in `scripts/` directory, used by hooks
-- STRONGLY PREFER bash scripts over prompt-based hooks for:
-  - Pattern matching and validation (deterministic)
-  - File analysis and checks (cacheable)
-  - Any operation that doesn't require LLM reasoning
+- STRONGLY PREFER bash scripts over prompt-based hooks (see @docs/claude-code/hooks.md):
+  - Use for deterministic operations: pattern matching, validation, file analysis
+  - Faster and cacheable
 
 **Decision Framework Requirements:**
 
@@ -780,7 +588,6 @@ Work through the design hierarchy for each component type:
 **Implementation Requirements:**
 
 - MUST provide phased approach
-- MUST include time estimates
 - MUST define success metrics
 - MUST identify risks with mitigation
 - MUST be actionable and realistic
@@ -800,8 +607,7 @@ After generating the design document, you MUST verify:
 2. **Structure Compliance:**
 
    - [ ] Uses official directories (skills/, hooks/, knowledge/, scripts/)
-   - [ ] Skills use concern-prefix naming
-   - [ ] No custom directories like concerns/
+   - [ ] No custom directories like forms/, state/, etc.
    - [ ] No exports field in plugin.json
    - [ ] Intelligent PreToolUse hook designed
 
@@ -818,7 +624,7 @@ After generating the design document, you MUST verify:
    - [ ] File structure tree matches official docs
    - [ ] Knowledge/ directory included
    - [ ] Scripts/ directory included
-   - [ ] Skill naming uses concern prefixes
+   - [ ] Skill naming uses gerund form verb
    - [ ] Hook execution time < 100ms
 
 **Failure Handling:**
@@ -846,7 +652,6 @@ The document provides:
 2. **Official Structure Compliance**
 
    - Uses skills/, hooks/, knowledge/, scripts/
-   - Concern-prefix organization
    - Auto-discovery (no exports needed)
 
 3. **Intelligent Hook Design**
@@ -858,7 +663,7 @@ The document provides:
 
 4. **Detailed Architecture**
 
-   - All skills with concern prefixes
+   - All skills
    - Hook activation logic
    - Knowledge organization
    - Script purposes
@@ -871,7 +676,6 @@ The document provides:
 
 6. **Implementation Roadmap**
    - Phased approach
-   - Time estimates
    - Success metrics
    - Risk mitigation
 
@@ -879,54 +683,36 @@ Inform user: "Design document created at $ARGUMENTS/PLUGIN-DESIGN.md following o
 </output>
 
 <examples>
-**Good Skill Naming:**
-```
-skills/
-├── HOOKS-use-hook/
-├── HOOKS-action-state/
-├── FORMS-server-actions/
-├── STATE-context-api/
-└── REVIEW-patterns/
-```
-
-**Bad Skill Naming:**
-
-```
-skills/
-├── use-hook/              # Missing concern prefix
-├── hooks-use-hook/        # Concern not uppercase
-├── HOOKS/                 # Directory, not skill
-└── FORMS-server-actions-skill/  # Redundant "skill" suffix
-```
-
 **Good Hook Activation Rule:**
 
 ```markdown
-| Pattern      | Triggered Skills             | Rationale              |
-| ------------ | ---------------------------- | ---------------------- |
-| _.tsx, _.jsx | HOOKS-_, FORMS-_, STATE-\*   | React component file   |
-| app/page.tsx | All skills + Next.js context | Next.js page component |
-| \*Form.tsx   | FORMS-_, STATE-_             | Form component pattern |
+| Pattern                        | Triggered Skills               | Rationale              |
+| ------------------------------ | ------------------------------ | ---------------------- |
+| _.tsx, _.jsx                   | react skills                   | React component file   |
+| app/page.tsx                   | react skills + Next.js context | Next.js page component |
+| \*Form.tsx                     | form related skills            | Form component pattern |
+| file contains `useActionState` | using-use-action-state skill   | Server Action pattern  |
 ```
 
-**Good File Structure:**
+**Good File Structure Example:**
+
+See @docs/claude-code/plugins.md for complete structure reference.
 
 ```tree
 react-19/
-├── skills/
-│   ├── HOOKS-use-hook/
-│   │   ├── SKILL.md
-│   │   └── references/
-│   │       └── examples.md
-│   └── FORMS-server-actions/
+├── .claude-plugin/
+│   └── plugin.json              # Required manifest
+├── skills/                       # Auto-discovered
+│   ├── using-the-use-hook/
+│   │   └── SKILL.md
+│   └── validating-type-assertions/
 │       └── SKILL.md
-├── hooks/
+├── hooks/                        # Must configure in plugin.json
 │   └── hooks.json
-├── scripts/
-│   ├── init-session.sh            # MANDATORY: SessionStart lifecycle
-│   ├── recommend-skills.sh        # MANDATORY: Once-per-session recommendations
-│   └── check-react-patterns.sh
-└── knowledge/
+├── scripts/                      # Design-specific: lifecycle management
+│   ├── init-session.sh
+│   └── recommend-skills.sh
+└── knowledge/                    # Design-specific: shared research
     └── react-19-comprehensive.md
 ```
 

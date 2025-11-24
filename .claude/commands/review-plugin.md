@@ -19,35 +19,23 @@ Philosophy: @docs/PLUGIN-PHILOSOPHY.md
 
 ## Phase 1: Discovery
 
-Verify plugin exists:
-
-```bash
-[ -d "$ARGUMENTS" ] || exit 1
-```
-
-**If not found:** STOP → "Plugin '$ARGUMENTS' not found."
-
 Enumerate components:
 
 ```bash
-find $ARGUMENTS -type f \( -name "*.md" -o -name "*.json" \)
+find $ARGUMENTS -type f \( -name "*.md" -o -name "*.json" -o -name "*.sh" \)
 ```
-
-Identify: plugin.json, skills, commands, agents, hooks, MCP, README, PHILOSOPHY-ALIGNMENT, PLUGIN-DESIGN
-
-Load: design doc, philosophy alignment, README, plugin philosophy
 
 ## Phase 2: Parallel Review
 
 ### Shared Context
 
 ```
-Plugin: {name} @ @{path}/
+Plugin: {name} @ {path}/
 Components: {list with counts and paths}
-Design: {content or "Not found"}
-Philosophy Alignment: {content or "Not found"}
-README: {content}
-Plugin Philosophy: {from docs}
+Design: $ARGUMENTS/PLUGIN-DESIGN.md
+Research: $ARGUMENTS/RESEARCH.md
+Plugin Philosophy: docs/PLUGIN-PHILOSOPHY.md
+Plugin Documentation: docs/claude-code/plugins.md
 ```
 
 ### Deploy All Review Agents (Single Message)
@@ -56,23 +44,29 @@ subagent_type: "general-purpose" for Tasks 1-8
 subagent_type: "Explore" for Task 9 (integration opportunities)
 
 ```
-Task 1: Review plugin.json
+Task 1: Review plugin metadata
+- Run: node scripts/validate-plugin-manifest.js $ARGUMENTS/.claude-plugin/plugin.json
+- Align with docs/claude-code/plugins.md
 - Check: required fields, kebab-case name, component paths match structure, semver
 - Return: {"review_type": "metadata", "issues": [{severity, file, line, description, recommendation}], "compliant": bool}
 
-Task 2: Review skills
+Task 2: Review plugin skills (skip dispatching an agent if no skills in design)
+- Run: node scripts/validate-skill-frontmatter.js for each $ARGUMENTS/skills/*/SKILL.md
+- REQUIRED: See docs/claude-code/skills.md for complete skill principles
 - Check: frontmatter (name gerund, description specific, allowed-tools), <500 lines, focused scope, progressive disclosure, no duplication
 - Cross-ref design: matches spec, justification preserved
 - Gerund form: both skill folder name and metadata name contain a gerund (verb + -ing) (e.g., "reviewing-react-hooks")
+- Ensure skills have relevant scripts to assist with validation of deterministic operations
 - provides accurate knowledge that aligns with $ARGUMENTS/RESEARCH.md
 - Plugin has at least one REVIEW skill
 - Philosophy alignment: Each skill justified against cognitive load (discovery cost + usage cost < value provided)
-- Progressive disclosure: Skills use references/ for detailed content, main SKILL.md under 500 lines
+- Progressive disclosure: Skills use references/ for detailed content and all examples, main SKILL.md under 500 lines, acts as a table of contents for the skill if multiple references are present
 - Single responsibility: Each skill owns one concern, no overlap with other skills
-- Composability: Skills reference other skills via @plugin/skill-name pattern, no duplication
+- Composability: Skills reference other skills via "use skill-name to..." pattern, no duplication
 - Return: {"review_type": "skills", "issues": [], "skills_reviewed": [{name, compliant, issues_count, philosophy_aligned: bool}], "compliant": bool}
 
-Task 3: Review commands
+Task 3: Review plugin commands (skip dispatching an agent if no commands in design)
+- Run: node scripts/validate-command-frontmatter.js for each $ARGUMENTS/commands/*.md
 - Check: frontmatter, orchestrates (doesn't duplicate), daily use justified, not replaceable by natural language
 - Cross-ref design: matches spec, justification valid
 - Philosophy alignment: Used multiple times per day, clearer than natural language, orchestrates existing capabilities
@@ -80,7 +74,9 @@ Task 3: Review commands
 - Cognitive load: Discovery cost (remembering command exists) + usage cost (syntax) < value provided (time saved)
 - Return: {"review_type": "commands", "issues": [], "commands_reviewed": [{name, compliant, daily_use_justified: bool, philosophy_aligned: bool}], "compliant": bool}
 
-Task 4: Review hooks
+Task 4: Review plugin hooks
+- Run: node scripts/validate-hooks.js $ARGUMENTS/hooks/hooks.json
+- REQUIRED: See docs/claude-code/hooks.md for complete hook principles
 - Check: valid schema, scripts exist/executable/<500ms, objective validation, rare false positives, clear errors, no overlap with built-ins
 - Cross-ref design: matches spec, performance met
 - Philosophy alignment: Event-driven (context is expensive), fast execution, objective validation, justified in design doc
@@ -88,7 +84,7 @@ Task 4: Review hooks
 - Design hierarchy: Hooks justified (can't be done with skills/parent Claude alone)
 - MANDATORY INTEGRATION TESTING: Test ALL hook scripts against actual code violations
   1. Identify violation patterns from design doc (e.g., "83% any abuse", "Base64 passwords", "deprecated APIs")
-  2. Extract real violation examples from $ARGUMENTS/stress-test/ directory
+  2. Extract real violation examples from $ARGUMENTS/stress-test/stress-test-report.md
   3. For each hook script, create JSON input with actual violation code and verify:
      - Hook DETECTS the violation (outputs warning/error)
      - Exit code matches severity (0=warning, 2=block for critical)
@@ -99,7 +95,8 @@ Task 4: Review hooks
   6. CRITICAL: If hook misses documented violations from stress test → HIGH severity issue
 - Return: {"review_type": "hooks", "issues": [], "hooks_reviewed": [{name, compliant, philosophy_aligned: bool, integration_tests: {violations_tested, detected, missed, false_positives}}], "compliant": bool}
 
-Task 5: Review agents (omit if no agents in design)
+Task 5: Review plugin agents (skip dispatching an agent if no agents in design)
+- Run: node scripts/validate-agent-frontmatter.js for each $ARGUMENTS/agents/*.md
 - Check: frontmatter, differentiation (permissions OR model OR context - at least one), justification (why not skill?), clear I/O boundary
 - Cross-ref design: meets 3 criteria
 - CRITICAL: If no differentiation → HIGH severity
@@ -109,8 +106,9 @@ Task 5: Review agents (omit if no agents in design)
 - Anti-pattern check: Not a "God Agent" with same capabilities as parent
 - Return: {"review_type": "agents", "issues": [], "agents_reviewed": [{name, compliant, differentiation_criteria_met, philosophy_aligned: bool, issues_count}], "compliant": bool}
 
-Task 6: Review MCP (omit if no MCP in design)
-- Check: valid JSON, server type, paths use ${CLAUDE_PLUGIN_ROOT}, env vars documented, tools not in built-ins, justified
+Task 6: Review MCP (skip dispatching an agent if no MCP in design)
+- Run: node scripts/validate-mcp.js $ARGUMENTS/.mcp.json
+- Check: valid JSON, server type required, paths use ${CLAUDE_PLUGIN_ROOT}, env vars documented, tools not in built-ins, justified
 - Cross-ref design: justified, matches spec
 - Philosophy alignment: MCP provides essential external tools not available in built-ins (Read, Write, Edit, Bash, Grep, Glob)
 - Design hierarchy: MCP justified (built-in tools insufficient), provides external API access or specialized parsing
@@ -118,29 +116,21 @@ Task 6: Review MCP (omit if no MCP in design)
 - Anti-pattern check: Not a "Kitchen Sink MCP" with overlapping built-in functionality
 - Return: {"review_type": "mcp", "issues": [], "mcp_servers_reviewed": [{name, compliant, philosophy_aligned: bool}], "compliant": bool}
 
-Task 7: Review documentation
-- README: purpose, domain, problems solved, component justifications, installation, examples, philosophy alignment section
-- PHILOSOPHY-ALIGNMENT: each component justified against cognitive load, design hierarchy decision flow documented, composability demonstrated
-- Cross-ref design: implementation matches design spec, all components documented
-- Philosophy alignment explicit: README includes "Why This Plugin Exists" and component-by-component justification
-- Design hierarchy traced: Documents which hierarchy level plugin stopped at and why
-- Cognitive load analysis: Discovery cost + usage cost vs value provided calculation present
-- Return: {"review_type": "documentation", "issues": [], "has_philosophy_section: bool, "compliant": bool}
-
-Task 8: Review philosophy compliance
-- Minimal Cognitive Load: every component justified
-- Design Hierarchy: stopped at right level
-- Progressive Disclosure: skills load when relevant
+Task 7: Review philosophy compliance
+- REQUIRED: See docs/PLUGIN-PHILOSOPHY.md for complete principles
+- Minimal Cognitive Load: every component justified (discovery + usage cost < value)
+- Design Hierarchy: stopped at right level (skills → hooks → commands → MCP → agents)
+- Progressive Disclosure: skills load when relevant (see @docs/claude-code/skills.md)
 - Context Efficiency: no duplication, single source of truth
 - Single Responsibility: focused domain
 - Composability: extensible, referenceable, no tight coupling
 - Cross-ref design: implementation matches philosophy
 - Return: {"review_type": "philosophy", "principles": [{principle, compliant, issues: []}], "overall_compliant": bool}
 
-Task 9: Explore integration opportunities (use Explore agent)
+Task 8: Explore integration opportunities (use Explore agent)
 - Scan ALL other plugins in parent directory (../) for integration opportunities
 - For each skill in target plugin:
-  - Search other plugins for skills that could reference it (via @$ARGUMENTS/SKILL-name pattern)
+  - Search other plugins for skills that could reference it
   - Check if related concepts in other plugins duplicate knowledge instead of referencing
   - Identify framework plugins that should reference target plugin's foundational skills
 - For target plugin hooks:
@@ -150,10 +140,10 @@ Task 9: Explore integration opportunities (use Explore agent)
   - Check if other plugins have similar commands (opportunity for cross-cutting plugin)
   - Identify orchestration opportunities across plugins
 - Integration patterns to check:
-  - TypeScript plugin skills referenced by framework plugins (React, Next.js, etc.)
-  - Security plugin patterns referenced by framework plugins
-  - Testing plugin patterns referenced by framework plugins
-  - Validation hooks composing across plugins
+  - Other plugin's relevant skills referencing target plugin's skills (e.g., "if, [condition], use skill-name to...")
+  - Target plugin's skills referencing other plugin's relevant skills (e.g., "if, [condition], use skill-name to...")
+  - Review plugin referencing $ARGUMENTS plugins for specialized review capabilities (e.g., "if, [condition], use review-skill-name to...")
+  - Validation hooks composing across plugins without duplication
 - Return: {"review_type": "integration", "opportunities": [{other_plugin, opportunity_type, description, benefit, recommendation}], "missed_references": [{other_plugin_file, should_reference, target_skill, rationale}], "duplication_detected": [{other_plugin_file, duplicates_target_skill, recommendation}], "compliant": bool}
 ```
 
