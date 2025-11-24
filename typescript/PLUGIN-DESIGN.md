@@ -9,6 +9,7 @@
 A Claude Code plugin that helps developers write correct TypeScript 5.9+ code through proactive guidance, pattern teaching, and mistake prevention. The plugin assumes the LLM has outdated TypeScript knowledge and provides current TypeScript patterns, best practices, and guardrails based on stress testing that revealed critical gaps in AI coding agents' TypeScript knowledge.
 
 This plugin addresses the comprehensive failures identified in the TypeScript stress test where 6 agents made 23 violations including:
+
 - 83% of agents overused `any` type (defeating TypeScript's purpose)
 - 33% had critical security vulnerabilities (password hashing failures)
 - 33% ignored TypeScript requirement entirely (wrote JavaScript)
@@ -22,7 +23,9 @@ The plugin works within a multi-framework ecosystem where TypeScript underpins R
 When helping users write TypeScript code, LLMs face five critical problems revealed through stress testing:
 
 ### 1. **Overusing `any` Type**
+
 Agents default to `any` when uncertain about types, completely defeating TypeScript's purpose. Found in 5/6 agents across:
+
 - Generic defaults (`ApiResponse<T = any>`)
 - Validation functions (`validate(data: any)`)
 - Configuration loaders
@@ -31,7 +34,9 @@ Agents default to `any` when uncertain about types, completely defeating TypeScr
 **Impact:** Bypasses compile-time safety, allows runtime errors, makes TypeScript worthless.
 
 ### 2. **Critical Security Failures**
+
 2/6 agents had severe security vulnerabilities:
+
 - Base64 "encryption" for passwords (trivially reversible)
 - Accepting PayPal passwords directly (violates PCI compliance)
 - Missing input validation
@@ -40,7 +45,9 @@ Agents default to `any` when uncertain about types, completely defeating TypeScr
 **Impact:** Production security breaches, data exposure, compliance violations.
 
 ### 3. **Ignoring TypeScript Entirely**
+
 2/6 agents wrote JavaScript instead of TypeScript despite explicit requirements:
+
 - Used `.js` extensions throughout
 - No type annotations
 - Relied on JSDoc comments
@@ -49,7 +56,9 @@ Agents default to `any` when uncertain about types, completely defeating TypeScr
 **Impact:** No compile-time safety, poor IDE support, difficult refactoring, broken contracts.
 
 ### 4. **Misusing Type Assertions**
+
 4/6 agents used type assertions instead of validation:
+
 - `as` keyword on external data (`parsed as T`)
 - Unsafe type casting in parsers
 - Bypassing type guards
@@ -58,7 +67,9 @@ Agents default to `any` when uncertain about types, completely defeating TypeScr
 **Impact:** Runtime errors despite TypeScript claiming type safety, crashes from malformed data.
 
 ### 5. **Using Deprecated APIs**
+
 3/6 agents used deprecated JavaScript methods:
+
 - `substr()` instead of `slice()` (4 occurrences)
 - Missing error class prototype fixes
 - Outdated patterns
@@ -85,11 +96,7 @@ Built-in tools (Read, Write, Edit, Grep, Glob, Bash) suffice for TypeScript work
 
 **Decision: Zero MCP servers in core. Optional addon plugins can provide specialized tools.**
 
-### 4. Concern-Prefix Organization
-
-Organize skills by TypeScript domain concern (TYPES, CONFIG, VALIDATION, ERROR-HANDLING, SECURITY, MIGRATION, PERFORMANCE) with ALL CAPS concern prefixes followed by lowercase-with-hyphens topics.
-
-**Decision: 7 concerns, each with 2-3 skills, following official Claude Code structure.**
+**Decision: 16 skills, across 7 concerns following official Claude Code structure.**
 
 ### 5. Intelligent Skill Activation
 
@@ -103,7 +110,7 @@ PreToolUse hooks intelligently detect file context (extension, path, content) an
 
 **Skills (16 total across 7 concerns)**
 
-- Organized with concern prefixes: `TYPES-advanced-patterns/`, `CONFIG-compiler-options/`
+- Organized with gerund-form names: `configuring-compiler-options/`
 - Each skill contains SKILL.md with progressive disclosure
 - Optional `references/` for skill-specific examples
 - Teaching focus: "how to do it right" in TypeScript 5.9+
@@ -136,202 +143,206 @@ PreToolUse hooks intelligently detect file context (extension, path, content) an
 
 ### Naming Convention
 
-`[CONCERN]-[topic]/`
+`[gerund-verb-topic]/`
 
 **Format:**
-- Concern prefix: ALL CAPS (TYPES, CONFIG, VALIDATION, etc.)
+
+- Gerund verb form (ending in -ing)
 - Topic: lowercase-with-hyphens
-- Separator: single hyphen
 
 Examples:
-- `TYPES-any-vs-unknown/` - When to use unknown over any
-- `CONFIG-compiler-options/` - Essential tsconfig.json settings
-- `VALIDATION-runtime-checks/` - Validating external data with Zod
-- `ERROR-HANDLING-custom-errors/` - Creating custom error classes
-- `SECURITY-input-validation/` - Preventing XSS and injection
-- `REVIEW-type-safety/` - Code review skill for type safety
+
+- `avoiding-any-type/` - Teaching how to avoid using any type
+- `configuring-compiler-options/` - Essential tsconfig.json settings
+- `handling-custom-errors/` - Creating custom error classes
+- `reviewing-type-safety/` - Code review skill for type safety
 
 ### Concerns
 
-The plugin organizes skills into 7 concern areas based on TypeScript stress test findings:
+The plugin has skills across 7 concerns based on TypeScript stress test findings:
 
-#### 1. TYPES Concern
-**Scope:** Type system fundamentals and advanced patterns
+#### 1. Type Safety Concern
 
-**Rationale:** 5/6 agents overused `any`, misused type assertions, failed to use proper type guards. This is the most critical concern.
+#### 2. Configuration Concern
 
-**Skills:**
-- `TYPES-any-vs-unknown/` - When and how to use `unknown` instead of `any`
-- `TYPES-type-guards/` - Writing custom type guards with type predicates
-- `TYPES-generics/` - Generic constraints and best practices
-
-#### 2. CONFIG Concern
 **Scope:** TypeScript compiler configuration
 
 **Rationale:** Proper tsconfig.json prevents many issues caught in stress test (unchecked index access, missing strict flags).
 
 **Skills:**
-- `CONFIG-compiler-options/` - Essential strict mode flags
-- `CONFIG-module-resolution/` - NodeNext, Bundler, and ESM/CommonJS
-- `CONFIG-performance/` - Incremental builds, skipLibCheck
 
-#### 3. VALIDATION Concern
+- `configuring-compiler-options/` - Essential strict mode flags
+- `configuring-module-resolution/` - NodeNext, Bundler, and ESM/CommonJS
+- `optimizing-build-performance/` - Incremental builds, skipLibCheck
+
+#### 3. Validation Concern
+
 **Scope:** Runtime type validation
 
 **Rationale:** 4/6 agents used type assertions on external data instead of validation. TypeScript types are compile-time only.
 
 **Skills:**
-- `VALIDATION-runtime-checks/` - Using Zod, io-ts for runtime validation
-- `VALIDATION-type-assertions/` - When assertions are safe vs dangerous
-- `VALIDATION-external-data/` - API responses, JSON parsing, user input
 
-#### 4. ERROR-HANDLING Concern
+- `validating-runtime-types/` - Using Zod, io-ts for runtime validation
+- `using-type-assertions/` - When assertions are safe vs dangerous
+- `validating-external-data/` - API responses, JSON parsing, user input
+
+#### 4. Error Handling Concern
+
 **Scope:** Error handling patterns
 
 **Rationale:** Multiple agents had silent error handling, missing error type guards, improper error classes.
 
 **Skills:**
-- `ERROR-HANDLING-custom-errors/` - Creating and using custom error classes
-- `ERROR-HANDLING-type-guards/` - Checking error types with type guards
-- `ERROR-HANDLING-result-pattern/` - Alternative to throwing errors
 
-#### 5. SECURITY Concern
+- `creating-custom-errors/` - Creating and using custom error classes
+- `guarding-error-types/` - Checking error types with type guards
+- `using-result-pattern/` - Alternative to throwing errors
+
+#### 5. Security Concern
+
 **Scope:** Security best practices
 
 **Rationale:** 2/6 agents had critical security failures (password storage, accepting sensitive credentials).
 
 **Skills:**
-- `SECURITY-input-validation/` - Sanitizing user input, preventing XSS
-- `SECURITY-credentials/` - Never store passwords, use proper cryptography
-- `SECURITY-dependencies/` - Auditing and updating dependencies
 
-#### 6. MIGRATION Concern
+- `validating-user-input/` - Sanitizing user input, preventing XSS
+- `handling-credentials/` - Never store passwords, use proper cryptography
+- `auditing-dependencies/` - Auditing and updating dependencies
+
+#### 6. Migration Concern
+
 **Scope:** JavaScript to TypeScript migration
 
 **Rationale:** 2/6 agents wrote JavaScript when TypeScript was required, suggesting confusion about migration path.
 
 **Skills:**
-- `MIGRATION-js-to-ts/` - Step-by-step migration guide
-- `MIGRATION-strict-mode/` - Enabling strict mode incrementally
 
-#### 7. PERFORMANCE Concern
+- `migrating-from-javascript/` - Step-by-step migration guide
+- `enabling-strict-mode/` - Enabling strict mode incrementally
+
+#### 7. Performance Concern
+
 **Scope:** TypeScript compiler performance
 
 **Rationale:** Large projects need optimization strategies. Research shows 10% improvement possible with proper configuration.
 
 **Skills:**
-- `PERFORMANCE-build-speed/` - Incremental compilation, project references
-- `PERFORMANCE-type-complexity/` - Avoiding overly complex types
+
+- `optimizing-build-speed/` - Incremental compilation, project references
+- `simplifying-type-complexity/` - Avoiding overly complex types
 
 ### Skill Breakdown by Concern
 
-#### TYPES Concern
+#### Type Safety Concern
 
 **Skills:**
 
-- `TYPES-any-vs-unknown/` - Critical skill teaching when to use `unknown` with type guards instead of `any`. Addresses #1 violation pattern.
+- `choosing-unknown-over-any/` - Critical skill teaching when to use `unknown` with type guards instead of `any`. Addresses #1 violation pattern.
 
   Example content: Teaching progression from `any` → `unknown` → type guards → safe access
 
-- `TYPES-type-guards/` - Writing custom type predicates (`pet is Fish`) and using built-in guards (`typeof`, `instanceof`, `in`).
+- `writing-type-guards/` - Writing custom type predicates (`pet is Fish`) and using built-in guards (`typeof`, `instanceof`, `in`).
 
   Example content: Pattern library of type guard implementations
 
-- `TYPES-generics/` - Generic constraints with `extends`, avoiding `any` in generic defaults, mapped types.
+- `constraining-generics/` - Generic constraints with `extends`, avoiding `any` in generic defaults, mapped types.
 
   Example content: Real-world generic patterns from stress test scenarios
 
-#### CONFIG Concern
+#### Configuration Concern
 
 **Skills:**
 
-- `CONFIG-compiler-options/` - Essential strict flags: `strict: true`, `noUncheckedIndexedAccess: true`, `exactOptionalPropertyTypes: true`. Explains what each flag prevents.
+- `configuring-compiler-options/` - Essential strict flags: `strict: true`, `noUncheckedIndexedAccess: true`, `exactOptionalPropertyTypes: true`. Explains what each flag prevents.
 
   Example content: Before/after examples showing issues each flag catches
 
-- `CONFIG-module-resolution/` - Modern module options: `NodeNext` (floating), `node20` (stable), `Bundler` (for Webpack/Vite).
+- `configuring-module-resolution/` - Modern module options: `NodeNext` (floating), `node20` (stable), `Bundler` (for Webpack/Vite).
 
   Example content: Decision tree for choosing module strategy
 
-- `CONFIG-performance/` - `incremental: true`, `skipLibCheck: true`, project references for monorepos.
+- `optimizing-build-performance/` - `incremental: true`, `skipLibCheck: true`, project references for monorepos.
 
   Example content: Performance benchmarks and when each optimization matters
 
-#### VALIDATION Concern
+#### Validation Concern
 
 **Skills:**
 
-- `VALIDATION-runtime-checks/` - Using Zod schemas for external data. TypeScript types are erased at runtime. Addresses type assertion failures.
+- `validating-runtime-types/` - Using Zod schemas for external data. TypeScript types are erased at runtime. Addresses type assertion failures.
 
   Example content: Complete Zod integration patterns, error handling
 
-- `VALIDATION-type-assertions/` - When assertions are acceptable (`as const`, `as unknown as T` with validation) vs dangerous (`data as T` without checks).
+- `using-type-assertions/` - When assertions are acceptable (`as const`, `as unknown as T` with validation) vs dangerous (`data as T` without checks).
 
   Example content: Safe vs unsafe assertion examples from stress test
 
-- `VALIDATION-external-data/` - API responses, JSON parsing, user input all need runtime validation. Never trust external data.
+- `validating-external-data/` - API responses, JSON parsing, user input all need runtime validation. Never trust external data.
 
   Example content: Full validation pipeline examples
 
-#### ERROR-HANDLING Concern
+#### Error Handling Concern
 
 **Skills:**
 
-- `ERROR-HANDLING-custom-errors/` - Creating error classes with proper prototype chain (`Object.setPrototypeOf`). Addresses missing prototype fix in stress test.
+- `creating-custom-errors/` - Creating error classes with proper prototype chain (`Object.setPrototypeOf`). Addresses missing prototype fix in stress test.
 
   Example content: Error class hierarchy examples
 
-- `ERROR-HANDLING-type-guards/` - Checking `error instanceof Error` before accessing properties. Caught errors are `unknown` in strict mode.
+- `guarding-error-types/` - Checking `error instanceof Error` before accessing properties. Caught errors are `unknown` in strict mode.
 
   Example content: Error handling patterns for different error types
 
-- `ERROR-HANDLING-result-pattern/` - `Result<T, E>` type for expected failures instead of exceptions.
+- `using-result-pattern/` - `Result<T, E>` type for expected failures instead of exceptions.
 
   Example content: When to use Result vs throwing errors
 
-#### SECURITY Concern
+#### Security Concern
 
 **Skills:**
 
-- `SECURITY-input-validation/` - Sanitizing user input (DOMPurify for HTML), validating email/phone formats, preventing XSS.
+- `validating-user-input/` - Sanitizing user input (DOMPurify for HTML), validating email/phone formats, preventing XSS.
 
   Example content: Security validation patterns, OWASP guidelines
 
-- `SECURITY-credentials/` - NEVER use Base64 for passwords. Use bcrypt/argon2. NEVER accept third-party passwords (use OAuth). Addresses critical failures in stress test.
+- `handling-credentials/` - NEVER use Base64 for passwords. Use bcrypt/argon2. NEVER accept third-party passwords (use OAuth). Addresses critical failures in stress test.
 
   Example content: Secure authentication patterns, what NOT to do
 
-- `SECURITY-dependencies/` - Running `npm audit`, keeping dependencies updated, monitoring vulnerabilities.
+- `auditing-dependencies/` - Running `npm audit`, keeping dependencies updated, monitoring vulnerabilities.
 
   Example content: Security workflow integration
 
-#### MIGRATION Concern
+#### Migration Concern
 
 **Skills:**
 
-- `MIGRATION-js-to-ts/` - Incremental migration: `allowJs: true` → rename files → add types → `strict: true`. Addresses agents writing JavaScript.
+- `migrating-from-javascript/` - Incremental migration: `allowJs: true` → rename files → add types → `strict: true`. Addresses agents writing JavaScript.
 
   Example content: Step-by-step migration guide with checkpoints
 
-- `MIGRATION-strict-mode/` - Enabling strict flags one at a time, handling migration errors.
+- `enabling-strict-mode/` - Enabling strict flags one at a time, handling migration errors.
 
   Example content: Common migration errors and fixes
 
-#### PERFORMANCE Concern
+#### Performance Concern
 
 **Skills:**
 
-- `PERFORMANCE-build-speed/` - TypeScript 5.9 incremental caching (10% faster), project references, alternative compilers (SWC, esbuild).
+- `optimizing-build-speed/` - TypeScript 5.9 incremental caching (10% faster), project references, alternative compilers (SWC, esbuild).
 
   Example content: Performance optimization workflow
 
-- `PERFORMANCE-type-complexity/` - Avoiding deeply nested types, using interfaces over type aliases for objects, selective imports.
+- `simplifying-type-complexity/` - Avoiding deeply nested types, using interfaces over type aliases for objects, selective imports.
 
   Example content: Type complexity anti-patterns and refactoring
 
 ### Review Skills
 
-**REVIEW-type-safety/** - Exported skill for review plugin to check:
+**reviewing-type-safety/** - Exported skill for review plugin to check:
+
 - `any` type usage
 - Type assertions on external data
 - Missing type guards in error handling
@@ -372,6 +383,7 @@ echo "TypeScript session initialized: $STATE_FILE"
 ```
 
 **Key Design:**
+
 - Creates fresh state on session start
 - Tracks 4 recommendation types
 - Runs once per session (< 5ms)
@@ -400,21 +412,21 @@ case "$FILE_EXT" in
   ts|tsx)
     if [[ "$FILE_NAME" == "tsconfig.json" ]]; then
       RECOMMENDATION_TYPE="config_files"
-      SKILLS="CONFIG-*, especially CONFIG-compiler-options, CONFIG-module-resolution"
+      SKILLS="configuring-compiler-options, configuring-module-resolution, optimizing-build-performance"
       MESSAGE="📚 TypeScript Config Detected: $SKILLS"
     elif [[ "$FILE_PATH" == *"test"* || "$FILE_PATH" == *"spec"* ]]; then
       RECOMMENDATION_TYPE="test_files"
-      SKILLS="TYPES-type-guards, VALIDATION-runtime-checks, ERROR-HANDLING-*"
+      SKILLS="writing-type-guards, validating-runtime-types, guarding-error-types"
       MESSAGE="📚 TypeScript Test File: $SKILLS"
     else
       RECOMMENDATION_TYPE="typescript_files"
-      SKILLS="TYPES-*, VALIDATION-*, ERROR-HANDLING-*, SECURITY-*"
+      SKILLS="choosing-unknown-over-any, writing-type-guards, validating-runtime-types, validating-user-input"
       MESSAGE="📚 TypeScript Skills Available: $SKILLS"
     fi
     ;;
   js|jsx)
     RECOMMENDATION_TYPE="migration_context"
-    SKILLS="MIGRATION-js-to-ts, MIGRATION-strict-mode"
+    SKILLS="migrating-from-javascript, enabling-strict-mode"
     MESSAGE="📚 JavaScript File - Consider Migration: $SKILLS"
     ;;
 esac
@@ -434,6 +446,7 @@ exit 0
 ```
 
 **Key Features:**
+
 - ✅ File extension detection (.ts, .tsx, .js, .jsx)
 - ✅ Special handling for tsconfig.json
 - ✅ Test file detection
@@ -444,14 +457,15 @@ exit 0
 
 **Activation Rules Table:**
 
-| Pattern | Triggered Skills | Rationale | Frequency |
-|---------|------------------|-----------|-----------|
-| *.ts, *.tsx | TYPES-*, VALIDATION-*, ERROR-HANDLING-*, SECURITY-* | TypeScript file editing | Once per session |
-| tsconfig.json | CONFIG-* (all configuration skills) | TypeScript configuration | Once per session |
-| *test*.ts, *spec*.ts | TYPES-type-guards, VALIDATION-*, ERROR-HANDLING-* | Testing TypeScript code | Once per session |
-| *.js, *.jsx | MIGRATION-js-to-ts, MIGRATION-strict-mode | Migration opportunity | Once per session |
+| Pattern              | Triggered Skills                                    | Rationale                | Frequency        |
+| -------------------- | --------------------------------------------------- | ------------------------ | ---------------- |
+| _.ts, _.tsx          | choosing-unknown-over-any, writing-type-guards, validating-runtime-types, validating-user-input | TypeScript file editing  | Once per session |
+| tsconfig.json        | configuring-compiler-options, configuring-module-resolution, optimizing-build-performance | TypeScript configuration | Once per session |
+| _test_.ts, _spec_.ts | writing-type-guards, validating-runtime-types, guarding-error-types   | Testing TypeScript code  | Once per session |
+| _.js, _.jsx          | migrating-from-javascript, enabling-strict-mode           | Migration opportunity    | Once per session |
 
 **Performance:**
+
 - File extension check: ~1ms
 - Path pattern detection: ~2ms
 - State file read/write: ~2ms
@@ -463,6 +477,7 @@ exit 0
 **check-type-safety.sh** - Called by PreToolUse hook on Write/Edit
 
 Detects common violations from stress test:
+
 - `any` type usage (grep for `: any`, `<any>`, `= any`)
 - Type assertions without validation (`as T` without prior type guard)
 - Missing generic constraints (`<T>` should often be `<T extends X>`)
@@ -473,6 +488,7 @@ Fast execution using grep and simple regex patterns (< 50ms).
 **check-deprecated-apis.sh** - Called by PreToolUse hook on Write/Edit
 
 Detects deprecated JavaScript methods from stress test:
+
 - `substr()` → suggest `slice()`
 - `escape()` → suggest `encodeURIComponent()`
 - `unescape()` → suggest `decodeURIComponent()`
@@ -486,53 +502,53 @@ typescript/
 ├── .claude-plugin/
 │   └── plugin.json
 ├── skills/
-│   ├── TYPES-any-vs-unknown/
+│   ├── choosing-unknown-over-any/
 │   │   ├── SKILL.md
 │   │   └── references/
 │   │       └── examples.md
-│   ├── TYPES-type-guards/
+│   ├── writing-type-guards/
 │   │   └── SKILL.md
-│   ├── TYPES-generics/
+│   ├── constraining-generics/
 │   │   └── SKILL.md
-│   ├── CONFIG-compiler-options/
+│   ├── configuring-compiler-options/
 │   │   ├── SKILL.md
 │   │   └── references/
 │   │       └── strict-flags.md
-│   ├── CONFIG-module-resolution/
+│   ├── configuring-module-resolution/
 │   │   └── SKILL.md
-│   ├── CONFIG-performance/
+│   ├── optimizing-build-performance/
 │   │   └── SKILL.md
-│   ├── VALIDATION-runtime-checks/
+│   ├── validating-runtime-types/
 │   │   ├── SKILL.md
 │   │   └── references/
 │   │       └── zod-examples.md
-│   ├── VALIDATION-type-assertions/
+│   ├── using-type-assertions/
 │   │   └── SKILL.md
-│   ├── VALIDATION-external-data/
+│   ├── validating-external-data/
 │   │   └── SKILL.md
-│   ├── ERROR-HANDLING-custom-errors/
+│   ├── creating-custom-errors/
 │   │   └── SKILL.md
-│   ├── ERROR-HANDLING-type-guards/
+│   ├── guarding-error-types/
 │   │   └── SKILL.md
-│   ├── ERROR-HANDLING-result-pattern/
+│   ├── using-result-pattern/
 │   │   └── SKILL.md
-│   ├── SECURITY-input-validation/
+│   ├── validating-user-input/
 │   │   └── SKILL.md
-│   ├── SECURITY-credentials/
+│   ├── handling-credentials/
 │   │   ├── SKILL.md
 │   │   └── references/
 │   │       └── never-do-this.md
-│   ├── SECURITY-dependencies/
+│   ├── auditing-dependencies/
 │   │   └── SKILL.md
-│   ├── MIGRATION-js-to-ts/
+│   ├── migrating-from-javascript/
 │   │   └── SKILL.md
-│   ├── MIGRATION-strict-mode/
+│   ├── enabling-strict-mode/
 │   │   └── SKILL.md
-│   ├── PERFORMANCE-build-speed/
+│   ├── optimizing-build-speed/
 │   │   └── SKILL.md
-│   ├── PERFORMANCE-type-complexity/
+│   ├── simplifying-type-complexity/
 │   │   └── SKILL.md
-│   └── REVIEW-type-safety/
+│   └── reviewing-type-safety/
 │       └── SKILL.md
 ├── hooks/
 │   └── hooks.json
@@ -573,12 +589,13 @@ typescript/
 React plugin references TypeScript skills:
 
 ```markdown
-## TYPES-component-props/SKILL.md in react-19 plugin
+## typing-component-props/SKILL.md in react-19 plugin
 
-See @typescript/TYPES-generics for generic component patterns.
-See @typescript/VALIDATION-runtime-checks for prop validation.
+Use the constraining-generics skill from the typescript plugin for generic component patterns.
+Use the validating-runtime-types skill from the typescript plugin for prop validation.
 
 React-specific additions:
+
 - ComponentProps<typeof Component> for extracting prop types
 - PropsWithChildren<T> for components with children
 ```
@@ -621,14 +638,7 @@ Both run in parallel. TypeScript plugin validates TypeScript patterns, React plu
     "name": "Claude Code Plugin Marketplace",
     "email": "plugins@claude.ai"
   },
-  "keywords": [
-    "typescript",
-    "type-safety",
-    "compiler",
-    "validation",
-    "security",
-    "ts5.9"
-  ],
+  "keywords": ["typescript", "type-safety", "compiler", "validation", "security", "ts5.9"],
   "engines": {
     "claude-code": ">=1.0.0"
   }
@@ -642,14 +652,19 @@ Note: No `exports` field needed - uses standard auto-discovery for skills/, hook
 ### Phase 1: Core Type Safety Skills (Week 1)
 
 **Deliverables:**
-- 3 TYPES concern skills
-- 3 VALIDATION concern skills
-- 3 ERROR-HANDLING concern skills
+
+- 3 type safety skills
+- 3 validation skills
+- 3 error handling skills
+- 3 security skills
+- 2 migration skills
+- 2 performance skills
 - Knowledge base (TypeScript 5.9 comprehensive doc)
 
 **Focus:** Address the most critical violations from stress test - `any` abuse, type assertions, error handling.
 
 **Time estimate:** 40 hours
+
 - 3 hours per skill × 9 skills = 27 hours
 - Knowledge base organization: 8 hours
 - Testing and refinement: 5 hours
@@ -657,13 +672,15 @@ Note: No `exports` field needed - uses standard auto-discovery for skills/, hook
 ### Phase 2: Configuration and Security Skills (Week 2)
 
 **Deliverables:**
-- 3 CONFIG concern skills
-- 3 SECURITY concern skills
-- Review skill (REVIEW-type-safety)
+
+- 3 configuration skills (configuring-compiler-options, configuring-module-resolution, optimizing-build-performance)
+- 3 security skills (validating-user-input, handling-credentials, auditing-dependencies)
+- Review skill (reviewing-type-safety)
 
 **Focus:** Prevent security vulnerabilities and ensure proper compiler configuration.
 
 **Time estimate:** 35 hours
+
 - 3 hours per skill × 7 skills = 21 hours
 - Security examples and anti-patterns: 8 hours
 - Review skill integration: 6 hours
@@ -671,6 +688,7 @@ Note: No `exports` field needed - uses standard auto-discovery for skills/, hook
 ### Phase 3: Intelligent Hook System (Week 3)
 
 **Deliverables:**
+
 - SessionStart hook with init-session.sh
 - PreToolUse hook with recommend-skills.sh
 - Validation scripts (check-type-safety.sh, check-deprecated-apis.sh)
@@ -679,6 +697,7 @@ Note: No `exports` field needed - uses standard auto-discovery for skills/, hook
 **Focus:** Context-aware skill recommendations without bloat.
 
 **Time estimate:** 30 hours
+
 - Session lifecycle scripts: 8 hours
 - Recommendation logic: 10 hours
 - Validation scripts: 8 hours
@@ -687,51 +706,17 @@ Note: No `exports` field needed - uses standard auto-discovery for skills/, hook
 ### Phase 4: Migration and Performance Skills (Week 4)
 
 **Deliverables:**
-- 2 MIGRATION concern skills
-- 2 PERFORMANCE concern skills
+
+- 2 migration skills (migrating-from-javascript, enabling-strict-mode)
+- 2 performance skills (optimizing-build-speed, simplifying-type-complexity)
 - Complete README and documentation
 
 **Focus:** Help developers migrate existing codebases and optimize builds.
 
-**Time estimate:** 25 hours
-- 3 hours per skill × 4 skills = 12 hours
-- README and plugin documentation: 8 hours
-- Example projects: 5 hours
-
-### Phase 5: Integration Testing and Refinement (Week 5)
-
-**Deliverables:**
-- Integration with React/Next.js plugins
-- Stress test validation (run original scenarios)
-- Performance optimization
-- User feedback iteration
-
-**Focus:** Ensure plugin prevents all 23 violations found in original stress test.
-
-**Time estimate:** 30 hours
-- Cross-plugin testing: 10 hours
-- Stress test re-run and validation: 12 hours
-- Performance tuning: 4 hours
-- Documentation polish: 4 hours
-
-**Total Implementation:** 160 hours (~5 weeks)
-
-## Success Metrics
-
-### Effectiveness
-
-**Stress Test Prevention:**
-- ✅ Blocks `any` type before it's written (TYPES-any-vs-unknown skill activated)
-- ✅ Prevents security vulnerabilities (SECURITY-credentials warns against password storage)
-- ✅ Catches type assertions on external data (VALIDATION-type-assertions skill)
-- ✅ Detects deprecated APIs (check-deprecated-apis.sh hook)
-- ✅ Ensures TypeScript usage (MIGRATION-js-to-ts skill for .js files)
-
-**Target:** Reduce violations by 90% when re-running stress test scenarios with plugin active.
-
 ### Efficiency
 
 **Context Management:**
+
 - Skills load progressively (only when activated by user)
 - Hook recommendations once per session per file type
 - State file prevents repeated bloat
@@ -742,8 +727,9 @@ Note: No `exports` field needed - uses standard auto-discovery for skills/, hook
 ### Extensibility
 
 **Plugin Composition:**
+
 - Clear boundaries with framework plugins
-- Skills referenceable across plugins (`@typescript/TYPES-generics`)
+- Skills referenceable across plugins (`@typescript/constraining-generics`)
 - Hooks compose without conflicts
 - Knowledge base shared resource
 
@@ -754,6 +740,7 @@ Note: No `exports` field needed - uses standard auto-discovery for skills/, hook
 ### Risk: Hook execution slows development
 
 **Mitigation:**
+
 - Optimize scripts (use grep, avoid heavy parsing)
 - Short timeouts (10-20ms per script)
 - Session lifecycle prevents repeated execution
@@ -764,6 +751,7 @@ Note: No `exports` field needed - uses standard auto-discovery for skills/, hook
 ### Risk: Skills activate incorrectly or too frequently
 
 **Mitigation:**
+
 - Test file patterns thoroughly with real projects
 - Use specific patterns (tsconfig.json, test file paths)
 - Session state prevents re-activation
@@ -774,6 +762,7 @@ Note: No `exports` field needed - uses standard auto-discovery for skills/, hook
 ### Risk: Overlap with linter/compiler warnings
 
 **Mitigation:**
+
 - Focus on conceptual teaching, not just error detection
 - Provide "why" and "how to fix" context beyond compiler errors
 - Catch patterns compilers miss (security anti-patterns)
@@ -781,10 +770,10 @@ Note: No `exports` field needed - uses standard auto-discovery for skills/, hook
 
 **Fallback:** Plugin adds value even with ESLint/TSC through teaching and context.
 
-
 ### Risk: False positives in validation hooks
 
 **Mitigation:**
+
 - Use conservative patterns (high confidence only)
 - Provide clear explanation when blocking
 - Warn instead of block for ambiguous cases
@@ -796,7 +785,7 @@ Note: No `exports` field needed - uses standard auto-discovery for skills/, hook
 
 This plugin provides TypeScript 5.9+ assistance through:
 
-- **16 Teaching Skills** organized by 7 concern prefixes (TYPES, CONFIG, VALIDATION, ERROR-HANDLING, SECURITY, MIGRATION, PERFORMANCE)
+- **16 Teaching Skills** all under 500 lines
 - **Intelligent Hooks** with session lifecycle management for context-aware, non-repetitive skill recommendations
 - **Validation Scripts** using fast bash patterns to catch violations before code is written
 - **Shared Knowledge Base** providing comprehensive TypeScript 5.9 reference

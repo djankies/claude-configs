@@ -411,7 +411,7 @@ description: Next.js App Router with React 19 Server Components
 
 ## Base Pattern
 
-See @react-19/components/server-vs-client-boundaries for Server Component basics.
+Use the server-vs-client-boundaries skill from the react-19 plugin for Server Component basics.
 
 ## Next.js Specific
 

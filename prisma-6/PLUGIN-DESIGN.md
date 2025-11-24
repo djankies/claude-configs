@@ -640,8 +640,8 @@ Next.js plugin references Prisma skills:
 ```markdown
 ## Server Actions with Prisma (in nextjs-15 plugin)
 
-See @prisma-6/configuring-serverless-clients for Next.js global singleton pattern.
-See @prisma-6/validating-query-inputs for validating form data before Prisma.
+Use the configuring-serverless-clients skill from the prisma-6 plugin for Next.js global singleton pattern.
+Use the validating-query-inputs skill from the prisma-6 plugin for validating form data before Prisma.
 
 Next.js-specific additions:
 

@@ -506,7 +506,7 @@ Skills can reference other plugins: `@react-19/HOOKS-use-action-state`
 
 Example in `FORMS-server-actions-security/SKILL.md`:
 ```markdown
-For form state management with server actions, see @react-19/HOOKS-use-action-state.
+For form state management with server actions, use the HOOKS-use-action-state skill from the react-19 plugin.
 This skill focuses on authentication within server actions.
 ```
 

@@ -605,7 +605,7 @@ Other plugins reference Zod skills for validation context:
 Example from Next.js 15 Server Actions skill:
 
 ```markdown
-For Server Action input validation, use Zod schemas. See @zod-4/using-zod-v4-features for pattern.
+For Server Action input validation, use Zod schemas. Use the using-zod-v4-features skill from the zod-4 plugin for pattern.
 
 Example:
 ```typescript
