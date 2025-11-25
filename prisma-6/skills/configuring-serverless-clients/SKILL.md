@@ -149,6 +149,13 @@ auto-encrypted); connection pooling shared across invocations; consider Vercel P
 
 **Railway/Render:** Apply `connection_limit=1` pattern; check platform docs for built-in pooling.
 
+## Related Skills
+
+**Next.js Integration:**
+
+- If implementing authenticated data access layers in Next.js, use the securing-data-access-layer skill from nextjs-16 for verifySession() DAL patterns
+- If securing server actions with database operations, use the securing-server-actions skill from nextjs-16 for authentication patterns
+
 ## References
 
 - Next.js patterns: `references/nextjs-patterns.md`

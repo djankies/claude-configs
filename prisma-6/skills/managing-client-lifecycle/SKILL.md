@@ -188,3 +188,7 @@ Too many connections" in tests | New PrismaClient created per test file | Use gl
 - **CLIENT-singleton-pattern:** Ensuring single PrismaClient instance
 - **CLIENT-serverless-config:** Serverless-specific connection management
 - **PERFORMANCE-connection-pooling:** Optimizing connection pool size
+
+**Next.js Integration:**
+
+- If implementing data access layers with session verification, use the securing-data-access-layer skill from nextjs-16 for authenticated database patterns

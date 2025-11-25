@@ -419,6 +419,12 @@ const dangerousPatterns = [
 - [ ] Add SQL injection test cases
 - [ ] Run security audit tools
 
+## Related Skills
+
+**Security Best Practices:**
+
+- If sanitizing user inputs before database operations, use the sanitizing-user-inputs skill from typescript for input sanitization patterns
+
 ## Resources
 
 - [Prisma Raw Database Access Docs](https://www.prisma.io/docs/orm/prisma-client/queries/raw-database-access)

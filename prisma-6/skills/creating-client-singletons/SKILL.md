@@ -165,3 +165,9 @@ module.exports = prisma;
 **Red Flags (Implement Singleton Immediately):**
 
 - Multiple `new PrismaClient()` in grep results; P1017 errors in logs; growing connection count during development; different files importing from `@prisma/client`; PrismaClient creation inside functions; test files creating own clients
+
+## Related Skills
+
+**TypeScript Type Safety:**
+
+- If using type guards for singleton validation, use the using-type-guards skill from typescript for type narrowing patterns

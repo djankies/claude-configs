@@ -27,7 +27,7 @@ if [ -z "$TS_FILES" ]; then
   finish_hook 0
 fi
 
-INSTANCES=$(echo "$TS_FILES" | xargs grep -n "new PrismaClient()" 2>/dev/null || true)
+INSTANCES=$(echo "$TS_FILES" | xargs grep -n --exclude="*.test.ts" --exclude="*.spec.ts" --exclude-dir="__tests__" --exclude-dir="test" "new PrismaClient()" 2>/dev/null || true)
 
 if [ -n "$INSTANCES" ]; then
   INSTANCE_COUNT=$(echo "$INSTANCES" | wc -l | tr -d ' ')
@@ -45,7 +45,7 @@ Use global singleton pattern to prevent connection pool exhaustion:
   fi
 fi
 
-FUNCTION_SCOPED=$(echo "$TS_FILES" | xargs grep -B5 "new PrismaClient()" 2>/dev/null | \
+FUNCTION_SCOPED=$(echo "$TS_FILES" | xargs grep -B5 --exclude="*.test.ts" --exclude="*.spec.ts" --exclude-dir="__tests__" --exclude-dir="test" "new PrismaClient()" 2>/dev/null | \
   grep -E "(function|const.*=.*\(|async.*\()" || true)
 
 if [ -n "$FUNCTION_SCOPED" ]; then
@@ -73,6 +73,22 @@ This creates new instances on each function call, exhausting connections.
 Move PrismaClient to module scope with singleton pattern."
     finish_hook 0
   fi
+fi
+
+RAW_INTERPOLATION=$(echo "$TS_FILES" | xargs grep -n "prisma\.\(raw\|queryRaw\|executeRaw\)" 2>/dev/null | \
+  grep -E '\$\{.*\}|"\s*\+\s*[^+]|\`\$\{' || true)
+
+if [ -n "$RAW_INTERPOLATION" ]; then
+  log_warn "Potential SQL interpolation in Prisma.raw() call"
+  pretooluse_respond "allow" "Warning: Potential SQL interpolation detected in Prisma.raw() call
+
+Use parameterized queries to prevent SQL injection:
+  prisma.\$queryRaw\`SELECT * FROM users WHERE id = \${id}\`
+
+Avoid string concatenation:
+  ❌ prisma.\$queryRaw('SELECT * FROM users WHERE id = ' + id)
+  ❌ prisma.\$queryRaw(\`SELECT * FROM users WHERE id = \${unsafeVar}\`)"
+  finish_hook 0
 fi
 
 MISSING_GLOBAL=$(echo "$TS_FILES" | xargs grep -L "globalForPrisma\|globalThis.*prisma" 2>/dev/null | \

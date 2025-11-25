@@ -501,3 +501,9 @@ await prisma.$transaction(
   { timeout: 30000 }
 );
 ```
+
+## Related Skills
+
+**TypeScript Error Handling:**
+
+- If implementing runtime checks for error codes, use the using-runtime-checks skill from typescript for assertion and guard patterns

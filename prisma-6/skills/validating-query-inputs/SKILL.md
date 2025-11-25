@@ -417,3 +417,17 @@ const userCreateSchema = z.object({
 
 type ValidatedUserInput = z.infer<typeof userCreateSchema>
 ```
+
+## Related Skills
+
+**Zod v4 Validation:**
+
+- If normalizing string inputs (trim, toLowerCase), use the transforming-string-methods skill for Zod v4 built-in string transformations
+- If using Zod for schema construction, use the validating-schema-basics skill from zod-4 for core validation patterns
+- If customizing validation error messages, use the customizing-errors skill from zod-4 for error formatting strategies
+- If validating string formats (email, UUID, URL), use the validating-string-formats skill from zod-4 for built-in validators
+
+**TypeScript Validation:**
+
+- If performing runtime type checking beyond Zod, use the using-runtime-checks skill from typescript for assertion patterns
+- If validating external data sources, use the validating-external-data skill from typescript for comprehensive validation strategies

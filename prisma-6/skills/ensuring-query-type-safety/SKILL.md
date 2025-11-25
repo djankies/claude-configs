@@ -279,3 +279,10 @@ async function getDynamicUser(id: string, options: DynamicUserArgs) {
 4. Avoid `any`; leverage TypeScript's type system
 5. Type dynamic queries with proper generics
 6. Create const validators for common patterns
+
+## Related Skills
+
+**TypeScript Type Safety:**
+
+- If avoiding any types in TypeScript, use the avoiding-any-types skill from typescript for strict type patterns
+- If implementing generic patterns for type-safe queries, use the using-generics skill from typescript for advanced generic techniques

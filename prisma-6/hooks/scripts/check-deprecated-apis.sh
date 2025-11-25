@@ -65,7 +65,7 @@ For base64 encoding:
   finish_hook 0
 fi
 
-NOT_FOUND_ERROR=$(echo "$TS_FILES" | xargs grep -En 'Prisma.*NotFoundError|@prisma/client.*NotFoundError|PrismaClient.*NotFoundError|from.*["\x27]@prisma/client["\x27].*NotFoundError' 2>/dev/null || true)
+NOT_FOUND_ERROR=$(echo "$TS_FILES" | xargs grep -En --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" 'Prisma.*NotFoundError|@prisma/client.*NotFoundError|PrismaClient.*NotFoundError|from.*["\047]@prisma/client["\047].*NotFoundError' 2>/dev/null || true)
 
 if [ -n "$NOT_FOUND_ERROR" ]; then
   log_warn "Deprecated NotFoundError handling detected"

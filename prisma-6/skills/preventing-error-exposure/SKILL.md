@@ -474,3 +474,10 @@ async function createUser(input: unknown) {
 ```
 
 Validation catches format issues, error transformation handles database constraints.
+
+## Related Skills
+
+**Error Handling and Validation:**
+
+- If sanitizing error messages for user display, use the sanitizing-user-inputs skill from typescript for safe error formatting
+- If customizing Zod validation errors, use the customizing-errors skill from zod-4 for user-friendly error messages

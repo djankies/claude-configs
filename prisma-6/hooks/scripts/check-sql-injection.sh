@@ -27,7 +27,7 @@ if [ -z "$TS_FILES" ]; then
   finish_hook 0
 fi
 
-UNSAFE_QUERY_RAW=$(echo "$TS_FILES" | xargs grep -n '\$queryRawUnsafe' 2>/dev/null || true)
+UNSAFE_QUERY_RAW=$(echo "$TS_FILES" | xargs grep -n --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" '\$queryRawUnsafe' 2>/dev/null || true)
 
 if [ -n "$UNSAFE_QUERY_RAW" ]; then
   log_error "Unsafe raw SQL query detected - SQL injection risk"
@@ -39,7 +39,7 @@ Use \$queryRaw with tagged template syntax instead:
   finish_hook 0
 fi
 
-RAW_WITH_INTERPOLATION=$(echo "$TS_FILES" | xargs grep -n 'Prisma\.raw(' 2>/dev/null | \
+RAW_WITH_INTERPOLATION=$(echo "$TS_FILES" | xargs grep -n --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" 'Prisma\.raw(' 2>/dev/null | \
   grep -E '\$\{|\+.*["\`]' || true)
 
 if [ -n "$RAW_WITH_INTERPOLATION" ]; then
@@ -52,7 +52,7 @@ Use Prisma.sql with tagged template syntax:
   finish_hook 0
 fi
 
-MISSING_TAGGED_TEMPLATE=$(echo "$TS_FILES" | xargs grep -n '\$queryRaw(' 2>/dev/null || true)
+MISSING_TAGGED_TEMPLATE=$(echo "$TS_FILES" | xargs grep -n --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" '\$queryRaw(' 2>/dev/null || true)
 
 if [ -n "$MISSING_TAGGED_TEMPLATE" ]; then
   log_warn "\$queryRaw with function call syntax instead of tagged template"
@@ -64,7 +64,7 @@ Use tagged template syntax for automatic parameterization:
   finish_hook 0
 fi
 
-EXECUTE_RAW_UNSAFE=$(echo "$TS_FILES" | xargs grep -n '\$executeRawUnsafe' 2>/dev/null || true)
+EXECUTE_RAW_UNSAFE=$(echo "$TS_FILES" | xargs grep -n --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" '\$executeRawUnsafe' 2>/dev/null || true)
 
 if [ -n "$EXECUTE_RAW_UNSAFE" ]; then
   log_error "Unsafe raw SQL execution detected - SQL injection risk"
