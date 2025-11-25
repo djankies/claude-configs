@@ -836,6 +836,11 @@ async function validateKnowledge() {
     const plugin = JSON.parse(fs.readFileSync(path.join(pluginDir, '.claude-plugin', 'plugin.json'), 'utf8'));
     const pluginName = plugin.name;
 
+    const knowledgeExemptPlugins = ['review'];
+    if (knowledgeExemptPlugins.includes(pluginName)) {
+      continue;
+    }
+
     const knowledgeDir = path.join(pluginDir, 'knowledge');
 
     if (!fs.existsSync(knowledgeDir)) {

@@ -455,7 +455,7 @@ export default async function Page({
 
 For detailed migration examples, edge cases, and troubleshooting, see:
 
-- [Detailed Async Patterns Reference](./references/async-patterns.md)
+- [Detailed Async Patterns Reference](../../knowledge/async-patterns.md)
 - Next.js 16 Migration Guide: https://nextjs.org/docs/app/building-your-application/upgrading/version-16
 - `@typescript/TYPES-type-guards` for Promise type handling
 

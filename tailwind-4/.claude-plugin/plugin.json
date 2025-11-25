@@ -8,6 +8,5 @@
     "name": "Design Session with Claude Code"
   },
   "license": "MIT",
-  "keywords": ["tailwind", "css", "v4", "styling", "theming", "container-queries"],
-  "hooks": "./hooks/hooks.json"
+  "keywords": ["tailwind", "css", "v4", "styling", "theming", "container-queries"]
 }

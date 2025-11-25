@@ -85,6 +85,21 @@
       "category": "library"
     },
     {
+      "name": "tailwind-4",
+      "source": "./tailwind-4",
+      "description": "Tailwind CSS v4 patterns: CSS-first config, oklch colors, container queries, @utility directive",
+      "version": "1.0.0",
+      "author": {
+        "name": "Daniel Jankowski",
+        "email": "djank0113@gmail.com"
+      },
+      "homepage": "https://github.com/djankies/claude-configs",
+      "repository": "djankies/claude-configs",
+      "license": "MIT",
+      "keywords": ["tailwind", "css", "v4", "styling", "theming", "container-queries"],
+      "category": "library"
+    },
+    {
       "name": "prisma-6",
       "source": "./prisma-6",
       "description": "Prisma 6 ORM patterns, client management, query optimization, and security best practices based on real-world AI coding failures",
