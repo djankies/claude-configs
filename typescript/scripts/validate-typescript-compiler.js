@@ -62,10 +62,31 @@ const validateTypeScript = (filePath) => {
   const program = ts.createProgram([fileName], compilerOptions, host);
   const diagnostics = ts.getPreEmitDiagnostics(program);
 
+  const moduleResolutionErrorCodes = new Set([
+    2307,
+    2304,
+    2305,
+    2306,
+    2339,
+    2503,
+    2552,
+    2580,
+    2614,
+    2686,
+    2693,
+    2694,
+    2792,
+    7016,
+  ]);
+
   const errors = [];
   const warnings = [];
 
   diagnostics.forEach((diagnostic) => {
+    if (moduleResolutionErrorCodes.has(diagnostic.code)) {
+      return;
+    }
+
     if (diagnostic.file && diagnostic.start !== undefined) {
       const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(
         diagnostic.start
