@@ -1,0 +1,235 @@
+{
+  "tests": [
+    {
+      "name": "deprecated-maxThreads",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "vitest.config.ts",
+          "content": "export default defineConfig({\n  pool: 'threads',\n  poolOptions: {\n    maxThreads: 4\n  }\n})"
+        }
+      },
+      "expected_exit": 2
+    },
+    {
+      "name": "deprecated-minThreads",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "vitest.config.ts",
+          "content": "export default defineConfig({\n  pool: 'threads',\n  minThreads: 1\n})"
+        }
+      },
+      "expected_exit": 2
+    },
+    {
+      "name": "deprecated-singleThread",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "vitest.config.ts",
+          "content": "export default defineConfig({\n  singleThread: true\n})"
+        }
+      },
+      "expected_exit": 2
+    },
+    {
+      "name": "deprecated-singleFork",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "vitest.config.ts",
+          "content": "export default defineConfig({\n  singleFork: true\n})"
+        }
+      },
+      "expected_exit": 2
+    },
+    {
+      "name": "deprecated-poolOptions",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "vitest.config.ts",
+          "content": "export default defineConfig({\n  poolOptions: {\n    threads: { singleThread: true }\n  }\n})"
+        }
+      },
+      "expected_exit": 2
+    },
+    {
+      "name": "deprecated-minWorkers",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "vitest.config.ts",
+          "content": "export default defineConfig({\n  minWorkers: 1\n})"
+        }
+      },
+      "expected_exit": 2
+    },
+    {
+      "name": "deprecated-coverage-ignoreEmptyLines",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "vitest.config.ts",
+          "content": "export default defineConfig({\n  coverage: {\n    ignoreEmptyLines: true,\n    provider: 'v8'\n  }\n})"
+        }
+      },
+      "expected_exit": 2
+    },
+    {
+      "name": "deprecated-coverage-all",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "vitest.config.ts",
+          "content": "export default defineConfig({\n  coverage: {\n    all: true,\n    provider: 'v8'\n  }\n})"
+        }
+      },
+      "expected_exit": 2
+    },
+    {
+      "name": "deprecated-coverage-extensions",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "vitest.config.ts",
+          "content": "export default defineConfig({\n  coverage: {\n    extensions: ['ts', 'tsx'],\n    provider: 'v8'\n  }\n})"
+        }
+      },
+      "expected_exit": 2
+    },
+    {
+      "name": "deprecated-defineWorkspace",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "vitest.config.ts",
+          "content": "export default defineWorkspace([\n  { test: { environment: 'node' } }\n])"
+        }
+      },
+      "expected_exit": 2
+    },
+    {
+      "name": "deprecated-poolMatchGlobs",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "vitest.config.ts",
+          "content": "export default defineConfig({\n  poolMatchGlobs: [['**/*.browser.test.ts', 'browser']]\n})"
+        }
+      },
+      "expected_exit": 2
+    },
+    {
+      "name": "deprecated-environmentMatchGlobs",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "vitest.config.ts",
+          "content": "export default defineConfig({\n  environmentMatchGlobs: [['**/*.browser.test.ts', 'browser']]\n})"
+        }
+      },
+      "expected_exit": 2
+    },
+    {
+      "name": "moved-deps-inline",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "vitest.config.ts",
+          "content": "export default defineConfig({\n  deps: {\n    inline: ['@testing-library/react']\n  }\n})"
+        }
+      },
+      "expected_exit": 2
+    },
+    {
+      "name": "moved-deps-external",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "vitest.config.ts",
+          "content": "export default defineConfig({\n  deps: {\n    external: ['node_modules']\n  }\n})"
+        }
+      },
+      "expected_exit": 2
+    },
+    {
+      "name": "moved-deps-fallbackCJS",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "vitest.config.ts",
+          "content": "export default defineConfig({\n  deps: {\n    fallbackCJS: true\n  }\n})"
+        }
+      },
+      "expected_exit": 2
+    },
+    {
+      "name": "replaced-browser-testerScripts",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "vitest.config.ts",
+          "content": "export default defineConfig({\n  browser: {\n    testerScripts: ['<script>'],\n    provider: 'playwright'\n  }\n})"
+        }
+      },
+      "expected_exit": 2
+    },
+    {
+      "name": "valid-config-no-deprecated",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "vitest.config.ts",
+          "content": "export default defineConfig({\n  test: {\n    environment: 'jsdom',\n    globals: true\n  },\n  coverage: {\n    provider: 'v8',\n    reporter: ['text', 'json']\n  }\n})"
+        }
+      },
+      "expected_exit": 0
+    },
+    {
+      "name": "edit-valid-config",
+      "input": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "vitest.config.ts",
+          "old_string": "test: { environment: 'node' }",
+          "new_string": "test: { environment: 'jsdom' }"
+        }
+      },
+      "expected_exit": 0
+    },
+    {
+      "name": "non-vitest-config-file",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "src/index.ts",
+          "content": "export const maxThreads = 4;"
+        }
+      },
+      "expected_exit": 0
+    },
+    {
+      "name": "wrong-tool-read",
+      "input": {
+        "tool_name": "Read",
+        "tool_input": {
+          "file_path": "vitest.config.ts"
+        }
+      },
+      "expected_exit": 0
+    },
+    {
+      "name": "multiple-violations",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "vitest.config.ts",
+          "content": "export default defineConfig({\n  maxThreads: 4,\n  singleThread: true,\n  coverage: {\n    ignoreEmptyLines: true,\n    all: true\n  },\n  deps: {\n    inline: ['pkg']\n  }\n})"
+        }
+      },
+      "expected_exit": 2
+    }
+  ]
+}

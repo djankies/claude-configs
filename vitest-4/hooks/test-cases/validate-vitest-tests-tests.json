@@ -1,0 +1,136 @@
+{
+  "tests": [
+    {
+      "name": "deprecated-vitest-browser-context",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "src/browser.test.ts",
+          "content": "import { expect } from 'vitest';\nimport { getContext } from '@vitest/browser/context';\n\ntest('browser context', async () => {\n  const ctx = getContext();\n  expect(ctx).toBeDefined();\n});"
+        }
+      },
+      "expected_exit": 2
+    },
+    {
+      "name": "deprecated-vitest-execute-import",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "src/execute.test.ts",
+          "content": "import { evaluate } from 'vitest/execute';\n\ntest('execute code', async () => {\n  const result = await evaluate('1 + 1');\n  expect(result).toBe(2);\n});"
+        }
+      },
+      "expected_exit": 2
+    },
+    {
+      "name": "renamed-env-variable",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "src/setup.test.ts",
+          "content": "process.env.VITE_NODE_DEPS_MODULE_DIRECTORIES = '/node_modules';\n\ntest('setup with old env var', () => {\n  expect(process.env.VITE_NODE_DEPS_MODULE_DIRECTORIES).toBeDefined();\n});"
+        }
+      },
+      "expected_exit": 2
+    },
+    {
+      "name": "valid-test-file-no-violations",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "src/example.test.ts",
+          "content": "import { describe, it, expect } from 'vitest';\n\ndescribe('valid test', () => {\n  it('should work', () => {\n    expect(true).toBe(true);\n  });\n});"
+        }
+      },
+      "expected_exit": 0
+    },
+    {
+      "name": "valid-vitest-browser-import",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "src/browser.test.ts",
+          "content": "import { expect, vi } from 'vitest';\nimport { page, getElement } from 'vitest/browser';\n\ntest('browser APIs', async () => {\n  await page.goto('/');\n  const el = await getElement('button');\n  expect(el).toBeDefined();\n});"
+        }
+      },
+      "expected_exit": 0
+    },
+    {
+      "name": "valid-renamed-env-variable",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "src/setup.test.ts",
+          "content": "process.env.VITEST_MODULE_DIRECTORIES = '/node_modules';\n\ntest('setup with new env var', () => {\n  expect(process.env.VITEST_MODULE_DIRECTORIES).toBeDefined();\n});"
+        }
+      },
+      "expected_exit": 0
+    },
+    {
+      "name": "edit-jsx-test-file-valid",
+      "input": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "src/component.test.tsx",
+          "old_string": "const { unmount } = render(<Component />);",
+          "new_string": "const { unmount } = render(<Component />);\n  unmount();"
+        }
+      },
+      "expected_exit": 0
+    },
+    {
+      "name": "non-test-file-ignored",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "src/utils.ts",
+          "content": "import { getContext } from '@vitest/browser/context';\nimport { evaluate } from 'vitest/execute';\n\nexport function setup() {}"
+        }
+      },
+      "expected_exit": 0
+    },
+    {
+      "name": "spec-file-with-violation",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "src/main.spec.ts",
+          "content": "import { getContext } from '@vitest/browser/context';\n\ntest('spec file', () => {\n  const ctx = getContext();\n});"
+        }
+      },
+      "expected_exit": 2
+    },
+    {
+      "name": "wrong-tool-read",
+      "input": {
+        "tool_name": "Read",
+        "tool_input": {
+          "file_path": "src/example.test.ts"
+        }
+      },
+      "expected_exit": 0
+    },
+    {
+      "name": "multiple-violations-same-file",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "src/complex.test.ts",
+          "content": "import { getContext } from '@vitest/browser/context';\nimport { evaluate } from 'vitest/execute';\nimport { test, expect } from 'vitest';\n\ntest('all violations', async () => {\n  process.env.VITE_NODE_DEPS_MODULE_DIRECTORIES = 'value';\n  const ctx = getContext();\n  const result = await evaluate('code');\n});"
+        }
+      },
+      "expected_exit": 2
+    },
+    {
+      "name": "jsx-test-file-with-violation",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "src/react.spec.tsx",
+          "content": "import { render } from '@testing-library/react';\nimport { getContext } from '@vitest/browser/context';\n\ntest('react component', () => {\n  const { unmount } = render(<Component />);\n  const ctx = getContext();\n});"
+        }
+      },
+      "expected_exit": 2
+    }
+  ]
+}

@@ -1,0 +1,172 @@
+{
+  "tests": [
+    {
+      "name": "config-file-vitest-config-ts",
+      "input": {
+        "tool_name": "Read",
+        "tool_input": {
+          "file_path": "vitest.config.ts"
+        }
+      },
+      "expected_exit": 0
+    },
+    {
+      "name": "config-file-vitest-config-js",
+      "input": {
+        "tool_name": "Read",
+        "tool_input": {
+          "file_path": "vitest.config.js"
+        }
+      },
+      "expected_exit": 0
+    },
+    {
+      "name": "config-file-vitest-config-mjs",
+      "input": {
+        "tool_name": "Read",
+        "tool_input": {
+          "file_path": "vitest.config.mjs"
+        }
+      },
+      "expected_exit": 0
+    },
+    {
+      "name": "config-file-with-path-prefix",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "/home/user/project/vitest.config.ts",
+          "content": "export default defineConfig({})"
+        }
+      },
+      "expected_exit": 0
+    },
+    {
+      "name": "test-file-test-ts",
+      "input": {
+        "tool_name": "Read",
+        "tool_input": {
+          "file_path": "src/example.test.ts"
+        }
+      },
+      "expected_exit": 0
+    },
+    {
+      "name": "test-file-spec-ts",
+      "input": {
+        "tool_name": "Read",
+        "tool_input": {
+          "file_path": "src/example.spec.ts"
+        }
+      },
+      "expected_exit": 0
+    },
+    {
+      "name": "test-file-test-tsx",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "src/component.test.tsx",
+          "content": "import { render } from '@testing-library/react';\n\ntest('renders', () => {\n  render(<App />);\n});"
+        }
+      },
+      "expected_exit": 0
+    },
+    {
+      "name": "test-file-spec-tsx",
+      "input": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "src/button.spec.tsx",
+          "old_string": "test('button')",
+          "new_string": "test('button click')"
+        }
+      },
+      "expected_exit": 0
+    },
+    {
+      "name": "non-vitest-file",
+      "input": {
+        "tool_name": "Read",
+        "tool_input": {
+          "file_path": "src/utils.ts"
+        }
+      },
+      "expected_exit": 0
+    },
+    {
+      "name": "non-test-javascript",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "src/index.js",
+          "content": "export const greeting = 'hello';"
+        }
+      },
+      "expected_exit": 0
+    },
+    {
+      "name": "wrong-tool-exec",
+      "input": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "ls -la"
+        }
+      },
+      "expected_exit": 0
+    },
+    {
+      "name": "missing-file-path",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "content": "some content"
+        }
+      },
+      "expected_exit": 0
+    },
+    {
+      "name": "nested-test-ts-file",
+      "input": {
+        "tool_name": "Read",
+        "tool_input": {
+          "file_path": "src/components/buttons/primary.test.ts"
+        }
+      },
+      "expected_exit": 0
+    },
+    {
+      "name": "nested-config-file",
+      "input": {
+        "tool_name": "Read",
+        "tool_input": {
+          "file_path": "packages/utils/vitest.config.ts"
+        }
+      },
+      "expected_exit": 0
+    },
+    {
+      "name": "test-file-with-underscore",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "src/my_test.test.ts",
+          "content": "test('test')"
+        }
+      },
+      "expected_exit": 0
+    },
+    {
+      "name": "config-file-lowercase",
+      "input": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "vitest.config.ts",
+          "old_string": "pool: 'threads'",
+          "new_string": "pool: 'forks'"
+        }
+      },
+      "expected_exit": 0
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "vitest-4",
+  "version": "1.0.0",
+  "description": "Vitest 4.x patterns and config",
+  "author": {
+    "name": "Claude Code Plugin Marketplace"
+  },
+  "keywords": [
+    "vitest",
+    "testing",
+    "vite",
+    "coverage",
+    "mocking"
+  ],
+  "hooks": "./hooks/hooks.json"
+}
