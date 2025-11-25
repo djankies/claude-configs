@@ -302,19 +302,7 @@ async function getUser(userId: string) {
 
 **Prisma:**
 
-```typescript
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
-
-async function getUser(userId: string) {
-  return await prisma.user.findUnique({
-    where: { id: userId },
-  });
-}
-```
-
-Both automatically parameterize queries.
+If preventing SQL injection with Prisma ORM, use the preventing-sql-injection skill from prisma-6 for comprehensive $queryRaw vs $queryRawUnsafe guidance and parameterization strategies.
 
 ## Command Injection Prevention
 
@@ -593,12 +581,13 @@ Before deploying any endpoint that processes user input:
 ## Related Skills
 
 **Zod v4 Validation:**
-- using-zod-v4-features skill from the zod-4 plugin - Top-level string format functions (z.email(), z.uuid(), z.url(), z.ipv4(), z.base64()) for validating common input formats
-- writing-zod-transformations skill from the zod-4 plugin - Built-in string transformations (trim, toLowerCase, toUpperCase) for sanitizing and normalizing user input
+- If validating common input formats, use the validating-string-formats skill for top-level string format functions (z.email(), z.uuid(), z.url(), z.ipv4(), z.base64())
+- If transforming user input strings, use the transforming-string-methods skill for built-in string transformations (trim, toLowerCase, toUpperCase)
+- If constructing Zod schemas for user input, use the validating-schema-basics skill for comprehensive schema patterns
 
 **Prisma 6 Security:**
-- validating-query-inputs skill from the prisma-6 plugin - Zod validation patterns specifically for Prisma database operations and SQL injection prevention
-- preventing-sql-injection skill from the prisma-6 plugin - Parameterized queries, raw query safety, and SQL injection prevention techniques in Prisma 6
+- If preventing SQL injection with Prisma 6, use the preventing-sql-injection skill from prisma-6 for database-specific sanitization patterns, $queryRaw vs $queryRawUnsafe parameterization, and safe query construction
+- If validating inputs for Prisma database operations with type-safe Zod schemas, use the validating-query-inputs skill from prisma-6 for Prisma-specific validation patterns.
 
 ## Resources
 

@@ -241,6 +241,11 @@ For related skills:
 - **Type Guards**: Use the using-type-guards skill for manual type narrowing
 - **Unknown vs Any**: Use the avoiding-any-types skill for why validation is needed
 - **External Data**: Use the validating-external-data skill for specific data source patterns
+
+**Cross-Plugin References:**
+
+- If constructing Zod schemas for runtime validation, use the validating-schema-basics skill for type-safe Zod v4 schema patterns
+- If handling validation errors, use the customizing-errors skill for error formatting and custom messages
 </progressive-disclosure>
 
 <constraints>

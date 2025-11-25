@@ -461,6 +461,8 @@ async function getUser(id: string): Promise<UserRow> {
 }
 ```
 
+**Database Safety Note:** Use parameterized queries (with `$1`, `$2` placeholders) to prevent SQL injection. For detailed patterns on safe query construction with Prisma, use the preventing-sql-injection skill from prisma-6 for database-specific sanitization patterns.
+
 ### MongoDB Results
 
 ```typescript
@@ -696,12 +698,13 @@ Silently failing validation defeats its purpose.
 ## Related Skills
 
 **Zod v4 Features:**
-- Use the using-zod-v4-features skill from the zod-4 plugin - Top-level string format functions and v4 features for validating API responses and external data
-- Use the handling-zod-errors skill from the zod-4 plugin - SafeParse pattern, error handling strategies, and error formatting for robust external data validation
+- If constructing Zod schemas for external data, use the validating-schema-basics skill for type-safe schema patterns and validation best practices
+- If validating email, URL, UUID formats, use the validating-string-formats skill for Zod v4 top-level format functions
+- If handling validation errors, use the customizing-errors skill for safeParse pattern, error formatting, and user-friendly messages
 
 **Prisma 6 Database Validation:**
-- Use the ensuring-query-type-safety skill from the prisma-6 plugin - Type-safe Prisma queries with runtime validation for database query results as external data sources
-- Use the validating-query-inputs skill from the prisma-6 plugin - Validate data before Prisma operations to ensure database integrity and prevent invalid data persistence
+- If validating Prisma query results as external data sources with type-safe patterns, use the ensuring-query-type-safety skill from prisma-6 for GetPayload type inference
+- If constructing database queries from external data, use the preventing-sql-injection skill from prisma-6 for database-specific sanitization patterns and safe parameterization
 
 ## Resources
 

@@ -86,6 +86,10 @@ function ContactForm() {
 - **Form Validation**: `../../forms/skills/form-validation/SKILL.md`
 - **Progressive Enhancement**: `../../../research/react-19-comprehensive.md` (lines 715-722)
 
+**Cross-Plugin References:**
+
+- If customizing validation error messages, use the customizing-errors skill for error formatting with safeParse and field error flattening
+
 Load as needed for specific patterns.
 </progressive-disclosure>
 

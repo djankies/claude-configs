@@ -124,5 +124,7 @@ For comprehensive Server Actions documentation, see: `research/react-19-comprehe
 - handling-zod-errors skill from the zod-4 plugin - SafeParse pattern, error flattening, and user-friendly error messages for server action validation
 
 **Prisma 6 Integration:**
-- ensuring-query-type-safety skill from the prisma-6 plugin - Type-safe Prisma queries with GetPayload patterns for server action database operations
-- validating-query-inputs skill from the prisma-6 plugin - Input validation patterns for database queries in server actions to prevent injection and invalid data
+- If setting up PrismaClient singleton pattern for Server Actions in serverless Next.js, use the creating-client-singletons skill from prisma-6 for proper initialization preventing connection pool exhaustion.
+- If validating database inputs in server actions, use the validating-query-inputs skill from prisma-6 for Zod validation pipeline patterns
+- If ensuring type-safe Prisma queries with GetPayload patterns, use the ensuring-query-type-safety skill from prisma-6 for type-safe database operations
+- For multi-step mutations and complex database operations, use the handling-transaction-errors skill from prisma-6 for comprehensive transaction error handling in server actions

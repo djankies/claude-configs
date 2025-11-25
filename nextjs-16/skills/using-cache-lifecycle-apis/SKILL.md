@@ -361,8 +361,9 @@ export async function DELETE(
 
 When caching database queries, optimize query selection and pagination to prevent performance issues:
 
-- For optimizing field selection in cached queries, use the optimizing-query-selection skill from the prisma-6 plugin
-- For implementing pagination in cached endpoints, use the implementing-query-pagination skill from the prisma-6 plugin
+- If optimizing field selection in cached Prisma queries, use the optimizing-query-selection skill from prisma-6 for select() patterns preventing over-fetching
+- If implementing pagination in cached Prisma endpoints, use the implementing-query-pagination skill from prisma-6 for cursor vs offset pagination patterns
+- If implementing query result caching with Redis, use the implementing-query-caching skill from prisma-6 for cache key generation, invalidation strategies, and TTL management
 
 ## Common Patterns
 

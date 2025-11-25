@@ -16,7 +16,9 @@ version: 1.0.0
 - [ ] Length limits enforced
 - [ ] No SQL injection vulnerabilities
 
-For runtime validation patterns and type safety, use the VALIDATION-runtime-checks skill from the typescript plugin.
+For runtime validation patterns and type safety, use the using-runtime-checks skill from the typescript plugin.
+
+If reviewing Zod schema validation patterns, use the validating-schema-basics skill for type-safe Zod v4 schema patterns.
 
 ### Authentication & Authorization
 - [ ] Session/auth checked before mutations

@@ -104,6 +104,8 @@ export async function getUser() {
 
 **Always verify session before database queries.** This is your actual security boundary.
 
+For type-safe database access patterns, use the ensuring-query-type-safety skill from prisma-6 to prevent type errors and runtime failures in your data access functions.
+
 #### Layer 3: Server Actions (Mutation Security)
 
 ```typescript
@@ -174,7 +176,9 @@ export async function getPost(postId: string) {
 
 ### Multi-Step Atomic Operations
 
-For authenticated operations requiring atomicity (e.g., creating a post with tags, transferring ownership), use the using-interactive-transactions skill from the prisma-6 plugin.
+If setting up PrismaClient with singleton pattern in Next.js, use the creating-client-singletons skill from prisma-6 for proper instantiation preventing connection pool exhaustion.
+
+If implementing authenticated operations requiring atomicity (e.g., creating a post with tags, transferring ownership), use the using-interactive-transactions skill from prisma-6 for database-specific transaction patterns.
 
 ### Public + Private Data
 

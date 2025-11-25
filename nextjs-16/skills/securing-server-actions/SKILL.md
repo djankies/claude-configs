@@ -176,6 +176,8 @@ export async function transferFunds(formData: FormData) {
 }
 ```
 
+If implementing production transaction error handling with P-code detection, timeout configuration, and retry strategies, use the handling-transaction-errors skill from prisma-6 for comprehensive patterns beyond this basic example.
+
 ## Validation Patterns
 
 For comprehensive Zod validation patterns and runtime type checking, use the using-runtime-checks skill from the typescript plugin.
@@ -280,12 +282,13 @@ export function ProfileForm() {
 ## Related Skills
 
 **Zod v4 Validation:**
-- handling-zod-errors skill from the zod-4 plugin - Error customization with unified error API, safeParse pattern, and error formatting for secure error responses
-- using-zod-v4-features skill from the zod-4 plugin - Top-level string format functions (z.email(), z.uuid(), z.url()) for validating common input types
+- If customizing validation errors, use the customizing-errors skill for error formatting with unified error API, safeParse pattern, and user-safe responses
+- If using string format validators (email, UUID, URL), use the validating-string-formats skill for Zod v4 top-level format functions
 
 **Prisma 6 Integration:**
-- validating-query-inputs skill from the prisma-6 plugin - Validate external input with Zod before Prisma operations in server actions
-- handling-transaction-errors skill from the prisma-6 plugin - Handle Prisma transaction errors with P-code checking and retry strategies for server action database operations
+- If validating input before Prisma operations in server actions, use the validating-query-inputs skill from prisma-6 for Zod validation patterns
+- If handling errors in multi-step database transactions, use the handling-transaction-errors skill from prisma-6 for P-code checking and retry strategies
+- Use the preventing-error-exposure skill from prisma-6 for proper Prisma error transformation to ensure API responses don't leak database schema or P-codes
 
 ## Common Vulnerabilities
 
