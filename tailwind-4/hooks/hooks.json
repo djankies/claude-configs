@@ -1,0 +1,53 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/init-session.sh",
+            "timeout": 1000,
+            "description": "Initialize session state for skill recommendations"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Read|Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/recommend-skills.sh",
+            "timeout": 1000,
+            "description": "Recommend relevant Tailwind v4 skills based on file patterns"
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/validate-config.sh",
+            "timeout": 1000,
+            "description": "Block deprecated tailwind.config.js files in Tailwind v4"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/validate-tailwind-v4.sh",
+            "timeout": 5000,
+            "description": "Validate Tailwind v4 patterns and suggest fixes"
+          }
+        ]
+      }
+    ]
+  }
+}

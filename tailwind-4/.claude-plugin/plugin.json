@@ -1,0 +1,13 @@
+{
+  "name": "tailwind-4",
+  "version": "1.0.0",
+  "description": "Tailwind CSS v4 patterns: CSS-first config, oklch colors, container queries, @utility directive",
+  "homepage": "https://github.com/danielraffel/claude-configs/tree/main/tailwind-4",
+  "repository": "danielraffel/claude-configs",
+  "author": {
+    "name": "Design Session with Claude Code"
+  },
+  "license": "MIT",
+  "keywords": ["tailwind", "css", "v4", "styling", "theming", "container-queries"],
+  "hooks": "./hooks/hooks.json"
+}
