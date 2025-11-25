@@ -12,7 +12,7 @@
     {
       "name": "react-19",
       "source": "./react-19",
-      "description": "React 19 patterns, hooks, and best practices for modern React applications",
+      "description": "React 19 patterns, hooks, and best practices",
       "version": "1.0.0",
       "author": {
         "name": "Daniel Jankowski",
@@ -27,7 +27,7 @@
     {
       "name": "review",
       "source": "./review",
-      "description": "Cross-cutting code review plugin that orchestrates review skills from tool plugins",
+      "description": "Cross-cutting code review orchestration",
       "version": "1.0.0",
       "author": {
         "name": "Daniel Jankowski",
@@ -42,7 +42,7 @@
     {
       "name": "typescript",
       "source": "./typescript",
-      "description": "TypeScript 5.9 type safety, compiler configuration, and best practices based on real-world AI coding failures. Provides intelligent skill recommendations, type safety validation, and prevents common TypeScript anti-patterns.",
+      "description": "TypeScript 5.9 type safety and best practices",
       "version": "1.0.0",
       "author": {
         "name": "Daniel Jankowski",
@@ -57,7 +57,7 @@
     {
       "name": "nextjs-16",
       "source": "./nextjs-16",
-      "description": "Next.js 16 breaking changes, Cache Components model, and CVE-2025-29927 security patterns",
+      "description": "Next.js 16 breaking changes and security patterns",
       "version": "1.0.0",
       "author": {
         "name": "Daniel Jankowski",
@@ -72,7 +72,7 @@
     {
       "name": "zod-4",
       "source": "./zod-4",
-      "description": "Comprehensive guidance for Zod v4 schema validation, covering breaking changes, new features, and best practices for TypeScript-first runtime validation",
+      "description": "Zod v4 schema validation and best practices",
       "version": "1.0.0",
       "author": {
         "name": "Daniel Jankowski",
@@ -87,7 +87,7 @@
     {
       "name": "tailwind-4",
       "source": "./tailwind-4",
-      "description": "Tailwind CSS v4 patterns: CSS-first config, oklch colors, container queries, @utility directive",
+      "description": "Tailwind CSS v4 patterns and configuration",
       "version": "1.0.0",
       "author": {
         "name": "Daniel Jankowski",
@@ -102,7 +102,7 @@
     {
       "name": "prisma-6",
       "source": "./prisma-6",
-      "description": "Prisma 6 ORM patterns, client management, query optimization, and security best practices based on real-world AI coding failures",
+      "description": "Prisma 6 ORM patterns and best practices",
       "version": "1.0.0",
       "author": {
         "name": "Daniel Jankowski",

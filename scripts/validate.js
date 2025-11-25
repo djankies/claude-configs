@@ -268,15 +268,23 @@ function validateMarketplace() {
   }
   
   logSuccess('marketplace.json is valid');
-  
+
+  let allValid = true;
+  for (const plugin of marketplace.plugins) {
+    if (plugin.description && plugin.description.length > 50) {
+      logError(`marketplace.json: Plugin '${plugin.name}' description exceeds 50 characters (${plugin.description.length}): "${plugin.description}"`);
+      allValid = false;
+    }
+  }
+
   // Check for plugin references
   if (marketplace.plugins.length === 0) {
     logWarning('No plugins listed in marketplace (this is OK for a new marketplace)');
   } else {
     logInfo(`Found ${marketplace.plugins.length} plugin(s) referenced`);
   }
-  
-  return true;
+
+  return allValid;
 }
 
 /**
