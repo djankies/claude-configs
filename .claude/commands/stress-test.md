@@ -2,7 +2,6 @@
 description: Stress test AI coding agents with realistic scenarios to expose anti-patterns, outdated APIs, and deviations from best practices
 argument-hint: <technology>
 allowed-tools: Read, Glob, Task, TodoWrite, Write, Edit, MultiEdit, Bash, Grep
-model: sonnet
 ---
 
 # Stress Testing LLM agents to identify anti-patterns, outdated APIs, and deviations from best practices

@@ -2,6 +2,7 @@
 description: Generate comprehensive plugin design document from research and philosophy
 argument-hint: <plugin-name>
 allowed-tools: Read, Glob, Write, TodoWrite, Bash
+model: opus
 ---
 
 <role>
@@ -97,42 +98,57 @@ Work through the design hierarchy for each component type:
 
 8. **Level 3: Hooks - Intelligent skill activation with lifecycle management**
 
-   See @docs/claude-code/hooks.md for:
+   See @docs/claude-code/hooks.md for hook events and schemas.
+   See @marketplace-utils/README.md for shared utilities.
+   See @marketplace-utils/docs/HOOK-DEVELOPMENT.md for complete development guide.
 
-   - Complete hook event reference (SessionStart, PreToolUse, PostToolUse, etc.)
-   - Hook input/output schemas and exit codes
-   - Performance guidelines (< 100ms ideal, < 500ms acceptable)
-   - Common hook patterns (session state, file validation, contextual loading)
+   **Standardized Hook Infrastructure:**
+
+   All hooks MUST use marketplace-utils/hook-lifecycle.sh for:
+
+   - Consistent initialization and error handling
+   - Session management with file locking
+   - Standardized response formatting
+   - Security validation helpers
+   - Logging infrastructure
 
    **Design Requirements for This Plugin:**
 
    **SessionStart hook** - Initialize session state
 
-   - Use session state JSON pattern from hooks.md
-   - Track recommendation types for this plugin's contexts
-   - Create `/tmp/claude-[plugin]-session.json` with boolean flags
+   - Source hook-lifecycle.sh and call `init_hook(plugin, hook)`
+   - Session state automatically managed via session-management.sh
+   - Uses `/tmp/claude-session-${CLAUDE_SESSION_PID}.json` (shared across plugins)
 
    **PreToolUse hook** - Contextual skill recommendations
 
-   - Use session state pattern to recommend skills once per session per context type
-   - Detect context from file extension, path patterns, or content
+   - Use `has_shown_recommendation(plugin, skill)` to deduplicate
+   - Use file-detection.sh helpers: `is_typescript_file()`, `detect_framework()`
+   - Call `mark_recommendation_shown(plugin, skill)` after showing
    - Early exit if no relevant context detected
-   - Update session state after first recommendation shown
 
    **Validation hooks** (if needed)
 
-   - Use file pattern validation pattern from hooks.md
-   - Detect anti-patterns specific to this plugin's domain
+   - Use `is_sensitive_file()` and `validate_file_path()` for security
+   - Use `has_passed_validation()` / `mark_validation_passed()` to avoid re-checking
    - Exit code 2 to block operations with clear error messages
 
-   **Performance targets** (see @docs/claude-code/hooks.md performance guidelines):
+   **Available Utilities (from marketplace-utils/):**
 
-   - Total hook execution < 100ms ideal
-   - Individual scripts < 50ms
+   | Utility               | Purpose     | Key Functions                                                                  |
+   | --------------------- | ----------- | ------------------------------------------------------------------------------ |
+   | hook-lifecycle.sh     | Entry point | `init_hook`, `read_hook_input`, `get_input_field`, `pretooluse_respond`        |
+   | session-management.sh | State       | `has_shown_recommendation`, `mark_recommendation_shown`, `get/set_custom_data` |
+   | file-detection.sh     | File types  | `is_typescript_file`, `is_test_file`, `detect_framework`                       |
+   | logging.sh            | Logging     | `log_debug`, `log_info`, `log_warn`, `log_error`                               |
+
+   **Performance targets:**
+
+   - Total hook execution < 100ms ideal, < 500ms acceptable
    - Early exit patterns for irrelevant files
-   - Bash scripts preferred over prompt-based hooks for speed
+   - Bash scripts preferred over prompt-based hooks
 
-   **Implementation:** Complete bash examples will be in PLUGIN-DESIGN-TEMPLATE.md for copy-paste.
+   **Implementation:** Use @marketplace-utils/hook-templates/ as starting point.
 
 9. **Level 4: Commands - Frequent directives?**
 
@@ -150,6 +166,23 @@ Work through the design hierarchy for each component type:
     - Check if needs different permissions, model, or context
     - **Default to NO** - skills provide knowledge, not personalities
     - Document why agents were rejected
+
+**CHECKPOINT 1: Component Decisions**
+
+Before proceeding to architecture, present summary and confirm:
+
+```markdown
+## Component Decisions for {plugin-name}
+
+**Skills ({N}):** {skill-1}, {skill-2}, {skill-3}...
+**Hooks:** {Yes - PreToolUse for skill activation / No}
+**Commands:** No ({reason})
+**MCP:** No ({reason})
+**Agents:** No ({reason})
+```
+
+Use AskUserQuestion: "Proceed with these components?" with single option "Approve and continue".
+User can select "Other" to suggest modifications.
 
 **Phase 4: Architecture Design**
 
@@ -185,33 +218,83 @@ Work through the design hierarchy for each component type:
     - What domains do related plugins own?
     - Where are the clean separation points?
 
-17. **Map Composition with Other Plugins**
+17. **Plan Skill Integration**
+
+    Use Explore agent (thoroughness: quick) to scan existing plugins for integration opportunities.
+
+    **Outbound References (this plugin → others):**
+
+    - What existing skills should THIS plugin's skills reference?
+    - Search other plugins for foundational skills this domain builds on
+    - Example: nextjs-16 skills should reference react-19 skills for core React patterns
+
+    **Inbound References (others → this plugin):**
+
+    - What skills does THIS plugin provide that others should reference?
+    - Identify related plugins that discuss this domain
+    - Document expected references for cross-plugin consistency
+
+    **Review Skill Integration:**
+
+    - Does this plugin include review skills (`review: true` frontmatter)?
+    - How will `/review {domain}` discover these skills?
+    - What review concerns does this plugin uniquely address?
+
+    **Duplication Prevention:**
+
+    - What knowledge exists in other plugins that should NOT be duplicated?
+    - Document "reference instead of duplicate" decisions
+
+    **Integration Planning Table:**
+    | Direction | Other Plugin | Skill | Integration Type |
+    |-----------|--------------|-------|------------------|
+    | Outbound | react-19 | using-use-hook | Reference in async patterns |
+    | Inbound | nextjs-16 | using-form-actions | Should reference this plugin |
+    | Review | review | reviewing-\* | Auto-discovery via frontmatter |
+
+18. **Map Composition Patterns**
     - Identify related plugins
-    - Document cross-references using `@plugin-name/[plugin-name]`
-    - Show how plugins layer (e.g., react-19 + nextjs-15)
+    - Document cross-references using `@plugin-name/skills/skill-name`
+    - Show how plugins layer (e.g., react-19 + nextjs-16 + tailwind-4)
+
+**CHECKPOINT 2: Architecture & Integration**
+
+Before generating document, present summary and confirm:
+
+```markdown
+## Architecture for {plugin-name}
+
+**Skills:** {N} total ({teaching} teaching, {review} review)
+**Hook Triggers:** {file-patterns} → recommends {skills}
+**Integration:** {N} outbound refs, {N} inbound refs expected
+**Boundaries:** Owns {domain}, delegates {concern} to {other-plugin}
+```
+
+Use AskUserQuestion: "Generate design document?" with single option "Approve and generate".
+User can select "Other" to request revisions.
 
 **Phase 6: Implementation Planning**
 
-18. **Create Phased Implementation Plan**
+19. **Create Phased Implementation Plan**
 
     - Phase 1: Core skills
     - Phase 2: Intelligent hooks
     - Phase 3: Integration and testing
     - Phase 4: Refinement
 
-19. **Define Success Metrics**
+20. **Define Success Metrics**
 
     - Effectiveness: What does success look like?
     - Efficiency: Performance targets
     - Extensibility: Composition goals
 
-20. **Identify Risks and Mitigation**
+21. **Identify Risks and Mitigation**
     - List potential risks (3-5)
     - For each: mitigation strategy and fallback
 
 **Phase 7: Document Generation**
 
-21. **Generate Design Document**
+22. **Generate Design Document**
 
     Create `$ARGUMENTS/PLUGIN-DESIGN.md` with structure:
 
@@ -269,19 +352,20 @@ Work through the design hierarchy for each component type:
 
     **Scripts ([N] shared utilities)**
 
-    - **Lifecycle scripts** (MANDATORY):
-      - `init-session.sh`: SessionStart - creates/resets state JSON
-      - `recommend-skills.sh`: PreToolUse - once-per-session recommendations
-    - **Validation scripts** (as needed):
-      - Pattern matching, file analysis, code validation
-    - Used by hooks for validation
-    - Used by skills for checks
-    - Used by commands for operations
+    All hooks should source @marketplace-utils/hook-lifecycle.sh for standardized infrastructure.
+
+    - **Use marketplace-utils/ for common operations:**
+      - hook-lifecycle.sh: Hook initialization, input parsing, responses
+      - session-management.sh: Session state, recommendation deduplication
+      - file-detection.sh: File type detection, framework detection
+      - logging.sh: Structured logging with levels
+    - **Plugin-specific scripts** (as needed):
+      - Domain-specific anti-pattern detection
+      - Custom validation rules
     - Fast, focused, single-purpose
-    - **STRONGLY PREFER bash scripts for deterministic operations** (see @docs/claude-code/hooks.md):
+    - **STRONGLY PREFER bash scripts with marketplace-utils helpers**:
       - Validation, pattern matching, file analysis
       - Faster than LLM-based validation
-      - Cacheable and optimizable by Claude Code
       - Reusable across all plugin components
 
     **Knowledge (shared research)**
@@ -303,32 +387,49 @@ Work through the design hierarchy for each component type:
 
     ### Session Lifecycle Management
 
-    See @docs/claude-code/hooks.md for:
+    See @docs/claude-code/hooks.md for hook events and schemas.
+    See @marketplace-utils/docs/HOOK-DEVELOPMENT.md for complete development guide.
 
-    - Complete hook event documentation (SessionStart, PreToolUse, etc.)
-    - Session state JSON pattern with complete bash examples
-    - File pattern validation patterns
-    - Performance optimization strategies
+    **Standardized Hook Infrastructure:**
+
+    All hooks MUST use marketplace-utils/hook-lifecycle.sh:
+
+    ```bash
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    source "${SCRIPT_DIR}/../../marketplace-utils/hook-lifecycle.sh"
+
+    init_hook "plugin-name" "hook-name"
+
+    input=$(read_hook_input)
+    tool_name=$(get_input_field "tool_name")
+    file_path=$(get_input_field "tool_input.file_path")
+
+    # Hook logic using marketplace-utils helpers...
+
+    pretooluse_respond "allow"
+    exit 0
+    ```
 
     **For this plugin's design document, include:**
 
     **Activation Rules Table:**
-    | Pattern | Triggered Skills | Rationale | Frequency |
-    |---------|------------------|-----------|-----------|
-    | [pattern1] | [skills] | [why] | Once per session |
-    | [pattern2] | [skills] | [why] | Once per session |
-    | [pattern3] | [skills] | [why] | Once per session |
+
+    | Pattern    | Triggered Skills | Rationale | Frequency        |
+    | ---------- | ---------------- | --------- | ---------------- |
+    | [pattern1] | [skills]         | [why]     | Once per session |
+    | [pattern2] | [skills]         | [why]     | Once per session |
+    | [pattern3] | [skills]         | [why]     | Once per session |
 
     **Hook Scripts:**
 
-    - `scripts/init-session.sh` - SessionStart hook (see hooks.md pattern)
-    - `scripts/recommend-skills.sh` - PreToolUse hook (see hooks.md pattern)
-    - `scripts/validate-[concern].sh` - Validation hooks as needed
+    - `scripts/init-session.sh` - SessionStart hook (sources hook-lifecycle.sh)
+    - `scripts/recommend-skills.sh` - PreToolUse hook (uses session-management.sh)
+    - `scripts/validate-[concern].sh` - PostToolUse validation hooks (uses file-detection.sh)
 
-    **Implementation:** Complete bash examples are in:
-
-    1. @docs/claude-code/hooks.md (patterns section)
-    2. PLUGIN-DESIGN-TEMPLATE.md (copy-paste templates)
+    **Implementation:** Use @marketplace-utils/hook-templates/ as starting point.
 
     ### Additional Hooks
 
@@ -491,7 +592,7 @@ Work through the design hierarchy for each component type:
     ```
     ````
 
-22. **Verify Completeness**
+23. **Verify Completeness**
     - [ ] All sections present
     - [ ] Intelligent hook design included
     - [ ] File structure follows official docs
@@ -500,14 +601,15 @@ Work through the design hierarchy for each component type:
 
 **Phase 8: Final Validation**
 
-23. **Run Quality Checks**
+24. **Run Quality Checks**
 
     - Document has 10+ major sections
     - PreToolUse hook has activation rules
     - Plugin boundaries clear
+    - Integration planning table complete
     - Implementation plan realistic
 
-24. **Generate Summary**
+25. **Generate Summary**
     Output:
 
     ```text
@@ -551,32 +653,30 @@ Work through the design hierarchy for each component type:
 **Hook Design Requirements:**
 
 - MUST design intelligent PreToolUse hook
-- MUST include session lifecycle scripts:
+- MUST use marketplace-utils/hook-lifecycle.sh for standardized infrastructure
+- MUST include hooks that source hook-lifecycle.sh:
 
   **SessionStart hook** (`scripts/init-session.sh`):
 
-  - Creates/resets session state JSON file
-  - Location: `/tmp/claude-[plugin]-session.json`
-  - Structure: `{"recommendations_shown": {"[type]": false, ...}}`
-  - Runs once at session start
+  - Sources hook-lifecycle.sh and calls `init_hook(plugin, hook)`
+  - Session state automatically managed via session-management.sh
+  - Location: `/tmp/claude-session-${CLAUDE_SESSION_PID}.json` (shared across plugins)
 
   **PreToolUse hook** (`scripts/recommend-skills.sh`):
 
-  - Reads session state JSON programmatically
-  - Checks relevant boolean for current file context
-  - If false: shows recommendation, updates boolean to true
-  - If true: exits silently (< 1ms)
-  - Uses sed/grep for JSON manipulation (no external dependencies)
+  - Uses `has_shown_recommendation(plugin, skill)` to check state
+  - Uses file-detection.sh helpers for file type detection
+  - Calls `mark_recommendation_shown(plugin, skill)` after showing
   - Prevents context bloat from repeated recommendations
 
-- MUST check file extension (.tsx, .jsx, etc.)
-- MUST check file path patterns (app/, components/, etc.)
+- MUST use file-detection.sh: `is_typescript_file()`, `detect_framework()`
 - MUST keep total execution < 100ms
 - MUST create activation rules table with "Frequency" column showing "Once per session"
-- SCRIPTS go in `scripts/` directory, used by hooks
-- STRONGLY PREFER bash scripts over prompt-based hooks (see @docs/claude-code/hooks.md):
-  - Use for deterministic operations: pattern matching, validation, file analysis
-  - Faster and cacheable
+- SCRIPTS go in `scripts/` directory, source marketplace-utils utilities
+- STRONGLY PREFER bash scripts with marketplace-utils helpers:
+  - hook-lifecycle.sh for input/output handling
+  - session-management.sh for state tracking
+  - file-detection.sh for file type detection
 
 **Decision Framework Requirements:**
 
@@ -626,6 +726,7 @@ After generating the design document, you MUST verify:
    - [ ] Scripts/ directory included
    - [ ] Skill naming uses gerund form verb
    - [ ] Hook execution time < 100ms
+   - [ ] Hooks reference marketplace-utils/hook-lifecycle.sh
 
 **Failure Handling:**
 If validation fails, you MUST:
