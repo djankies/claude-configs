@@ -7,6 +7,8 @@ version: 1.0.0
 
 # Testing Server Actions
 
+For Vitest mocking patterns (vi.mock(), vi.fn(), mockResolvedValue), see `vitest-4/skills/writing-vitest-tests/SKILL.md`.
+
 ## Basic Server Action Test
 
 ```javascript
@@ -39,10 +41,10 @@ test('submitContact succeeds with valid data', async () => {
 import { createUser } from './actions';
 import { db } from './db';
 
-jest.mock('./db', () => ({
+vi.mock('./db', () => ({
   db: {
     users: {
-      create: jest.fn(),
+      create: vi.fn(),
     },
   },
 }));
@@ -72,7 +74,7 @@ test('createUser creates database record', async () => {
 import { deletePost } from './actions';
 import { getSession } from './auth';
 
-jest.mock('./auth');
+vi.mock('./auth');
 
 test('deletePost requires authentication', async () => {
   getSession.mockResolvedValue(null);
@@ -88,3 +90,7 @@ test('deletePost checks ownership', async () => {
 ```
 
 For comprehensive Server Action testing, test the function directly in isolation.
+
+## References
+
+- [@vitest-4/skills/writing-vitest-tests](/vitest-4/skills/writing-vitest-tests/SKILL.md) - Mocking and spy patterns

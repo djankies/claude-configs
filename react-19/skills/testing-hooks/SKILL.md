@@ -9,6 +9,8 @@ version: 1.0.0
 
 ## Basic Hook Testing
 
+For hook testing with Vitest fixtures and describe/test patterns, use vitest-4/skills/writing-vitest-tests which covers test structure and fixture patterns.
+
 ```javascript
 import { renderHook, act } from '@testing-library/react';
 import { useCounter } from './useCounter';
@@ -64,3 +66,7 @@ test('useTheme returns theme from context', () => {
 ```
 
 For comprehensive hook testing patterns, see: React Testing Library documentation.
+
+## References
+
+- [@vitest-4/skills/writing-vitest-tests](/vitest-4/skills/writing-vitest-tests/SKILL.md) - Fixture patterns and setup

@@ -9,13 +9,14 @@ description: Test Zod schemas comprehensively with unit tests, integration tests
 
 Comprehensive guide to testing Zod v4 schemas, including validation logic, error messages, transformations, and type inference.
 
+**For Vitest test structure, mocking, and async patterns, use `vitest-4/skills/writing-vitest-tests`**
+
 ## Unit Testing Schemas
 
 ### Basic Validation Tests
 
 ```typescript
 import { z } from 'zod';
-import { describe, it, expect } from 'vitest';
 
 const userSchema = z.object({
   email: z.email().trim().toLowerCase(),
@@ -23,138 +24,110 @@ const userSchema = z.object({
   username: z.string().trim().min(3)
 });
 
-describe('userSchema', () => {
-  it('validates correct user data', () => {
-    const result = userSchema.safeParse({
-      email: 'user@example.com',
-      age: 25,
-      username: 'john'
-    });
-
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.email).toBe('user@example.com');
-    }
-  });
-
-  it('rejects invalid email', () => {
-    const result = userSchema.safeParse({
-      email: 'not-an-email',
-      age: 25,
-      username: 'john'
-    });
-
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues[0].path).toEqual(['email']);
-    }
-  });
+const result = userSchema.safeParse({
+  email: 'user@example.com',
+  age: 25,
+  username: 'john'
 });
+
+expect(result.success).toBe(true);
+if (result.success) {
+  expect(result.data.email).toBe('user@example.com');
+}
+
+const invalidResult = userSchema.safeParse({
+  email: 'not-an-email',
+  age: 25,
+  username: 'john'
+});
+
+expect(invalidResult.success).toBe(false);
+if (!invalidResult.success) {
+  expect(invalidResult.error.issues[0].path).toEqual(['email']);
+}
 ```
 
 ### Testing Transformations
 
 ```typescript
-describe('email transformation', () => {
-  const emailSchema = z.email().trim().toLowerCase();
+const emailSchema = z.email().trim().toLowerCase();
 
-  it('trims whitespace and converts to lowercase', () => {
-    const result = emailSchema.safeParse('  USER@EXAMPLE.COM  ');
+const result = emailSchema.safeParse('  USER@EXAMPLE.COM  ');
 
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data).toBe('user@example.com');
-    }
-  });
-});
+expect(result.success).toBe(true);
+if (result.success) {
+  expect(result.data).toBe('user@example.com');
+}
 ```
 
 ### Testing Error Messages
 
 ```typescript
-describe('custom error messages', () => {
-  const schema = z.object({
-    email: z.email({ error: "Please enter a valid email address" }),
-    password: z.string().min(8, {
-      error: "Password must be at least 8 characters"
-    })
-  });
-
-  it('shows custom email error', () => {
-    const result = schema.safeParse({
-      email: 'invalid',
-      password: 'password123'
-    });
-
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues[0].message).toBe(
-        "Please enter a valid email address"
-      );
-    }
-  });
+const schema = z.object({
+  email: z.email({ error: "Please enter a valid email address" }),
+  password: z.string().min(8, {
+    error: "Password must be at least 8 characters"
+  })
 });
+
+const result = schema.safeParse({
+  email: 'invalid',
+  password: 'password123'
+});
+
+expect(result.success).toBe(false);
+if (!result.success) {
+  expect(result.error.issues[0].message).toBe(
+    "Please enter a valid email address"
+  );
+}
 ```
 
 ### Testing Refinements
 
 ```typescript
-describe('password refinements', () => {
-  const passwordSchema = z.string()
-    .min(8)
-    .refine(
-      (password) => /[A-Z]/.test(password),
-      { error: "Must contain uppercase letter" }
-    )
-    .refine(
-      (password) => /[0-9]/.test(password),
-      { error: "Must contain number" }
-    );
+const passwordSchema = z.string()
+  .min(8)
+  .refine(
+    (password) => /[A-Z]/.test(password),
+    { error: "Must contain uppercase letter" }
+  )
+  .refine(
+    (password) => /[0-9]/.test(password),
+    { error: "Must contain number" }
+  );
 
-  it('accepts valid password', () => {
-    const result = passwordSchema.safeParse('Password123');
-    expect(result.success).toBe(true);
-  });
+const validResult = passwordSchema.safeParse('Password123');
+expect(validResult.success).toBe(true);
 
-  it('rejects password without uppercase', () => {
-    const result = passwordSchema.safeParse('password123');
-
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues[0].message).toBe(
-        "Must contain uppercase letter"
-      );
-    }
-  });
-});
+const invalidResult = passwordSchema.safeParse('password123');
+expect(invalidResult.success).toBe(false);
+if (!invalidResult.success) {
+  expect(invalidResult.error.issues[0].message).toBe(
+    "Must contain uppercase letter"
+  );
+}
 ```
 
 ### Testing Async Refinements
 
 ```typescript
-describe('async validation', () => {
-  const emailSchema = z.email().refine(
-    async (email) => {
-      const exists = await checkEmailExists(email);
-      return !exists;
-    },
-    { error: "Email already exists" }
-  );
+const emailSchema = z.email().refine(
+  async (email) => {
+    const exists = await checkEmailExists(email);
+    return !exists;
+  },
+  { error: "Email already exists" }
+);
 
-  it('accepts unique email', async () => {
-    const result = await emailSchema.safeParseAsync('new@example.com');
-    expect(result.success).toBe(true);
-  });
+const validResult = await emailSchema.safeParseAsync('new@example.com');
+expect(validResult.success).toBe(true);
 
-  it('rejects existing email', async () => {
-    const result = await emailSchema.safeParseAsync('existing@example.com');
-
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues[0].message).toBe("Email already exists");
-    }
-  });
-});
+const invalidResult = await emailSchema.safeParseAsync('existing@example.com');
+expect(invalidResult.success).toBe(false);
+if (!invalidResult.success) {
+  expect(invalidResult.error.issues[0].message).toBe("Email already exists");
+}
 ```
 
 ## Testing Complex Schemas
@@ -162,77 +135,65 @@ describe('async validation', () => {
 ### Nested Objects
 
 ```typescript
-describe('nested schema', () => {
-  const addressSchema = z.object({
-    street: z.string().trim().min(1),
-    city: z.string().trim().min(1),
-    zip: z.string().trim().regex(/^\d{5}$/)
-  });
-
-  const userSchema = z.object({
-    name: z.string().trim().min(1),
-    address: addressSchema
-  });
-
-  it('shows nested error path', () => {
-    const result = userSchema.safeParse({
-      name: 'John',
-      address: { street: '123 Main St', city: 'Boston', zip: 'invalid' }
-    });
-
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues[0].path).toEqual(['address', 'zip']);
-    }
-  });
+const addressSchema = z.object({
+  street: z.string().trim().min(1),
+  city: z.string().trim().min(1),
+  zip: z.string().trim().regex(/^\d{5}$/)
 });
+
+const userSchema = z.object({
+  name: z.string().trim().min(1),
+  address: addressSchema
+});
+
+const result = userSchema.safeParse({
+  name: 'John',
+  address: { street: '123 Main St', city: 'Boston', zip: 'invalid' }
+});
+
+expect(result.success).toBe(false);
+if (!result.success) {
+  expect(result.error.issues[0].path).toEqual(['address', 'zip']);
+}
 ```
 
 ### Arrays
 
 ```typescript
-describe('array schema', () => {
-  const tagsSchema = z.array(
-    z.string().trim().min(1)
-  ).min(1, { error: "At least one tag required" });
+const tagsSchema = z.array(
+  z.string().trim().min(1)
+).min(1, { error: "At least one tag required" });
 
-  it('shows item-specific errors', () => {
-    const result = tagsSchema.safeParse(['valid', '']);
+const result = tagsSchema.safeParse(['valid', '']);
 
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues[0].path).toEqual([1]);
-    }
-  });
-});
+expect(result.success).toBe(false);
+if (!result.success) {
+  expect(result.error.issues[0].path).toEqual([1]);
+}
 ```
 
 ### Discriminated Unions
 
 ```typescript
-describe('discriminated union', () => {
-  const eventSchema = z.discriminatedUnion('type', [
-    z.object({
-      type: z.literal('click'),
-      x: z.number(),
-      y: z.number()
-    }),
-    z.object({
-      type: z.literal('keypress'),
-      key: z.string()
-    })
-  ]);
+const eventSchema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('click'),
+    x: z.number(),
+    y: z.number()
+  }),
+  z.object({
+    type: z.literal('keypress'),
+    key: z.string()
+  })
+]);
 
-  it('validates click event', () => {
-    const result = eventSchema.safeParse({
-      type: 'click',
-      x: 100,
-      y: 200
-    });
-
-    expect(result.success).toBe(true);
-  });
+const result = eventSchema.safeParse({
+  type: 'click',
+  x: 100,
+  y: 200
 });
+
+expect(result.success).toBe(true);
 ```
 
 ## Type Testing
@@ -240,8 +201,6 @@ describe('discriminated union', () => {
 ### Type Inference
 
 ```typescript
-import { expectTypeOf } from 'vitest';
-
 const userSchema = z.object({
   email: z.email(),
   age: z.number(),
@@ -250,15 +209,11 @@ const userSchema = z.object({
 
 type User = z.infer<typeof userSchema>;
 
-describe('type inference', () => {
-  it('infers correct types', () => {
-    expectTypeOf<User>().toEqualTypeOf<{
-      email: string;
-      age: number;
-      name: string;
-    }>();
-  });
-});
+expectTypeOf<User>().toEqualTypeOf<{
+  email: string;
+  age: number;
+  name: string;
+}>();
 ```
 
 ### Transform Types
@@ -269,43 +224,27 @@ const schema = z.string().transform(s => parseInt(s));
 type Input = z.input<typeof schema>;
 type Output = z.output<typeof schema>;
 
-describe('transform types', () => {
-  it('has correct input/output types', () => {
-    expectTypeOf<Input>().toEqualTypeOf<string>();
-    expectTypeOf<Output>().toEqualTypeOf<number>();
-  });
-});
+expectTypeOf<Input>().toEqualTypeOf<string>();
+expectTypeOf<Output>().toEqualTypeOf<number>();
 ```
 
 ## Best Practices
 
 ### 1. Test Both Success and Failure
 
-```typescript
-it('validates correct data');      // ✅
-it('rejects invalid data');        // ✅
-```
+Always test valid data passes and invalid data fails
 
 ### 2. Test Transformations
 
-```typescript
-it('trims whitespace');            // ✅
-it('converts to lowercase');       // ✅
-```
+Verify trim, lowercase, and other transforms produce expected output
 
 ### 3. Verify Error Messages
 
-```typescript
-expect(error.message).toBe("Custom error");  // ✅
-```
+Check custom error messages appear correctly
 
 ### 4. Test Edge Cases
 
-```typescript
-it('handles empty string');        // ✅
-it('handles very long string');    // ✅
-it('handles special characters');  // ✅
-```
+Handle empty strings, very long strings, special characters
 
 ### 5. Use SafeParse in Tests
 
@@ -316,9 +255,7 @@ try { schema.parse(data) }              // ❌
 
 ### 6. Test Type Inference
 
-```typescript
-expectTypeOf<User>().toEqualTypeOf<ExpectedType>();  // ✅
-```
+Verify `z.infer`, `z.input`, and `z.output` produce correct types
 
 ## Test Coverage
 
@@ -328,6 +265,8 @@ Aim for:
 - **Edge cases** tested thoroughly
 - **Error messages** verified
 - **Transformations** validated
+
+For coverage configuration in Vitest 4.x when testing schemas, use vitest-4/skills/configuring-vitest-4 for coverage include patterns and thresholds setup.
 
 ## References
 
@@ -339,6 +278,7 @@ Aim for:
 **Cross-Plugin References:**
 
 - If testing Zod validation with React components, use the testing-components skill for component integration testing patterns
+- [@vitest-4/skills/configuring-vitest-4](/vitest-4/skills/configuring-vitest-4/SKILL.md) - Coverage configuration for schema testing
 
 ## Success Criteria
 

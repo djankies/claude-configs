@@ -111,6 +111,8 @@ grep -E "axios|node-fetch|got|ky|superagent" package.json
 grep -E "jest|mocha|jasmine|vitest" package.json
 ```
 
+Uses skills tagged with `review: true` including reviewing-vitest-config from vitest-4 for detecting configuration deprecations and testing framework migration patterns.
+
 **Multiple utility libraries:**
 
 ```bash

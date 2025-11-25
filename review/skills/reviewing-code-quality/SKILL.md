@@ -147,3 +147,4 @@ Use these criteria when classifying findings:
 **Cross-Plugin References:**
 
 - If reviewing Zod schema patterns, use the reviewing-patterns skill for detecting validation issues and schema anti-patterns
+- Uses skills tagged with `review: true` including reviewing-vitest-config from vitest-4 for detecting deprecated patterns and Vitest 4.x migration issues
