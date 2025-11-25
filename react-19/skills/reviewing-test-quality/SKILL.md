@@ -8,6 +8,8 @@ version: 1.0.0
 
 # Review: Test Quality
 
+For Vitest configuration validation (pool options, coverage setup, deprecated patterns), see `vitest-4/skills/reviewing-vitest-config/SKILL.md`.
+
 ## Checklist
 
 ### Test Coverage

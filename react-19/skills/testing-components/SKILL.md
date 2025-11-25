@@ -7,6 +7,8 @@ version: 1.0.0
 
 # Testing React 19 Components
 
+For Vitest test structure and mocking patterns (describe/test blocks, vi.fn(), assertions), see `vitest-4/skills/writing-vitest-tests/SKILL.md`.
+
 ## Basic Component Testing
 
 ```javascript
@@ -15,7 +17,7 @@ import userEvent from '@testing-library/user-event';
 import Button from './Button';
 
 test('button renders and handles click', async () => {
-  const handleClick = jest.fn();
+  const handleClick = vi.fn();
 
   render(<Button onClick={handleClick}>Click me</Button>);
 
@@ -34,8 +36,8 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ContactForm from './ContactForm';
 
-jest.mock('./actions', () => ({
-  submitContact: jest.fn(async (prev, formData) => {
+vi.mock('./actions', () => ({
+  submitContact: vi.fn(async (prev, formData) => {
     const email = formData.get('email');
     if (!email?.includes('@')) {
       return { error: 'Invalid email' };

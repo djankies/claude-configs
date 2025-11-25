@@ -67,17 +67,7 @@ test('creates user', async () => {
 
 Use single PrismaClient instance across all tests; $disconnect() only in afterAll(); clean database state between tests, not connections.
 
-**Vitest global setup** (`tests/setup.ts`):
-
-```typescript
-import { PrismaClient } from '@prisma/client';
-import { beforeAll, afterAll } from 'vitest';
-export const prisma = new PrismaClient();
-beforeAll(() => prisma.$connect());
-afterAll(() => prisma.$disconnect());
-```
-
-Add to `vitest.config.ts`: `test: { setupFiles: ['./tests/setup.ts'] }`
+For Vitest setup configuration (setupFiles, global hooks), see `vitest-4/skills/configuring-vitest-4/SKILL.md`.
 
 ### Serverless Functions (AWS Lambda, Vercel, Cloudflare Workers)
 
