@@ -113,6 +113,21 @@
       "license": "MIT",
       "keywords": ["prisma", "orm", "database", "typescript", "postgresql", "mysql", "security", "performance"],
       "category": "library"
+    },
+    {
+      "name": "vitest-4",
+      "source": "./vitest-4",
+      "description": "Vitest 4.x testing framework patterns and config",
+      "version": "1.0.0",
+      "author": {
+        "name": "Daniel Jankowski",
+        "email": "djank0113@gmail.com"
+      },
+      "homepage": "https://github.com/djankies/claude-configs",
+      "repository": "djankies/claude-configs",
+      "license": "MIT",
+      "keywords": ["vitest", "testing", "vite", "coverage", "mocking"],
+      "category": "library"
     }
   ]
 }
