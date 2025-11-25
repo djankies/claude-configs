@@ -141,3 +141,9 @@ Use these criteria when classifying findings:
 - Output formatting is handled by the calling agent
 - Severity classification should align with agent's schema
 - Do NOT include effort estimates or workflow instructions
+
+## Related Skills
+
+**Cross-Plugin References:**
+
+- If reviewing Zod schema patterns, use the reviewing-patterns skill for detecting validation issues and schema anti-patterns

@@ -228,6 +228,8 @@ Use these criteria when classifying security findings:
 7. **Check dependencies** for known vulnerabilities
 8. **Cross-reference findings** (e.g., missing auth + XSS = higher priority)
 
+If performing comprehensive Prisma code review covering security vulnerabilities and performance anti-patterns, use the reviewing-prisma-patterns skill from prisma-6 for systematic validation.
+
 ## Common Vulnerability Examples
 
 ### XSS Example
@@ -253,6 +255,8 @@ db.query(\`SELECT * FROM users WHERE email = '\${email}'\`);
 db.query("SELECT * FROM users WHERE id = ?", [userId]);
 db.query("SELECT * FROM users WHERE email = $1", [email]);
 ```
+
+If reviewing Prisma 6 SQL injection prevention patterns, use the preventing-sql-injection skill from prisma-6 for $queryRaw guidance.
 
 ### Command Injection Example
 

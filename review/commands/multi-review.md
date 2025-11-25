@@ -127,9 +127,10 @@ Detected technologies: ["react", "typescript", "nextjs"]
 Security Review skills:
 - review:reviewing-security (general)
 - typescript:reviewing-type-safety (for type-related security)
-- react-19:reviewing-server-actions (if nextjs detected)
+- react-19:reviewing-server-actions (if react detected)
 - nextjs-16:securing-server-actions (if nextjs detected)
 - nextjs-16:securing-data-access-layer (if nextjs detected)
+- prisma-6:reviewing-prisma-patterns (if prisma detected)
 
 Code Quality Review skills:
 - review:reviewing-code-quality (general)
