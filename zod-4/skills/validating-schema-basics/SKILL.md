@@ -1,7 +1,6 @@
 ---
 name: validating-schema-basics
 description: Validate code for Zod v4 compatibility by detecting deprecated APIs and ensuring adherence to v4 patterns
-review: true
 ---
 
 # Validating Zod v4 Compatibility
@@ -236,10 +235,14 @@ The skill will check for all deprecated patterns and provide remediation guidanc
 
 ## References
 
-- Full migration guide: MIGRATION-v3-to-v4 skill from the zod-4 plugin
-- String formats: VALIDATION-string-formats skill from the zod-4 plugin
-- Error handling: ERRORS-customization skill from the zod-4 plugin
-- Comprehensive docs: `@zod-4/knowledge/zod-4-comprehensive.md`
+- Full migration guide: Use the migrating-v3-to-v4 skill from the zod-4 plugin
+- String formats: Use the validating-string-formats skill from the zod-4 plugin
+- Error handling: Use the customizing-errors skill from the zod-4 plugin
+
+**Cross-Plugin References:**
+
+- If validating external data sources, use the validating-external-data skill for understanding runtime validation requirements
+- If applying schema validation patterns to database queries, use the ensuring-query-type-safety skill from prisma-6 for type-safe Prisma queries with proper input validation
 
 ## Success Criteria
 

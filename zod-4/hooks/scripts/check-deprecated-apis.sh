@@ -74,8 +74,8 @@ if [[ -n "$violations" ]]; then
 ${violations}"
 
   log_warn "Deprecated Zod API usage detected in $file_path"
-  echo "$context"
-  finish_hook 2
+  posttooluse_respond "" "" "$context"
+  finish_hook 0
 fi
 
 echo "{}"

@@ -337,11 +337,7 @@ Zod integrates seamlessly with popular frameworks for error handling.
 - Next.js Server Actions: Return flattened errors to client
 - Express API: Return 400 status with error details
 
-**Detailed examples:** See [references/framework-integration.md](./references/framework-integration.md) for complete implementation examples including:
-- React form with custom error state
-- React Hook Form integration
-- Next.js Server Actions with form validation
-- Express API error responses
+For framework-specific examples, see the integrating-zod-frameworks skill from the zod-4 plugin.
 
 ## Best Practices
 
@@ -466,11 +462,14 @@ const schema = z.union([
 
 ## References
 
-- Validation: VALIDATION-schema-basics skill from the zod-4 plugin
-- v4 Features: VALIDATION-string-formats skill from the zod-4 plugin
-- Framework integration: integrating-zod-frameworks skill from the zod-4 plugin
-- Testing: testing-zod-schemas skill from the zod-4 plugin
-- Comprehensive docs: `@zod-4/knowledge/zod-4-comprehensive.md`
+- Validation: Use the validating-schema-basics skill from the zod-4 plugin
+- v4 Features: Use the validating-string-formats skill from the zod-4 plugin
+- Framework integration: Use the integrating-zod-frameworks skill from the zod-4 plugin
+- Testing: Use the testing-zod-schemas skill from the zod-4 plugin
+
+**Cross-Plugin References:**
+
+- If displaying validation errors in React forms, use the validating-forms skill for error display patterns
 
 ## Success Criteria
 

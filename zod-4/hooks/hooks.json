@@ -6,31 +6,45 @@
           {
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/init-session.sh",
-            "timeout": 5000
+            "timeout": 5000,
+            "description": "Initialize session state for Zod 4 plugin"
           }
         ]
       }
     ],
     "PreToolUse": [
       {
-        "matcher": "Write|Edit",
+        "matcher": "Read",
         "hooks": [
           {
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/recommend-skills.sh",
-            "timeout": 30000
+            "timeout": 5000,
+            "description": "Recommend Zod 4 skills when reading schema files"
           }
         ]
       }
     ],
     "PostToolUse": [
       {
-        "matcher": "Write|Edit",
+        "matcher": "Read",
         "hooks": [
           {
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/validate-zod-usage.sh",
-            "timeout": 500
+            "timeout": 5000,
+            "description": "Validate Zod usage patterns after reading files"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check-deprecated-apis.sh",
+            "timeout": 5000,
+            "description": "Check for deprecated Zod v3 APIs after writing"
           }
         ]
       }

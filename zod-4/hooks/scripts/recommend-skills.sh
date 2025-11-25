@@ -32,11 +32,12 @@ if grep -q "from ['\"]zod['\"]" "$file_path" 2>/dev/null || \
   shown=$(get_plugin_value "zod-4" "recommendations_shown.zod_skills")
 
   if [[ "$shown" != "true" ]]; then
-    context="📚 Zod 4 Skills Available:
-  VALIDATION-*: Schema basics, string formats (z.email, z.uuid)
-  TRANSFORMATION-*: String methods (.trim, .toLowerCase), codecs
-  ERRORS-*: Unified error customization API
-  MIGRATION-*: v3 to v4 breaking changes
+    context="** Zod 4 Skills Available:
+  - validating-schema-basics: v4 compatibility checks
+  - validating-string-formats: z.email, z.uuid, z.url
+  - transforming-string-methods: .trim, .toLowerCase
+  - customizing-errors: unified error API
+  - migrating-v3-to-v4: breaking changes guide
 
 Use Skill tool to activate when needed."
 

@@ -31,7 +31,10 @@ if [[ "$file_ext" == "json" && "$file_path" == *"package.json" ]]; then
 fi
 
 if [[ "$file_ext" =~ ^(ts|tsx|js|jsx)$ ]]; then
-  grep -q "from ['\"]zod['\"]" "$file_path" 2>/dev/null || grep -q "import zod" "$file_path" 2>/dev/null || echo "{}" && finish_hook 0
+  if ! grep -q "from ['\"]zod['\"]" "$file_path" 2>/dev/null && ! grep -q "import zod" "$file_path" 2>/dev/null; then
+    echo "{}"
+    finish_hook 0
+  fi
 
   if grep -E "z\.string\(\)\.email\(" "$file_path" >/dev/null 2>&1; then
     violations="${violations}❌ Deprecated: z.string().email() → Use z.email()\n"
@@ -65,41 +68,24 @@ if [[ "$file_ext" =~ ^(ts|tsx|js|jsx)$ ]]; then
     violations="${violations}❌ Deprecated: z.string().jwt() → Use z.jwt()\n"
   fi
 
-  if grep -E "(message|errorMap|invalid_type_error|required_error)[[:space:]]*:" "$file_path" 2>/dev/null | grep -v "error[[:space:]]*:" >/dev/null 2>&1; then
+  if grep -B2 -E "(invalid_type_error|required_error)[[:space:]]*:" "$file_path" 2>/dev/null | grep -q "z\." 2>/dev/null; then
     violations="${violations}⚠️  Deprecated error customization detected\n"
-    violations="${violations}   Use { error: '...' } instead of { message, errorMap, invalid_type_error, required_error }\n"
+    violations="${violations}   Use { error: '...' } instead of { invalid_type_error, required_error }\n"
   fi
 
   if grep -E "\.merge\(" "$file_path" >/dev/null 2>&1; then
     violations="${violations}⚠️  .merge() is deprecated → Use .extend()\n"
   fi
 
-  if grep "\.parse(" "$file_path" >/dev/null 2>&1; then
-    if grep -B5 -A5 "\.parse(" "$file_path" 2>/dev/null | grep -E "(try|catch)" >/dev/null 2>&1; then
-      violations="${violations}⚠️  Anti-pattern: .parse() with try/catch → Use .safeParse() instead\n"
-    fi
+  if grep "\.parse(" "$file_path" >/dev/null 2>&1 && ! grep "\.safeParse(" "$file_path" >/dev/null 2>&1; then
+    violations="${violations}⚠️  Consider using .safeParse() for better error handling\n"
   fi
 
-  if grep -E "z\.enum\(\[['\"]true['\"],\s*['\"]false['\"]\]\)" "$file_path" >/dev/null 2>&1 || \
-     grep -E "z\.enum\(\[['\"]false['\"],\s*['\"]true['\"]\]\)" "$file_path" >/dev/null 2>&1 || \
-     grep -E "z\.enum\(\[['\"]yes['\"],\s*['\"]no['\"]\]\)" "$file_path" >/dev/null 2>&1 || \
-     grep -E "z\.enum\(\[['\"]no['\"],\s*['\"]yes['\"]\]\)" "$file_path" >/dev/null 2>&1; then
+  if grep -E "z\.enum\(.*['\"]true['\"].*['\"]false['\"]" "$file_path" >/dev/null 2>&1 || \
+     grep -E "z\.enum\(.*['\"]yes['\"].*['\"]no['\"]" "$file_path" >/dev/null 2>&1; then
     violations="${violations}⚠️  Boolean enum detected → Use z.stringbool() for 'true'/'false' values\n"
   fi
 
-  if grep -E "(firstName|lastName|username|fullName|name)[[:space:]]*:[[:space:]]*z\.string\(\)[[:space:]]*\.min\([^)]*\)" "$file_path" >/dev/null 2>&1; then
-    if ! grep -E "(firstName|lastName|username|fullName|name)[[:space:]]*:[[:space:]]*z\.string\(\)[[:space:]]*\.trim\(\)" "$file_path" >/dev/null 2>&1; then
-      violations="${violations}⚠️  Name field without .trim() → Add .trim() before validation\n"
-      violations="${violations}   Example: z.string().trim().min(1) instead of z.string().min(1)\n"
-    fi
-  fi
-
-  if grep -E "email[[:space:]]*:[[:space:]]*z\.(string\(\)\.)?email\(" "$file_path" >/dev/null 2>&1; then
-    if ! grep -E "email[[:space:]]*:[[:space:]]*z\.string\(\)[[:space:]]*\.toLowerCase\(\)" "$file_path" >/dev/null 2>&1; then
-      violations="${violations}⚠️  Email field without .toLowerCase() → Add .toLowerCase() before validation\n"
-      violations="${violations}   Example: z.string().toLowerCase().email() or z.email().toLowerCase()\n"
-    fi
-  fi
 fi
 
 if [[ -n "$violations" ]]; then

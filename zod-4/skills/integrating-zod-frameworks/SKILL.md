@@ -25,7 +25,7 @@ Zod integrates seamlessly with:
 - GraphQL (Pothos) - Schema validation plugin
 
 **Database/ORM:**
-- Prisma - Schema alignment and validation
+- Prisma - If validating Prisma query inputs with Zod schemas matching Prisma model types, use the validating-query-inputs skill from prisma-6 for comprehensive schema patterns with type inference.
 
 ## Quick Start Patterns
 
@@ -209,32 +209,24 @@ export async function createUser(data: User) {
 - Schema validation runs before resolvers
 - Consistent error format
 
-## Detailed Examples
-
-For complete implementation examples with all features, see:
-
-**[Framework Examples Reference](./references/framework-examples.md)** - Detailed integration patterns for:
-- React Hook Form (advanced patterns, conditional validation, array fields)
-- Next.js Server Actions (form validation, client components, API routes)
-- Express (middleware validation, query parameter validation)
-- tRPC (router configuration, client usage)
-- GraphQL with Pothos (schema definition, validation plugin)
-- Prisma Integration (schema validation, auto-generation)
-- React Query (mutation validation)
-- Fastify (plugin validation, pre-handlers)
-
 ## References
 
-- v4 Features: VALIDATION-string-formats skill from the zod-4 plugin
-- Error handling: ERRORS-customization skill from the zod-4 plugin
-- Testing: testing-zod-schemas skill from the zod-4 plugin
-- Transformations: TRANSFORMATION-string-methods skill from the zod-4 plugin
-- Comprehensive docs: `@zod-4/knowledge/zod-4-comprehensive.md`
+- v4 Features: Use the validating-string-formats skill from the zod-4 plugin
+- Error handling: Use the customizing-errors skill from the zod-4 plugin
+- Testing: Use the testing-zod-schemas skill from the zod-4 plugin
+- Transformations: Use the transforming-string-methods skill from the zod-4 plugin
+
+**Cross-Plugin References:**
+
+**React 19 Integration:**
+- If implementing comprehensive form validation, use the validating-forms skill for client and server validation strategies
+- If implementing Server Actions, use the implementing-server-actions skill for async server function patterns with Zod
+
+**Next.js 16 Integration:**
+- If securing Server Actions, use the securing-server-actions skill for authentication and input validation patterns
 
 **Prisma 6 Integration:**
-- validating-query-inputs skill from the prisma-6 plugin - Complete Zod + Prisma 6 validation patterns for API routes, form data, and database operations
-- ensuring-query-type-safety skill from the prisma-6 plugin - Type-safe Prisma queries with Zod runtime validation for database inputs and outputs
-- preventing-sql-injection skill from the prisma-6 plugin - SQL injection prevention with parameterized queries and raw SQL safety in Prisma 6
+- If validating Prisma query inputs with Zod, use the validating-query-inputs skill from prisma-6 for complete validation pipeline patterns: External Input → Zod Validation → Prisma Operation
 
 ## Success Criteria
 

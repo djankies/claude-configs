@@ -422,10 +422,9 @@ Compare bundle size before/after migration.
 
 ## References
 
-- Validation skill: VALIDATION-schema-basics skill from the zod-4 plugin
-- v4 Features: VALIDATION-string-formats skill from the zod-4 plugin
-- Error handling: ERRORS-customization skill from the zod-4 plugin
-- Comprehensive docs: `@zod-4/knowledge/zod-4-comprehensive.md`
+- Validation skill: Use the validating-schema-basics skill from the zod-4 plugin
+- v4 Features: Use the validating-string-formats skill from the zod-4 plugin
+- Error handling: Use the customizing-errors skill from the zod-4 plugin
 
 ## Success Criteria
 

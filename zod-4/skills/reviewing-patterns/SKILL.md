@@ -1,6 +1,6 @@
 ---
 name: reviewing-patterns
-description: Review Zod schemas for correctness, performance, type safety, and adherence to v4 best practices
+description: Review Zod schemas for correctness, performance, and v4 best practices
 review: true
 ---
 
@@ -471,11 +471,16 @@ Or explicitly:
 
 ## References
 
-- Compatibility validation: VALIDATION-schema-basics skill from the zod-4 plugin
-- v4 Features: VALIDATION-string-formats skill from the zod-4 plugin
-- Error handling: ERRORS-customization skill from the zod-4 plugin
-- Performance: PERFORMANCE-optimization skill from the zod-4 plugin
-- Testing: testing-zod-schemas skill from the zod-4 plugin
+- Compatibility validation: Use the validating-schema-basics skill from the zod-4 plugin
+- v4 Features: Use the validating-string-formats skill from the zod-4 plugin
+- Error handling: Use the customizing-errors skill from the zod-4 plugin
+- Performance: Use the optimizing-performance skill from the zod-4 plugin
+- Testing: Use the testing-zod-schemas skill from the zod-4 plugin
+
+**Cross-Plugin References:**
+
+- If reviewing TypeScript type safety alongside Zod schemas, use the reviewing-type-safety skill for comprehensive type validation patterns
+- If reviewing security concerns, use the reviewing-security skill for automated vulnerability scanning patterns
 
 ## Success Criteria
 

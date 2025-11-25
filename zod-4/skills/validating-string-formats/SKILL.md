@@ -175,19 +175,12 @@ schemaA.extend(schemaB.shape)  // ✅ v4
 schemaA.merge(schemaB)         // ❌ v3
 ```
 
-## Detailed Reference
-
-For comprehensive format reference table, advanced features, template literals, branded types, recursive types, and discriminated unions, see:
-
-**[V4 Features Reference](./references/v4-features-reference.md)**
-
 ## References
 
-- Validation: VALIDATION-schema-basics skill from the zod-4 plugin
-- Migration: MIGRATION-v3-to-v4 skill from the zod-4 plugin
-- Transformations: TRANSFORMATION-string-methods skill from the zod-4 plugin
-- Performance: PERFORMANCE-optimization skill from the zod-4 plugin
-- Comprehensive docs: `@zod-4/knowledge/zod-4-comprehensive.md`
+- Validation: Use the validating-schema-basics skill from the zod-4 plugin
+- Migration: Use the migrating-v3-to-v4 skill from the zod-4 plugin
+- Transformations: Use the transforming-string-methods skill from the zod-4 plugin
+- Performance: Use the optimizing-performance skill from the zod-4 plugin
 
 ## Success Criteria
 

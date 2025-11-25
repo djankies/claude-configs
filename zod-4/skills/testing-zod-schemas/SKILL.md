@@ -329,19 +329,16 @@ Aim for:
 - **Error messages** verified
 - **Transformations** validated
 
-## Detailed Examples
-
-For complete implementation examples including integration testing, performance testing, and coverage strategies, see:
-
-**[Testing Patterns Reference](./references/testing-patterns.md)**
-
 ## References
 
-- v4 Features: VALIDATION-string-formats skill from the zod-4 plugin
-- Error handling: ERRORS-customization skill from the zod-4 plugin
-- Transformations: TRANSFORMATION-string-methods skill from the zod-4 plugin
-- Performance: PERFORMANCE-optimization skill from the zod-4 plugin
-- Comprehensive docs: `@zod-4/knowledge/zod-4-comprehensive.md`
+- v4 Features: Use the validating-string-formats skill from the zod-4 plugin
+- Error handling: Use the customizing-errors skill from the zod-4 plugin
+- Transformations: Use the transforming-string-methods skill from the zod-4 plugin
+- Performance: Use the optimizing-performance skill from the zod-4 plugin
+
+**Cross-Plugin References:**
+
+- If testing Zod validation with React components, use the testing-components skill for component integration testing patterns
 
 ## Success Criteria
 

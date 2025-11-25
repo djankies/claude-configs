@@ -178,23 +178,15 @@ const schema = z.object({...})            // ✅ Module level, reusable
 schemaA.extend(schemaB.shape)             // ✅ Faster than merge
 ```
 
-## Detailed Examples
-
-For complete implementation examples, benchmarking code, and profiling techniques, see:
-
-**[Performance Benchmarks Reference](./references/performance-benchmarks.md)** - Detailed coverage of:
-- Performance monitoring and measurement
-- Benchmarking parse vs safeParse
-- Profiling with DevTools
-- Real-world API validation patterns
-- Real-world form validation patterns
-
 ## References
 
-- v4 Features: VALIDATION-string-formats skill from the zod-4 plugin
-- Error handling: ERRORS-customization skill from the zod-4 plugin
-- Testing: testing-zod-schemas skill from the zod-4 plugin
-- Comprehensive docs: `@zod-4/knowledge/zod-4-comprehensive.md`
+- v4 Features: Use the validating-string-formats skill from the zod-4 plugin
+- Error handling: Use the customizing-errors skill from the zod-4 plugin
+- Testing: Use the testing-zod-schemas skill from the zod-4 plugin
+
+**Cross-Plugin References:**
+
+- If analyzing schema complexity, use the reviewing-complexity skill for identifying optimization opportunities
 
 ## Success Criteria
 

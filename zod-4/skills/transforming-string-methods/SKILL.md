@@ -265,19 +265,12 @@ const codec = z.codec({
 });  // ✅ v4 bidirectional
 ```
 
-## Detailed Examples
-
-For common transformation patterns, async transformations, and advanced pipeline examples, see:
-
-**[Transformation Patterns Reference](./references/transformation-patterns.md)**
-
 ## References
 
-- v4 Features: VALIDATION-string-formats skill from the zod-4 plugin
-- Error handling: ERRORS-customization skill from the zod-4 plugin
-- Performance: PERFORMANCE-optimization skill from the zod-4 plugin
-- Testing: testing-zod-schemas skill from the zod-4 plugin
-- Comprehensive docs: `@zod-4/knowledge/zod-4-comprehensive.md`
+- v4 Features: Use the validating-string-formats skill from the zod-4 plugin
+- Error handling: Use the customizing-errors skill from the zod-4 plugin
+- Performance: Use the optimizing-performance skill from the zod-4 plugin
+- Testing: Use the testing-zod-schemas skill from the zod-4 plugin
 
 ## Success Criteria
 
